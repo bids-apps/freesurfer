@@ -60,7 +60,7 @@ if args.analysis_level == "participant":
 	for subject_label in subjects_to_analyze:
 		# grab all T1s from all sessions
 		input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"anat", "*_T1w.nii*")) + glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*","anat", "*_T1w.nii*"))])
-		cmd = "recon-all -subjid %s -sd %s %s -all"%(subject_label,
+		cmd = "recon-all -subjid %s -sd %s %s -all -openmp 4"%(subject_label,
 												 args.output_dir,
 												 input_args)
 		print(cmd)
