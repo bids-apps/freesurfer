@@ -3,13 +3,16 @@ import argparse
 import os
 import nibabel
 import numpy
+import shutil
 from glob import glob
 from subprocess import Popen, PIPE
 from shutil import rmtree
 import subprocess
 
 def run(command, env={}):
-	process = Popen(command, stdout=PIPE, stderr=subprocess.STDOUT, shell=True, env=env)
+	merged_env = os.environ
+	merged_env.update(env)
+	process = Popen(command, stdout=PIPE, stderr=subprocess.STDOUT, shell=True, env=merged_env)
 	while True:
 		line = process.stdout.readline()
 		line = str(line, 'utf-8')[:-1]
@@ -50,6 +53,9 @@ else:
 
 # running participant level
 if args.analysis_level == "participant":
+	if not os.path.exists(os.path.join(args.output_dir, "fsaverage")):
+		shutil.copytree(os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage"),
+						os.path.join(args.output_dir, "fsaverage"))
 	# find all T1s and skullstrip them
 	for subject_label in subjects_to_analyze:
 		# grab all T1s from all sessions

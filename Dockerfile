@@ -16,7 +16,7 @@ RUN apt-get install -y tar libgomp1 perl-modules
 ENV OS Linux
 ENV FS_OVERRIDE 0
 ENV FIX_VERTEX_AREA=
-ENV SUBJECTS_DIR /output
+ENV SUBJECTS_DIR /opt/freesurfer/subjects
 ENV FSF_OUTPUT_FORMAT nii.gz
 ENV MNI_DIR /opt/freesurfer/mni
 ENV LOCAL_DIR /opt/freesurfer/local
