@@ -22,11 +22,11 @@ dependencies:
 
 test:
   override:
-    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs participant --participant_label 01 :
+    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs participant --participant_label 01 --n_cpus 4 :
         timeout: 21600
-    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs participant --participant_label 02 :
+    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs participant --participant_label 02 --n_cpus 4 :
         timeout: 21600
-    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs group :
+    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs group --n_cpus 4 :
         timeout: 21600
 #deployment:
 #  hub:
