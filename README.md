@@ -1,3 +1,23 @@
+## Freesurfer recon-all BIDS App
+### Description
+This app implements surface reconstruction using Freesurfer. It reconstruct the surface for each subject individually and then
+creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates).
+
+The output of the pipeline consist of the SUBJECTS_DIR created during the analysis.
+
+### Documentation
+ - [Surface reconstruction](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all)
+ - [Study specific template creation](https://surfer.nmr.mgh.harvard.edu/fswiki/SurfaceRegAndTemplates#CreatingaregistrationtemplateinitializedwithFreeSurfertemplate.28DG.29)
+ - [Longitudinal pipeline](https://surfer.nmr.mgh.harvard.edu/fswiki/LongitudinalProcessing)
+
+### How to report errors
+https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSupport
+
+### Acknowledgements
+https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferMethodsCitation
+
+### Usage
+This App has the following comman line arguments:
 
 		$ docker run -ti bids/freesurfer --help
 		usage: run.py [-h]
@@ -30,3 +50,20 @@
 		  --template_name TEMPLATE_NAME
 		                        Name for the custom group level template generated
 		                        for this dataset
+
+To run it in participant level mode (for one participant):
+
+    docker run -i --rm \
+		-v /Users/filo/data/ds005:/bids_dataset \
+		-v /Users/filo/outputs:/outputs \
+		bids/freesurfer \
+		/bids_dataset /outputs participant --participant_label 01
+
+After doing this for all subjects (potentially in parallel) the group level analysis
+can be run:
+
+    docker run -i --rm \
+		-v /Users/filo/data/ds005:/bids_dataset \
+		-v /Users/filo/outputs:/outputs \
+		bids/freesurfer \
+		/bids_dataset /outputs group
