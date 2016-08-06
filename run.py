@@ -136,3 +136,10 @@ elif args.analysis_level == "group":
 			reg_file = os.path.join(args.output_dir, fsid, "surf", hemi+".sphere.reg." + args.template_name)
 			cmd = "mris_register -curv %s %s %s"%(sphere_file, tif_file, reg_file)
 			run(cmd, env={"SUBJECTS_DIR": args.output_dir})
+	# QA
+	input_args = " ".join([os.path.split(d)[-1] for d in glob(os.path.join(args.output_dir, "sub-*"))])
+	cmd = "/opt/qa_tools/recon_checker -s %s -gen-outputFOF -nocheck-aseg -snaps-overwrite"%(input_args)
+	run(cmd, env={"SUBJECTS_DIR": args.output_dir})
+	# fixing paths in the QA reports
+	cmd = "find %s/QA -type f -name '*.html' -exec sed -i 's/\/output\/\/QA\/.\+\/rgb\/snaps\///g' {} \;"%args.output_dir
+	run(cmd)
