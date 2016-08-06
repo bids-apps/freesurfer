@@ -82,7 +82,7 @@ if args.analysis_level == "participant":
 					rmtree(os.path.join(args.output_dir, fsid))
 				run(cmd)
 
-			#creating a subject specific template
+			# creating a subject specific template
 			input_args = " ".join(["-tp %s"%tp for tp in timepoints])
 			fsid = "sub-%s"%subject_label
 			cmd = "recon-all -base %s -sd %s %s -all -openmp %d"%(fsid,
@@ -95,16 +95,15 @@ if args.analysis_level == "participant":
 			run(cmd)
 
 			for tp in timepoints:
-				#creating a subject specific template
-				input_args = " ".join(["-tp %s"%tp for tp in timepoints])
+				# longitudinally process all timepoints
 				fsid = "sub-%s"%subject_label
-				cmd = "recon-all -long %s -sd %s -all -openmp %d"%(tp,
-																fsid,
-																args.output_dir,
-																args.n_cpus)
+				cmd = "recon-all -long %s %s -sd %s -all -openmp %d"%(tp,
+																	fsid,
+																	args.output_dir,
+																	args.n_cpus)
 				print(cmd)
-				if os.path.exists(os.path.join(args.output_dir, fsid)):
-					rmtree(os.path.join(args.output_dir, fsid))
+				if os.path.exists(os.path.join(args.output_dir, tp + ".long." + fsid)):
+					rmtree(os.path.join(args.output_dir, tp + ".long." + fsid))
 				run(cmd)
 
 		else:
