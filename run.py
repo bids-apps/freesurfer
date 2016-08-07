@@ -19,6 +19,8 @@ def run(command, env={}):
 		print(line)
 		if line == '' and process.poll() != None:
 			break
+	if process.returncode != 0:
+		raise Exception("Non zero return code: %d"%process.returncode)
 
 parser = argparse.ArgumentParser(description='FreeSurfer recon-all + custom template generation.')
 parser.add_argument('bids_dir', help='The directory with the input dataset '
@@ -58,6 +60,12 @@ if args.analysis_level == "participant":
 	if not os.path.exists(os.path.join(args.output_dir, "fsaverage")):
 		shutil.copytree(os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage"),
 						os.path.join(args.output_dir, "fsaverage"))
+	if not os.path.exists(os.path.join(args.output_dir, "lh.EC_average")):
+		shutil.copytree(os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average"),
+						os.path.join(args.output_dir, "lh.EC_average"))
+	if not os.path.exists(os.path.join(args.output_dir, "rh.EC_average")):
+		shutil.copytree(os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average"),
+						os.path.join(args.output_dir, "rh.EC_average"))
 	# find all T1s and skullstrip them
 	for subject_label in subjects_to_analyze:
 
