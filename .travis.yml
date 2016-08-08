@@ -1,0 +1,15 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
+- docker pull filo/docker2singularity
+- export REPO_NAME=${TRAVIS_REPO_SLUG##*/}
+- docker build -t bids/${REPO_NAME,,} .
+
+script:
+- docker run -v /var/run/docker.sock:/var/run/docker.sock -v $HOME:/output --privileged -t --rm filo/docker2singularity bids/${REPO_NAME,,}
+- wget "https://docs.google.com/uc?id=0B3X9GlR6EmbnQ0FtZmJJUXEyRTA&export=download" -O gdrive && chmod a+x gdrive
+- bash gdrive_upload.sh example "$GDRIVE_REFRESH_TOKEN" $HOME/*.img
