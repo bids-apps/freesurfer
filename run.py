@@ -46,6 +46,8 @@ parser.add_argument('--template_name', help='Name for the custom group level tem
 
 args = parser.parse_args()
 
+run("bids-validator " + args.bids_dir)
+
 subjects_to_analyze = []
 # only for a subset of subjects
 if args.participant_label:
@@ -97,7 +99,8 @@ if args.analysis_level == "participant":
                                                                     args.output_dir,
                                                                     input_args,
                                                                     args.n_cpus)
-            print(cmd)    	        if os.path.exists(os.path.join(args.output_dir, fsid)):
+            print(cmd)
+            if os.path.exists(os.path.join(args.output_dir, fsid)):
                 rmtree(os.path.join(args.output_dir, fsid))
             run(cmd)
 
@@ -136,9 +139,9 @@ elif args.analysis_level == "group":    	# running group level
     if os.path.exists(os.path.join(args.output_dir, args.template_name)):
         rmtree(os.path.join(args.output_dir, args.template_name))
     run(cmd, env={"SUBJECTS_DIR": args.output_dir})
-    tif_file = os.path.join(args.output_dir, args.template_name, hemi+".reg.template.tif")
     for subject_label in subjects_to_analyze:
         for hemi in ["lh", "rh"]:
+            tif_file = os.path.join(args.output_dir, args.template_name, hemi+".reg.template.tif")
             fsid = "sub-%s"%subject_label
             sphere_file = os.path.join(args.output_dir, fsid, "surf", hemi+".sphere")
             reg_file = os.path.join(args.output_dir, fsid, "surf", hemi+".sphere.reg." + args.template_name)
