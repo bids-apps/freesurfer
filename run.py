@@ -42,7 +42,7 @@ parser.add_argument('--participant_label', help='The label of the participant th
 parser.add_argument('--n_cpus', help='Number of CPUs/cores available to use.',
 				   default=1, type=int)
 parser.add_argument('--template_name', help='Name for the custom group level template generated for this dataset',
-					default="newtemplate")
+					default="average")
 
 args = parser.parse_args()
 
@@ -133,8 +133,10 @@ elif args.analysis_level == "group":
 	# running group level
 	# generate study specific template
 	fsids = ["sub-%s"%s for s in subjects_to_analyze]
-	cmd = "make_average_subject --out " + args.template_name + " --subjects " + " ".join(fsids)
+	cmd = "make_average_subject --no-symlink --out " + args.template_name + " --subjects " + " ".join(fsids)
 	print(cmd)
+	if os.path.exists(os.path.join(args.output_dir, args.template_name)):
+		rmtree(os.path.join(args.output_dir, args.template_name))
 	run(cmd, env={"SUBJECTS_DIR": args.output_dir})
 	tif_file = os.path.join(args.output_dir, args.template_name, hemi+".reg.template.tif")
 	for subject_label in subjects_to_analyze:
