@@ -1,6 +1,6 @@
 ## Freesurfer recon-all BIDS App
 ### Description
-This app implements surface reconstruction using Freesurfer. It reconstruct the surface for each subject individually and then
+This app implements surface reconstruction using Freesurfer. It reconstructs the surface for each subject individually and then
 creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates).
 
 The output of the pipeline consist of the SUBJECTS_DIR created during the analysis.
@@ -17,7 +17,7 @@ https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSupport
 https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferMethodsCitation
 
 ### Usage
-This App has the following comman line arguments:
+This App has the following command line arguments:
 
 		$ docker run -ti --rm bids/freesurfer --help
 		usage: run.py [-h]
