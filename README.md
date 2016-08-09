@@ -54,7 +54,7 @@ This App has the following comman line arguments:
 To run it in participant level mode (for one participant):
 
     docker run -i --rm \
-		-v /Users/filo/data/ds005:/bids_dataset \
+		-v /Users/filo/data/ds005:/bids_dataset:ro \
 		-v /Users/filo/outputs:/outputs \
 		bids/freesurfer \
 		/bids_dataset /outputs participant --participant_label 01
@@ -63,7 +63,7 @@ After doing this for all subjects (potentially in parallel) the group level anal
 can be run:
 
     docker run -i --rm \
-		-v /Users/filo/data/ds005:/bids_dataset \
+		-v /Users/filo/data/ds005:/bids_dataset:ro \
 		-v /Users/filo/outputs:/outputs \
 		bids/freesurfer \
 		/bids_dataset /outputs group
