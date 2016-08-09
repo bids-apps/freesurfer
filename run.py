@@ -43,6 +43,8 @@ parser.add_argument('--n_cpus', help='Number of CPUs/cores available to use.',
                    default=1, type=int)
 parser.add_argument('--template_name', help='Name for the custom group level template generated for this dataset',
                     default="average")
+parser.add_argument('--license_key', help='FreeSurfer license key - letters and numbers after "*" in the email you received after registration. To register (for free) visit https://surfer.nmr.mgh.harvard.edu/registration.html',
+                    required=True)
 
 args = parser.parse_args()
 

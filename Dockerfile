@@ -3,7 +3,7 @@ FROM ubuntu:trusty
 RUN apt-get update \
     && apt-get install -y wget
 RUN wget -qO- ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/5.3.0-HCP/freesurfer-Linux-centos4_x86_64-stable-pub-v5.3.0-HCP.tar.gz | tar zxv -C /opt
-RUN /bin/bash -c 'echo "krzysztof.gorgolewski@gmail.com\n5172\n *CvumvEV3zTfg" > /opt/freesurfer/.license'
+RUN /bin/bash -c 'touch /opt/freesurfer/.license'
 
 RUN apt-get install -y python3
 RUN apt-get install -y python3-pip
@@ -40,5 +40,6 @@ RUN mkdir /local-scratch
 
 RUN mkdir -p /code
 COPY run.py /code/run.py
+RUN chmod +x /code/run.py
 
 ENTRYPOINT ["/code/run.py"]
