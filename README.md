@@ -47,6 +47,7 @@ This App has the following command line arguments:
 		                        parameter is not provided all subjects should be
 		                        analyzed. Multiple participants can be specified with
 		                        a space separated list.
+		  --n_cpus N_CPUS       Number of CPUs/cores available to use.
 		  --template_name TEMPLATE_NAME
 		                        Name for the custom group level template generated
 		                        for this dataset
