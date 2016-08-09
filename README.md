@@ -50,27 +50,27 @@ This App has the following command line arguments:
 		  --template_name TEMPLATE_NAME
 		                        Name for the custom group level template generated
 		                        for this dataset
-      --license_key LICENSE_KEY
-                            FreeSurfer license key - letters and numbers after "*"
-                            in the email you received after registration. To
-                            register (for free) visit
-                            https://surfer.nmr.mgh.harvard.edu/registration.html
+		  --license_key LICENSE_KEY
+		                        FreeSurfer license key - letters and numbers after "*"
+		                        in the email you received after registration. To
+		                        register (for free) visit
+		                        https://surfer.nmr.mgh.harvard.edu/registration.html
 
 To run it in participant level mode (for one participant):
 
-    docker run -ti --rm \
+		docker run -ti --rm \
 		-v /Users/filo/data/ds005:/bids_dataset:ro \
 		-v /Users/filo/outputs:/outputs \
 		bids/freesurfer \
 		/bids_dataset /outputs participant --participant_label 01 \
-    --license_key "XXXXXXXX"
+		--license_key "XXXXXXXX"
 
 After doing this for all subjects (potentially in parallel) the group level analysis
 can be run:
 
-    docker run -ti --rm \
+		docker run -ti --rm \
 		-v /Users/filo/data/ds005:/bids_dataset:ro \
 		-v /Users/filo/outputs:/outputs \
 		bids/freesurfer \
 		/bids_dataset /outputs group \
-    --license_key "XXXXXXXX"
+		--license_key "XXXXXXXX"
