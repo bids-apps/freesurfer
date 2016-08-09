@@ -19,7 +19,7 @@ https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferMethodsCitation
 ### Usage
 This App has the following comman line arguments:
 
-		$ docker run -ti bids/freesurfer --help
+		$ docker run -ti --rm bids/freesurfer --help
 		usage: run.py [-h]
 		              [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
 		              [--template_name TEMPLATE_NAME]
