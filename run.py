@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import nibabel
-import numpy
 import shutil
 from glob import glob
 from subprocess import Popen, PIPE
