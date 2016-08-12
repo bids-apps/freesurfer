@@ -27,8 +27,12 @@ test:
 #        timeout: 21600
 #    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs group --n_cpus 4 :
 #        timeout: 21600
-#deployment:
-#  hub:
-#    branch: master
-#    commands:
-#      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push $DOCKER_REPO; fi
+
+deployment:
+  hub:
+    branch: master
+    commands:
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push bids/${CIRCLE_PROJECT_REPONAME}:latest; fi :
+          timeout: 21600
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker tag bids/${CIRCLE_PROJECT_REPONAME} bids/${CIRCLE_PROJECT_REPONAME}:V$CIRCLE_BUILD_NUM-${CIRCLE_SHA1:0:6} && docker push bids/${CIRCLE_PROJECT_REPONAME}:V$CIRCLE_BUILD_NUM-${CIRCLE_SHA1:0:6}; fi :
+          timeout: 21600
