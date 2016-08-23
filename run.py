@@ -74,7 +74,7 @@ if args.analysis_level == "participant":
         session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
         timepoints = []
-        if sessions:
+        if len(sessions) > 1:
             for session_label in sessions:
                 input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
                                                                 "sub-%s"%subject_label,
