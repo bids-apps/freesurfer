@@ -1,38 +1,29 @@
-#general:
-#  artifacts:
-#    - "~/outputs"
 machine:
   services:
-    - docker
+    - docker #don't use 1.10 - caching is broken
 
 dependencies:
   cache_directories:
     - "~/docker"
-#    - "~/data"
 
   override:
-#    - if [[ ! -d ~/data/ds114_test1 ]]; then wget -c -P ${HOME}/downloads/ "https://googledrive.com/host/0B2JWN60ZLkgkMEw4bW5VUUpSdFU/ds114_test1.tar" && mkdir -p ${HOME}/data && tar xf ${HOME}/downloads/ds114_test1.tar -C ${HOME}/data; fi
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
+    - git describe --tags > version
     - docker build -t bids/${CIRCLE_PROJECT_REPONAME} . :
         timeout: 21600
     - mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}" > ~/docker/image.tar
-#    - mkdir -p ${HOME}/outputs
 
 test:
   override:
-    - echo "pass"
-#    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs participant --participant_label 01 --n_cpus 4 :
-#        timeout: 21600
-#    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs participant --participant_label 02 --n_cpus 4 :
-#        timeout: 21600
-#    - docker run -ti -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs group --n_cpus 4 :
-#        timeout: 21600
+    # print version
+    - docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME,,} --version
 
 deployment:
   hub:
-    branch: master
+    owner: BIDS-Apps
+    tag: /.*/
     commands:
       - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push bids/${CIRCLE_PROJECT_REPONAME}:latest; fi :
           timeout: 21600
-      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker tag bids/${CIRCLE_PROJECT_REPONAME} bids/${CIRCLE_PROJECT_REPONAME}:V$CIRCLE_BUILD_NUM-${CIRCLE_SHA1:0:6} && docker push bids/${CIRCLE_PROJECT_REPONAME}:V$CIRCLE_BUILD_NUM-${CIRCLE_SHA1:0:6}; fi :
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker tag bids/${CIRCLE_PROJECT_REPONAME} bids/${CIRCLE_PROJECT_REPONAME}:$CIRCLE_TAG && docker push bids/${CIRCLE_PROJECT_REPONAME}:$CIRCLE_TAG; fi :
           timeout: 21600

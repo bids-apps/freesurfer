@@ -20,6 +20,8 @@ def run(command, env={}):
     if process.returncode != 0:
         raise Exception("Non zero return code: %d"%process.returncode)
 
+__version__ = open('/version').read()
+
 parser = argparse.ArgumentParser(description='FreeSurfer recon-all + custom template generation.')
 parser.add_argument('bids_dir', help='The directory with the input dataset '
                     'formatted according to the BIDS standard.')
@@ -43,6 +45,8 @@ parser.add_argument('--template_name', help='Name for the custom group level tem
                     default="average")
 parser.add_argument('--license_key', help='FreeSurfer license key - letters and numbers after "*" in the email you received after registration. To register (for free) visit https://surfer.nmr.mgh.harvard.edu/registration.html',
                     required=True)
+parser.add_argument('-v', '--version', action='version',
+                    version='BIDS-App example version {}'.format(__version__))
 
 args = parser.parse_args()
 
