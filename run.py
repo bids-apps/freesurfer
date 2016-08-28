@@ -20,7 +20,7 @@ def run(command, env={}):
     if process.returncode != 0:
         raise Exception("Non zero return code: %d"%process.returncode)
 
-__version__ = open('/version')).read()
+__version__ = open('/version').read()
 
 parser = argparse.ArgumentParser(description='FreeSurfer recon-all + custom template generation.')
 parser.add_argument('bids_dir', help='The directory with the input dataset '
