@@ -10,6 +10,8 @@ import subprocess
 def run(command, env={}):
     merged_env = os.environ
     merged_env.update(env)
+    # DEBUG env triggers freesurfer to produce gigabytes of files
+    merged_env.pop('DEBUG', None)
     process = Popen(command, stdout=PIPE, stderr=subprocess.STDOUT, shell=True, env=merged_env)
     while True:
         line = process.stdout.readline()
