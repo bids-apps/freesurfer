@@ -45,7 +45,7 @@ parser.add_argument('--n_cpus', help='Number of CPUs/cores available to use.',
                    default=1, type=int)
 parser.add_argument('--stages', help='Autorecon stages to run.',
                     choices=["autorecon1", "autorecon2", "autorecon3", "autorecon-all"],
-                    default=["autorecon-all"]
+                    default=["autorecon-all"],
                     nargs="+")
 parser.add_argument('--template_name', help='Name for the custom group level template generated for this dataset',
                     default="average")
@@ -119,9 +119,11 @@ if args.analysis_level == "participant":
             for tp in timepoints:
                 # longitudinally process all timepoints
                 fsid = "sub-%s"%subject_label
-                cmd = "recon-all -long %s %s -sd %s -all -openmp %d"%(tp,
+                stages = " ".join(["-" + stage for stage in args.stages])
+                cmd = "recon-all -long %s %s -sd %s %s -openmp %d"%(tp,
                                                                     fsid,
                                                                     args.output_dir,
+                                                                    stages,
                                                                     args.n_cpus)
                 print(cmd)
                 if os.path.exists(os.path.join(args.output_dir, tp + ".long." + fsid)):
@@ -135,9 +137,11 @@ if args.analysis_level == "participant":
                                                             "anat",
                                                             "*_T1w.nii*"))])
             fsid = "sub-%s"%subject_label
-            cmd = "recon-all -subjid %s -sd %s %s -all -openmp %d"%(fsid,
+            stages = " ".join(["-" + stage for stage in args.stages])
+            cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d"%(fsid,
                                                                      args.output_dir,
                                                                      input_args,
+                                                                     stages,
                                                                      args.n_cpus)
             print(cmd)
             if os.path.exists(os.path.join(args.output_dir, fsid)):
