@@ -43,6 +43,10 @@ parser.add_argument('--participant_label', help='The label of the participant th
                    nargs="+")
 parser.add_argument('--n_cpus', help='Number of CPUs/cores available to use.',
                    default=1, type=int)
+parser.add_argument('--stages', help='Autorecon stages to run.',
+                    choices=["autorecon1", "autorecon2", "autorecon3", "autorecon-all"],
+                    default=["autorecon-all"]
+                    nargs="+")
 parser.add_argument('--template_name', help='Name for the custom group level template generated for this dataset',
                     default="average")
 parser.add_argument('--license_key', help='FreeSurfer license key - letters and numbers after "*" in the email you received after registration. To register (for free) visit https://surfer.nmr.mgh.harvard.edu/registration.html',
@@ -101,10 +105,12 @@ if args.analysis_level == "participant":
             # creating a subject specific template
             input_args = " ".join(["-tp %s"%tp for tp in timepoints])
             fsid = "sub-%s"%subject_label
-            cmd = "recon-all -base %s -sd %s %s -all -openmp %d"%(fsid,
-                                                                    args.output_dir,
-                                                                    input_args,
-                                                                    args.n_cpus)
+            stages = " ".join(["-" + stage for stage in args.stages])
+            cmd = "recon-all -base %s -sd %s %s %s -openmp %d"%(fsid,
+                                                                  args.output_dir,
+                                                                  input_args,
+                                                                  stages,
+                                                                  args.n_cpus)
             print(cmd)
             if os.path.exists(os.path.join(args.output_dir, fsid)):
                 rmtree(os.path.join(args.output_dir, fsid))
