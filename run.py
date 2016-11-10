@@ -70,14 +70,14 @@ else:
 # running participant level
 if args.analysis_level == "participant":
     if not os.path.exists(os.path.join(args.output_dir, "fsaverage")):
-        shutil.copytree(os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage"),
-                        os.path.join(args.output_dir, "fsaverage"))
+        subprocess.run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage") + " " + os.path.join(args.output_dir, "fsaverage"),
+                       shell=True, check=True)
     if not os.path.exists(os.path.join(args.output_dir, "lh.EC_average")):
-        shutil.copytree(os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average"),
-                        os.path.join(args.output_dir, "lh.EC_average"))
+        subprocess.run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average") + " " + os.path.join(args.output_dir, "lh.EC_average"),
+                       shell=True, check=True)
     if not os.path.exists(os.path.join(args.output_dir, "rh.EC_average")):
-        shutil.copytree(os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average"),
-                        os.path.join(args.output_dir, "rh.EC_average"))
+        subprocess.run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(args.output_dir, "rh.EC_average"),
+                       shell=True, check=True)
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
 
