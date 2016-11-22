@@ -7,7 +7,7 @@ from subprocess import Popen, PIPE
 from shutil import rmtree
 import subprocess
 
-def run(command, env={}):
+def run(command, env={}, ignore_errors=False):
     merged_env = os.environ
     merged_env.update(env)
     # DEBUG env triggers freesurfer to produce gigabytes of files
@@ -19,7 +19,7 @@ def run(command, env={}):
         print(line)
         if line == '' and process.poll() != None:
             break
-    if process.returncode != 0:
+    if process.returncode != 0 and not ignore_errors:
         raise Exception("Non zero return code: %d"%process.returncode)
 
 __version__ = open('/version').read()
@@ -70,11 +70,14 @@ else:
 # running participant level
 if args.analysis_level == "participant":
     if not os.path.exists(os.path.join(args.output_dir, "fsaverage")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage") + " " + os.path.join(args.output_dir, "fsaverage"))
+        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage") + " " + os.path.join(args.output_dir, "fsaverage"),
+            ignore_errors=True)
     if not os.path.exists(os.path.join(args.output_dir, "lh.EC_average")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average") + " " + os.path.join(args.output_dir, "lh.EC_average"))
+        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average") + " " + os.path.join(args.output_dir, "lh.EC_average"),
+            ignore_errors=True)
     if not os.path.exists(os.path.join(args.output_dir, "rh.EC_average")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(args.output_dir, "rh.EC_average"))
+        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(args.output_dir, "rh.EC_average"),
+            ignore_errors=True)
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
 
