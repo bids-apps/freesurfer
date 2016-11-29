@@ -26,9 +26,9 @@ RUN apt-get install -y bc
 RUN apt-get install -y tar libgomp1 perl-modules
 
 RUN apt-get install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get install -y nodejs
-RUN npm install -g bids-validator
+RUN npm install -g bids-validator@0.19.8
 
 ENV OS Linux
 ENV FS_OVERRIDE 0
