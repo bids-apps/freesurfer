@@ -51,6 +51,7 @@ parser.add_argument('--template_name', help='Name for the custom group level tem
                     default="average")
 parser.add_argument('--license_key', help='FreeSurfer license key - letters and numbers after "*" in the email you received after registration. To register (for free) visit https://surfer.nmr.mgh.harvard.edu/registration.html',
                     required=True)
+parser.add_argument('--acqusition_label', help='If the dataset contains multiple T1 weighted images from different acqusitions which one should be used? Corresponds to "acq-<acqusition_label>"')
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App example version {}'.format(__version__))
 
@@ -86,6 +87,10 @@ if args.analysis_level == "participant":
         timepoints = []
         if len(sessions) > 1:
             for session_label in sessions:
+                if args.acqusition_label:
+                    acq_tpl = "*acq-%s*"%args.acqusition_label
+                else:
+                    acq_tpl = "*"
                 input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
                                                                 "sub-%s"%subject_label,
                                                                 "ses-%s"%session_label,
