@@ -96,6 +96,13 @@ if args.analysis_level == "participant":
                                                                 "ses-%s"%session_label,
                                                                 "anat",
                                                                 "%s_T1w.nii*"%acq_tpl))])
+                T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                        "ses-%s"%session_label, "anat",
+                                        "*_T2w.nii*"))
+                if T2s:
+                    input_args += " " + " ".join(["-T2 %s"%f for f in T2s])
+                    input_args += " -T2pial"
+
                 fsid = "sub-%s_ses-%s"%(subject_label, session_label)
                 timepoints.append(fsid)
                 cmd = "recon-all -subjid %s -sd %s %s -all -openmp %d"%(fsid,
@@ -141,6 +148,11 @@ if args.analysis_level == "participant":
                                                             "sub-%s"%subject_label,
                                                             "anat",
                                                             "%s_T1w.nii*"%acq_tpl))])
+            T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
+                                    "*_T2w.nii*"))
+            if T2s:
+                input_args += " " + " ".join(["-T2 %s"%f for f in T2s])
+                input_args += " -T2pial"
             fsid = "sub-%s"%subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
             cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d"%(fsid,
