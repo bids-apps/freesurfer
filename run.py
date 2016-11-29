@@ -95,7 +95,7 @@ if args.analysis_level == "participant":
                                                                 "sub-%s"%subject_label,
                                                                 "ses-%s"%session_label,
                                                                 "anat",
-                                                                "*_T1w.nii*"))])
+                                                                "%s_T1w.nii*"%acq_tpl))])
                 fsid = "sub-%s_ses-%s"%(subject_label, session_label)
                 timepoints.append(fsid)
                 cmd = "recon-all -subjid %s -sd %s %s -all -openmp %d"%(fsid,
