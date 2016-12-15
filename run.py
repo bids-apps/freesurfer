@@ -68,16 +68,19 @@ else:
     subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
     subjects_to_analyze = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
 
+# workaround for https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2016-July/046538.html
+output_dir = os.path.abspath(args.output_dir)
+    
 # running participant level
 if args.analysis_level == "participant":
-    if not os.path.exists(os.path.join(args.output_dir, "fsaverage")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage") + " " + os.path.join(args.output_dir, "fsaverage"),
+    if not os.path.exists(os.path.join(output_dir, "fsaverage")):
+        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage") + " " + os.path.join(output_dir, "fsaverage"),
             ignore_errors=True)
-    if not os.path.exists(os.path.join(args.output_dir, "lh.EC_average")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average") + " " + os.path.join(args.output_dir, "lh.EC_average"),
+    if not os.path.exists(os.path.join(output_dir, "lh.EC_average")):
+        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average") + " " + os.path.join(output_dir, "lh.EC_average"),
             ignore_errors=True)
-    if not os.path.exists(os.path.join(args.output_dir, "rh.EC_average")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(args.output_dir, "rh.EC_average"),
+    if not os.path.exists(os.path.join(output_dir, "rh.EC_average")):
+        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(output_dir, "rh.EC_average"),
             ignore_errors=True)
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
@@ -106,12 +109,12 @@ if args.analysis_level == "participant":
                 fsid = "sub-%s_ses-%s"%(subject_label, session_label)
                 timepoints.append(fsid)
                 cmd = "recon-all -subjid %s -sd %s %s -all -openmp %d"%(fsid,
-                                                                         args.output_dir,
-                                                                         input_args,
-                                                                         args.n_cpus)
+                                                                        output_dir,
+                                                                        input_args,
+                                                                        args.n_cpus)
                 print(cmd)
-                if os.path.exists(os.path.join(args.output_dir, fsid)):
-                    rmtree(os.path.join(args.output_dir, fsid))
+                if os.path.exists(os.path.join(output_dir, fsid)):
+                    rmtree(os.path.join(output_dir, fsid))
                 run(cmd)
 
             # creating a subject specific template
@@ -119,13 +122,13 @@ if args.analysis_level == "participant":
             fsid = "sub-%s"%subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
             cmd = "recon-all -base %s -sd %s %s %s -openmp %d"%(fsid,
-                                                                  args.output_dir,
-                                                                  input_args,
-                                                                  stages,
-                                                                  args.n_cpus)
+                                                                output_dir,
+                                                                input_args,
+                                                                stages,
+                                                                args.n_cpus)
             print(cmd)
-            if os.path.exists(os.path.join(args.output_dir, fsid)):
-                rmtree(os.path.join(args.output_dir, fsid))
+            if os.path.exists(os.path.join(output_dir, fsid)):
+                rmtree(os.path.join(output_dir, fsid))
             run(cmd)
 
             for tp in timepoints:
@@ -134,12 +137,12 @@ if args.analysis_level == "participant":
                 stages = " ".join(["-" + stage for stage in args.stages])
                 cmd = "recon-all -long %s %s -sd %s %s -openmp %d"%(tp,
                                                                     fsid,
-                                                                    args.output_dir,
+                                                                    output_dir,
                                                                     stages,
                                                                     args.n_cpus)
                 print(cmd)
-                if os.path.exists(os.path.join(args.output_dir, tp + ".long." + fsid)):
-                    rmtree(os.path.join(args.output_dir, tp + ".long." + fsid))
+                if os.path.exists(os.path.join(output_dir, tp + ".long." + fsid)):
+                    rmtree(os.path.join(output_dir, tp + ".long." + fsid))
                 run(cmd)
 
         else:
@@ -156,27 +159,30 @@ if args.analysis_level == "participant":
             fsid = "sub-%s"%subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
             cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d"%(fsid,
-                                                                     args.output_dir,
-                                                                     input_args,
-                                                                     stages,
-                                                                     args.n_cpus)
+                                                                  output_dir,
+                                                                  input_args,
+                                                                  stages,
+                                                                  args.n_cpus)
             print(cmd)
-            if os.path.exists(os.path.join(args.output_dir, fsid)):
-                rmtree(os.path.join(args.output_dir, fsid))
+            if os.path.exists(os.path.join(output_dir, fsid)):
+                rmtree(os.path.join(output_dir, fsid))
             run(cmd)
 elif args.analysis_level == "group":    	# running group level
-    # generate study specific template
-    fsids = ["sub-%s"%s for s in subjects_to_analyze]
-    cmd = "make_average_subject --no-symlink --out " + args.template_name + " --subjects " + " ".join(fsids)
-    print(cmd)
-    if os.path.exists(os.path.join(args.output_dir, args.template_name)):
-        rmtree(os.path.join(args.output_dir, args.template_name))
-    run(cmd, env={"SUBJECTS_DIR": args.output_dir})
-    for subject_label in subjects_to_analyze:
-        for hemi in ["lh", "rh"]:
-            tif_file = os.path.join(args.output_dir, args.template_name, hemi+".reg.template.tif")
-            fsid = "sub-%s"%subject_label
-            sphere_file = os.path.join(args.output_dir, fsid, "surf", hemi+".sphere")
-            reg_file = os.path.join(args.output_dir, fsid, "surf", hemi+".sphere.reg." + args.template_name)
-            cmd = "mris_register -curv %s %s %s"%(sphere_file, tif_file, reg_file)
-            run(cmd, env={"SUBJECTS_DIR": args.output_dir})
+    if len(subjects_to_analyze) > 1:
+        # generate study specific template
+        fsids = ["sub-%s"%s for s in subjects_to_analyze]
+        cmd = "make_average_subject --no-symlink --out " + args.template_name + " --subjects " + " ".join(fsids)
+        print(cmd)
+        if os.path.exists(os.path.join(output_dir, args.template_name)):
+            rmtree(os.path.join(output_dir, args.template_name))
+        run(cmd, env={"SUBJECTS_DIR": output_dir})
+        for subject_label in subjects_to_analyze:
+            for hemi in ["lh", "rh"]:
+                tif_file = os.path.join(output_dir, args.template_name, hemi+".reg.template.tif")
+                fsid = "sub-%s"%subject_label
+                sphere_file = os.path.join(output_dir, fsid, "surf", hemi+".sphere")
+                reg_file = os.path.join(output_dir, fsid, "surf", hemi+".sphere.reg." + args.template_name)
+                cmd = "mris_register -curv %s %s %s"%(sphere_file, tif_file, reg_file)
+                run(cmd, env={"SUBJECTS_DIR": output_dir})
+    else:
+        print("Only one subject included in the analysis. Skipping group level")
