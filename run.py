@@ -70,7 +70,7 @@ else:
 
 # workaround for https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2016-July/046538.html
 output_dir = os.path.abspath(args.output_dir)
-    
+
 # running participant level
 if args.analysis_level == "participant":
     if not os.path.exists(os.path.join(output_dir, "fsaverage")):
@@ -92,7 +92,7 @@ if args.analysis_level == "participant":
             acq_tpl = "*acq-%s*"%args.acquisition_label
         else:
             acq_tpl = "*"
-        if len(sessions) > 1:
+        if len(sessions) > 0:
             for session_label in sessions:
                 input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
                                                                 "sub-%s"%subject_label,
