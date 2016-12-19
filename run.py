@@ -63,12 +63,12 @@ run("bids-validator " + args.bids_dir)
 # if not, subject specific template and long stream are not run
 longitudinal_study = False
 subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
+if args.acquisition_label:
+    acq_tpl = "*acq-%s*" % args.acquisition_label
+else:
+    acq_tpl = "*"
+
 if glob(os.path.join(args.bids_dir, "sub-*", "ses-*")):
-    if args.acquisition_label:
-        acq_tpl = "*acq-%s*"%args.acquisition_label
-    else:
-        acq_tpl = "*"
-        
     subjects = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
     for subject_label in subjects:
         session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
@@ -114,10 +114,7 @@ if args.analysis_level == "participant":
         session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
         timepoints = []
-        if args.acquisition_label:
-            acq_tpl = "*acq-%s*"%args.acquisition_label
-        else:
-            acq_tpl = "*"
+
         if len(sessions) > 0:
             for session_label in sessions:
                 input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
