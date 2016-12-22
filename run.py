@@ -59,6 +59,32 @@ args = parser.parse_args()
 
 run("bids-validator " + args.bids_dir)
 
+# check if study with session folders includes at least one subject with longitudinal t1w data
+# if not, subject specific template and long stream are not run
+longitudinal_study = False
+subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
+if args.acquisition_label:
+    acq_tpl = "*acq-%s*" % args.acquisition_label
+else:
+    acq_tpl = "*"
+
+if glob(os.path.join(args.bids_dir, "sub-*", "ses-*")):
+    subjects = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
+    for subject_label in subjects:
+        session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
+        sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
+        n_valid_sessions = 0
+        for session_label in sessions:
+            if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                                "ses-%s"%session_label,
+                                                "anat",
+                                                "%s_T1w.nii*"%acq_tpl)):
+                n_valid_sessions += 1
+        if n_valid_sessions > 1:
+            longitudinal_study = True
+            break
+
+
 subjects_to_analyze = []
 # only for a subset of subjects
 if args.participant_label:
@@ -70,7 +96,7 @@ else:
 
 # workaround for https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2016-July/046538.html
 output_dir = os.path.abspath(args.output_dir)
-    
+
 # running participant level
 if args.analysis_level == "participant":
     if not os.path.exists(os.path.join(output_dir, "fsaverage")):
@@ -88,11 +114,8 @@ if args.analysis_level == "participant":
         session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
         timepoints = []
-        if args.acquisition_label:
-            acq_tpl = "*acq-%s*"%args.acquisition_label
-        else:
-            acq_tpl = "*"
-        if len(sessions) > 1:
+
+        if len(sessions) > 0:
             for session_label in sessions:
                 input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
                                                                 "sub-%s"%subject_label,
@@ -118,32 +141,33 @@ if args.analysis_level == "participant":
                 run(cmd)
 
             # creating a subject specific template
-            input_args = " ".join(["-tp %s"%tp for tp in timepoints])
-            fsid = "sub-%s"%subject_label
-            stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -base %s -sd %s %s %s -openmp %d"%(fsid,
-                                                                output_dir,
-                                                                input_args,
-                                                                stages,
-                                                                args.n_cpus)
-            print(cmd)
-            if os.path.exists(os.path.join(output_dir, fsid)):
-                rmtree(os.path.join(output_dir, fsid))
-            run(cmd)
-
-            for tp in timepoints:
-                # longitudinally process all timepoints
+            if longitudinal_study:
+                input_args = " ".join(["-tp %s"%tp for tp in timepoints])
                 fsid = "sub-%s"%subject_label
                 stages = " ".join(["-" + stage for stage in args.stages])
-                cmd = "recon-all -long %s %s -sd %s %s -openmp %d"%(tp,
-                                                                    fsid,
+                cmd = "recon-all -base %s -sd %s %s %s -openmp %d"%(fsid,
                                                                     output_dir,
+                                                                    input_args,
                                                                     stages,
                                                                     args.n_cpus)
                 print(cmd)
-                if os.path.exists(os.path.join(output_dir, tp + ".long." + fsid)):
-                    rmtree(os.path.join(output_dir, tp + ".long." + fsid))
+                if os.path.exists(os.path.join(output_dir, fsid)):
+                    rmtree(os.path.join(output_dir, fsid))
                 run(cmd)
+
+                for tp in timepoints:
+                    # longitudinally process all timepoints
+                    fsid = "sub-%s"%subject_label
+                    stages = " ".join(["-" + stage for stage in args.stages])
+                    cmd = "recon-all -long %s %s -sd %s %s -openmp %d"%(tp,
+                                                                        fsid,
+                                                                        output_dir,
+                                                                        stages,
+                                                                        args.n_cpus)
+                    print(cmd)
+                    if os.path.exists(os.path.join(output_dir, tp + ".long." + fsid)):
+                        rmtree(os.path.join(output_dir, tp + ".long." + fsid))
+                    run(cmd)
 
         else:
             # grab all T1s from all sessions
