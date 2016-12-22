@@ -44,7 +44,7 @@ parser.add_argument('--participant_label', help='The label of the participant th
 parser.add_argument('--n_cpus', help='Number of CPUs/cores available to use.',
                    default=1, type=int)
 parser.add_argument('--stages', help='Autorecon stages to run.',
-                    choices=["autorecon1", "autorecon2", "autorecon3", "autorecon-all"],
+                    choices=["autorecon1", "autorecon2", "autorecon2-cp", "autorecon2-wm", "autorecon2-pial", "autorecon3", "autorecon-all", "all"],
                     default=["autorecon-all"],
                     nargs="+")
 parser.add_argument('--template_name', help='Name for the custom group level template generated for this dataset',
