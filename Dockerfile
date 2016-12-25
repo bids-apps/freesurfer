@@ -20,6 +20,8 @@ RUN wget -qO- ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/5.3.0-HCP/fre
 RUN /bin/bash -c 'touch /opt/freesurfer/.license'
 
 RUN apt-get install -y python3
+RUN apt-get install -y python3-pip
+RUN pip3 install nibabel
 
 RUN apt-get install -y tcsh
 RUN apt-get install -y bc
