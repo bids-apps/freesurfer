@@ -2,6 +2,7 @@
 import argparse
 import os
 import shutil
+import nibabel
 from glob import glob
 from subprocess import Popen, PIPE
 from shutil import rmtree
@@ -53,7 +54,8 @@ parser.add_argument('--license_key', help='FreeSurfer license key - letters and 
                     required=True)
 parser.add_argument('--acquisition_label', help='If the dataset contains multiple T1 weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
 parser.add_argument('--refine_pial', help='If the dataset contains 3D T2 or T2 FLAIR weighted images (~1x1x1), these can be used to refine the pial surface.',
-                    choices=['T2', 'FLAIR'])
+                    choices=['T2', 'FLAIR'],
+                   dafault=['T2'])
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App example version {}'.format(__version__))
 
@@ -131,11 +133,15 @@ if args.analysis_level == "participant":
                                         "ses-%s"%session_label, "anat",
                                         "*_FLAIR.nii*"))
                 if args.refine_pial == "T2":
-                    input_args += " " + " ".join(["-T2 %s"%f for f in T2s])
-                    input_args += " -T2pial"
+                    for T2 in T2s:
+                        if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                            input_args += " " + " ".join(["-T2 %s"%T2])
+                            input_args += " -T2pial"
                 elif args.refine_pial == "FLAIR":
-                    input_args += " " + " ".join(["-FLAIR %s"%f for f in FLAIRs])
-                    input_args += " -FLAIRpial"
+                        for FLAIR in FLAIRs:
+                        if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                            input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                            input_args += " -FLAIRpial"
 
 
                 fsid = "sub-%s_ses-%s"%(subject_label, session_label)
@@ -189,11 +195,16 @@ if args.analysis_level == "participant":
             FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
                                     "*_FLAIR.nii*"))
             if args.refine_pial == "T2":
-                input_args += " " + " ".join(["-T2 %s"%f for f in T2s])
-                input_args += " -T2pial"
+                for T2 in T2s:
+                    if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                        input_args += " " + " ".join(["-T2 %s"%T2])
+                        input_args += " -T2pial"
             elif args.refine_pial == "FLAIR":
-                input_args += " " + " ".join(["-FLAIR %s"%f for f in FLAIRs])
-                input_args += " -FLAIRpial"
+                for FLAIR in FLAIRs:
+                    if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                        input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                        input_args += " -FLAIRpial"    
+
             fsid = "sub-%s"%subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
             cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d"%(fsid,
