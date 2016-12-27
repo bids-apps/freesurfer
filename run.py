@@ -55,7 +55,7 @@ parser.add_argument('--license_key', help='FreeSurfer license key - letters and 
 parser.add_argument('--acquisition_label', help='If the dataset contains multiple T1 weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
 parser.add_argument('--refine_pial', help='If the dataset contains 3D T2 or T2 FLAIR weighted images (~1x1x1), these can be used to refine the pial surface.',
                     choices=['T2', 'FLAIR'],
-                   dafault=['T2'])
+                    default=['T2'])
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App example version {}'.format(__version__))
 
