@@ -138,7 +138,7 @@ if args.analysis_level == "participant":
                             input_args += " " + " ".join(["-T2 %s"%T2])
                             input_args += " -T2pial"
                 elif args.refine_pial == "FLAIR":
-                        for FLAIR in FLAIRs:
+                    for FLAIR in FLAIRs:
                         if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
                             input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
                             input_args += " -FLAIRpial"
