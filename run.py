@@ -161,7 +161,7 @@ if args.analysis_level == "participant":
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                     print(cmd)
                     run(cmd)
-                elif if os.path.exists(os.path.join(output_dir, fsid)):
+                elif os.path.exists(os.path.join(output_dir, fsid)):
                     print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                     print(resume_cmd)
                     run(resume_cmd)
@@ -189,7 +189,7 @@ if args.analysis_level == "participant":
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                     print(cmd)
                     run(cmd)
-                elif if os.path.exists(os.path.join(output_dir, fsid)):
+                elif os.path.exists(os.path.join(output_dir, fsid)):
                     print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                     print(resume_cmd)
                     run(resume_cmd)
@@ -251,7 +251,7 @@ if args.analysis_level == "participant":
                 print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                 print(cmd)
                 run(cmd)
-            elif if os.path.exists(os.path.join(output_dir, fsid)):
+            elif os.path.exists(os.path.join(output_dir, fsid)):
                 print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                 print(resume_cmd)
                 run(resume_cmd)
