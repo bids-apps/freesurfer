@@ -153,7 +153,7 @@ if args.analysis_level == "participant":
                                                                         input_args,
                                                                         args.n_cpus)
                 print(cmd)
-                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning")):
+                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, fsid))
                 run(cmd)
 
@@ -168,7 +168,7 @@ if args.analysis_level == "participant":
                                                                     stages,
                                                                     args.n_cpus)
                 print(cmd)
-                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning")):
+                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, fsid))
                 run(cmd)
 
@@ -182,7 +182,7 @@ if args.analysis_level == "participant":
                                                                         stages,
                                                                         args.n_cpus)
                     print(cmd)
-                    if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning")):
+                    if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, tp + ".long." + fsid))
                     run(cmd)
 
@@ -215,7 +215,7 @@ if args.analysis_level == "participant":
                                                                   stages,
                                                                   args.n_cpus)
             print(cmd)
-            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning")):
+            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                 rmtree(os.path.join(output_dir, fsid))
             run(cmd)
 elif args.analysis_level == "group":    	# running group level
