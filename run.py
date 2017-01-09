@@ -56,7 +56,7 @@ parser.add_argument('--acquisition_label', help='If the dataset contains multipl
 parser.add_argument('--refine_pial', help='If the dataset contains 3D T2 or T2 FLAIR weighted images (~1x1x1), '
                     'these can be used to refine the pial surface. If you want to ignore these, specify None or '
                     ' T1only to base surfaces on the T1 alone.',
-                    choices=['T2', 'FLAIR','None','T1only'],
+                    choices=['T2', 'FLAIR', 'None', 'T1only'],
                     default=['T2'])
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App example version {}'.format(__version__))
@@ -152,10 +152,22 @@ if args.analysis_level == "participant":
                                                                         output_dir,
                                                                         input_args,
                                                                         args.n_cpus)
-                print(cmd)
-                if os.path.exists(os.path.join(output_dir, fsid)):
+                resume_cmd = "recon-all -subjid %s -sd %s -all -openmp %d"%(fsid,
+                                                                            output_dir,
+                                                                            args.n_cpus)
+
+                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, fsid))
-                run(cmd)
+                    print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                    print(cmd)
+                    run(cmd)
+                elif os.path.exists(os.path.join(output_dir, fsid)):
+                    print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                    print(resume_cmd)
+                    run(resume_cmd)
+                else:
+                    print(cmd)
+                    run(cmd)
 
             # creating a subject specific template
             if longitudinal_study:
@@ -167,11 +179,24 @@ if args.analysis_level == "participant":
                                                                     input_args,
                                                                     stages,
                                                                     args.n_cpus)
-                print(cmd)
-                if os.path.exists(os.path.join(output_dir, fsid)):
+                resume_cmd = "recon-all -base %s -sd %s %s -openmp %d"%(fsid,
+                                                                        output_dir,
+                                                                        stages,
+                                                                        args.n_cpus)
+                
+                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, fsid))
-                run(cmd)
-
+                    print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                    print(cmd)
+                    run(cmd)
+                elif os.path.exists(os.path.join(output_dir, fsid)):
+                    print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                    print(resume_cmd)
+                    run(resume_cmd)
+                else:
+                    print(cmd)
+                    run(cmd)
+                    
                 for tp in timepoints:
                     # longitudinally process all timepoints
                     fsid = "sub-%s"%subject_label
@@ -181,9 +206,11 @@ if args.analysis_level == "participant":
                                                                         output_dir,
                                                                         stages,
                                                                         args.n_cpus)
-                    print(cmd)
-                    if os.path.exists(os.path.join(output_dir, tp + ".long." + fsid)):
+                    
+                    if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, tp + ".long." + fsid))
+                        print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                    print(cmd)
                     run(cmd)
 
         else:
@@ -214,10 +241,24 @@ if args.analysis_level == "participant":
                                                                   input_args,
                                                                   stages,
                                                                   args.n_cpus)
-            print(cmd)
-            if os.path.exists(os.path.join(output_dir, fsid)):
+            resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d"%(fsid,
+                                                                      output_dir,
+                                                                      stages,
+                                                                      args.n_cpus)
+
+            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                 rmtree(os.path.join(output_dir, fsid))
-            run(cmd)
+                print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                print(cmd)
+                run(cmd)
+            elif os.path.exists(os.path.join(output_dir, fsid)):
+                print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                print(resume_cmd)
+                run(resume_cmd)
+            else:
+                print(cmd)
+                run(cmd)
+            
 elif args.analysis_level == "group":    	# running group level
     if len(subjects_to_analyze) > 1:
         # generate study specific template
