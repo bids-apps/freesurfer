@@ -53,6 +53,12 @@ parser.add_argument('--template_name', help='Name for the custom group level tem
 parser.add_argument('--license_key', help='FreeSurfer license key - letters and numbers after "*" in the email you received after registration. To register (for free) visit https://surfer.nmr.mgh.harvard.edu/registration.html',
                     required=True)
 parser.add_argument('--acquisition_label', help='If the dataset contains multiple T1 weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
+parser.add_argument('--multiple_sessions', help='For datasets with multiday sessions where you do not want to '
+                    'use the longitudinal pipeline, i.e., sessions were back-to-back, '
+                    'set this to multiday, otherwise sessions with T1w data will be '
+                    'considered independent sessions for longitudinal analysis.',
+                    choices=["longitudinal", "multiday"],
+                    default="longitudinal")
 parser.add_argument('--refine_pial', help='If the dataset contains 3D T2 or T2 FLAIR weighted images (~1x1x1), '
                     'these can be used to refine the pial surface. If you want to ignore these, specify None or '
                     ' T1only to base surfaces on the T1 alone.',
@@ -65,31 +71,11 @@ args = parser.parse_args()
 
 run("bids-validator " + args.bids_dir)
 
-# check if study with session folders includes at least one subject with longitudinal t1w data
-# if not, subject specific template and long stream are not run
-longitudinal_study = False
 subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
 if args.acquisition_label:
     acq_tpl = "*acq-%s*" % args.acquisition_label
 else:
     acq_tpl = "*"
-
-if glob(os.path.join(args.bids_dir, "sub-*", "ses-*")):
-    subjects = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
-    for subject_label in subjects:
-        session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
-        sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
-        n_valid_sessions = 0
-        for session_label in sessions:
-            if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                                "ses-%s"%session_label,
-                                                "anat",
-                                                "%s_T1w.nii*"%acq_tpl)):
-                n_valid_sessions += 1
-        if n_valid_sessions > 1:
-            longitudinal_study = True
-            break
-
 
 subjects_to_analyze = []
 # only for a subset of subjects
@@ -114,14 +100,27 @@ if args.analysis_level == "participant":
     if not os.path.exists(os.path.join(output_dir, "rh.EC_average")):
         run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(output_dir, "rh.EC_average"),
             ignore_errors=True)
-    # find all T1s and skullstrip them
+    
     for subject_label in subjects_to_analyze:
 
+        # Check for multiple sessions to combine as a multiday session or as a longitudinal stream
         session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
+        longitudinal_study = False
+        n_valid_sessions = 0
+        for session_label in sessions:
+            if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                                "ses-%s"%session_label,
+                                                "anat",
+                                                "%s_T1w.nii*"%acq_tpl)):
+                n_valid_sessions += 1
+        if n_valid_sessions > 1 and args.multiple_sessions == "longitudinal":
+            longitudinal_study = True
+
         timepoints = []
 
-        if len(sessions) > 0:
+        if len(sessions) > 0 and longitudinal_study == True:
+            # Running each session separately, prior to doing longitudinal pipeline
             for session_label in sessions:
                 input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
                                                                 "sub-%s"%subject_label,
@@ -170,51 +169,103 @@ if args.analysis_level == "participant":
                     run(cmd)
 
             # creating a subject specific template
-            if longitudinal_study:
-                input_args = " ".join(["-tp %s"%tp for tp in timepoints])
-                fsid = "sub-%s"%subject_label
-                stages = " ".join(["-" + stage for stage in args.stages])
-                cmd = "recon-all -base %s -sd %s %s %s -openmp %d"%(fsid,
+            input_args = " ".join(["-tp %s"%tp for tp in timepoints])
+            fsid = "sub-%s"%subject_label
+            stages = " ".join(["-" + stage for stage in args.stages])
+            cmd = "recon-all -base %s -sd %s %s %s -openmp %d"%(fsid,
+                                                                output_dir,
+                                                                input_args,
+                                                                stages,
+                                                                args.n_cpus)
+            resume_cmd = "recon-all -base %s -sd %s %s -openmp %d"%(fsid,
                                                                     output_dir,
-                                                                    input_args,
                                                                     stages,
                                                                     args.n_cpus)
-                resume_cmd = "recon-all -base %s -sd %s %s -openmp %d"%(fsid,
-                                                                        output_dir,
-                                                                        stages,
-                                                                        args.n_cpus)
+            
+            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+                rmtree(os.path.join(output_dir, fsid))
+                print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                print(cmd)
+                run(cmd)
+            elif os.path.exists(os.path.join(output_dir, fsid)):
+                print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                print(resume_cmd)
+                run(resume_cmd)
+            else:
+                print(cmd)
+                run(cmd)
                 
-                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
-                    rmtree(os.path.join(output_dir, fsid))
+            for tp in timepoints:
+                # longitudinally process all timepoints
+                fsid = "sub-%s"%subject_label
+                stages = " ".join(["-" + stage for stage in args.stages])
+                cmd = "recon-all -long %s %s -sd %s %s -openmp %d"%(tp,
+                                                                    fsid,
+                                                                    output_dir,
+                                                                    stages,
+                                                                    args.n_cpus)
+                
+                if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
+                    rmtree(os.path.join(output_dir, tp + ".long." + fsid))
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                    print(cmd)
-                    run(cmd)
-                elif os.path.exists(os.path.join(output_dir, fsid)):
-                    print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
-                    print(resume_cmd)
-                    run(resume_cmd)
-                else:
-                    print(cmd)
-                    run(cmd)
-                    
-                for tp in timepoints:
-                    # longitudinally process all timepoints
-                    fsid = "sub-%s"%subject_label
-                    stages = " ".join(["-" + stage for stage in args.stages])
-                    cmd = "recon-all -long %s %s -sd %s %s -openmp %d"%(tp,
-                                                                        fsid,
-                                                                        output_dir,
-                                                                        stages,
-                                                                        args.n_cpus)
-                    
-                    if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
-                        rmtree(os.path.join(output_dir, tp + ".long." + fsid))
-                        print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                    print(cmd)
-                    run(cmd)
+                print(cmd)
+                run(cmd)
+
+        elif len(sessions) > 0 and longitudinal_study == False:
+            # grab all T1s/T2s from multiple sessions and combine
+            input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
+                                                            "sub-%s"%subject_label,
+                                                            "ses-*",
+                                                            "anat",
+                                                            "%s_T1w.nii*"%acq_tpl))])
+            T2s = glob(os.path.join(args.bids_dir,
+                                    "sub-%s"%subject_label,
+                                    "ses-*",
+                                    "anat",
+                                    "*_T2w.nii*"))
+            FLAIRs = glob(os.path.join(args.bids_dir,
+                                    "sub-%s"%subject_label,
+                                    "ses-*",
+                                    "anat",
+                                    "*_FLAIR.nii*"))
+            if args.refine_pial == "T2":
+                for T2 in T2s:
+                    if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                        input_args += " " + " ".join(["-T2 %s"%T2])
+                        input_args += " -T2pial"
+            elif args.refine_pial == "FLAIR":
+                for FLAIR in FLAIRs:
+                    if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                        input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                        input_args += " -FLAIRpial"    
+
+            fsid = "sub-%s"%subject_label
+            stages = " ".join(["-" + stage for stage in args.stages])
+            cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d"%(fsid,
+                                                                  output_dir,
+                                                                  input_args,
+                                                                  stages,
+                                                                  args.n_cpus)
+            resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d"%(fsid,
+                                                                      output_dir,
+                                                                      stages,
+                                                                      args.n_cpus)
+
+            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+                rmtree(os.path.join(output_dir, fsid))
+                print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                print(cmd)
+                run(cmd)
+            elif os.path.exists(os.path.join(output_dir, fsid)):
+                print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                print(resume_cmd)
+                run(resume_cmd)
+            else:
+                print(cmd)
+                run(cmd)
 
         else:
-            # grab all T1s from all sessions
+            # grab all T1s/T2s from single session (no ses-* directories)
             input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
                                                             "sub-%s"%subject_label,
                                                             "anat",
