@@ -20,6 +20,8 @@ RUN wget -qO- ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/5.3.0-HCP/fre
 RUN /bin/bash -c 'touch /opt/freesurfer/.license'
 
 RUN apt-get install -y python3
+RUN apt-get install -y python3-pip
+RUN pip3 install nibabel
 
 RUN apt-get install -y tcsh
 RUN apt-get install -y bc
@@ -29,6 +31,27 @@ RUN apt-get install -y curl
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get install -y nodejs
 RUN npm install -g bids-validator@0.19.8
+
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -sSL http://neuro.debian.net/lists/trusty.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+    apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9 && \
+    apt-get update && \
+    apt-get remove -y curl && \
+    apt-get install -y fsl-core && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+
+# Configure environment
+ENV FSLDIR=/usr/share/fsl/5.0
+ENV FSLOUTPUTTYPE=NIFTI_GZ
+ENV PATH=/usr/lib/fsl/5.0:$PATH
+ENV FSLMULTIFILEQUIT=TRUE
+ENV POSSUMDIR=/usr/share/fsl/5.0
+ENV LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH
+ENV FSLTCLSH=/usr/bin/tclsh
+ENV FSLWISH=/usr/bin/wish
+ENV FSLOUTPUTTYPE=NIFTI_GZ
 
 ENV OS Linux
 ENV FS_OVERRIDE 0

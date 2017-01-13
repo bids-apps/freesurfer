@@ -26,6 +26,9 @@ This App has the following command line arguments:
 		              bids_dir output_dir {participant,group}
 
 		FreeSurfer recon-all + custom template generation.
+		
+		NOTE: if scripts/IsRunning is present, this pipeline assumes recon-all was
+		interrupted and removes the directory then re-runs the processing stream.
 
 		positional arguments:
 		  bids_dir              The directory with the input dataset formatted
@@ -37,7 +40,13 @@ This App has the following command line arguments:
 		  {participant,group}   Level of the analysis that will be performed. Multiple
 		                        participant level analyses can be run independently
 		                        (in parallel) using the same output_dir.
-
+		required arguments:
+		  --license_key LICENSE_KEY
+		                        FreeSurfer license key - letters and numbers after "*"
+		                        in the email you received after registration. To
+		                        register (for free) visit
+		                        https://surfer.nmr.mgh.harvard.edu/registration.html
+		
 		optional arguments:
 		  -h, --help            show this help message and exit
 		  --participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]
@@ -47,15 +56,23 @@ This App has the following command line arguments:
 		                        parameter is not provided all subjects should be
 		                        analyzed. Multiple participants can be specified with
 		                        a space separated list.
-		  --n_cpus N_CPUS       Number of CPUs/cores available to use.
+		  --n_cpus N_CPUS       Number of CPUs/cores available to use. (Default is 1)
+		  --stages {all,autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon2-pial,autorecon3,autorecon-all}
+		                        Recon-all stages to run. (Default is autorecon-all)
 		  --template_name TEMPLATE_NAME
 		                        Name for the custom group level template generated
-		                        for this dataset
-		  --license_key LICENSE_KEY
-		                        FreeSurfer license key - letters and numbers after "*"
-		                        in the email you received after registration. To
-		                        register (for free) visit
-		                        https://surfer.nmr.mgh.harvard.edu/registration.html
+		                        for this dataset.
+		  --acquisition_label ACQUISITION_LABEL
+                    			If the dataset contains multiple T1 weighted images
+		                        from different acquisitions which one should be used?
+		                        Corresponds to "acq-<acquisition_label>"
+		  --refine_pial {T2,FLAIR,None,T1only}
+		  			If the dataset contains 3D T2 or T2 FLAIR weighted images
+					(~1x1x1), these can be used to refine the pial surface.
+					The current default is to look for appropriate T2s, then
+					look for appropriate FLAIRs(resolution <1.2mm isovolumetric).
+					If you want to ignore these, specify None or T1only to 
+					generate surfaces on the T1 alone.
 
 To run it in participant level mode (for one participant):
 
