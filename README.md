@@ -3,7 +3,7 @@
 This app implements surface reconstruction using Freesurfer. It reconstructs the surface for each subject individually and then
 creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates) unless instructed to combine data across sessions.
 
-The current Freesurfer version is based on: freesurfer-Linux-centos4_x86_64-stable-pub-v5.3.0-HCP.tar.gz
+The current Freesurfer version is based on: freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz
 
 The output of the pipeline consist of the SUBJECTS_DIR created during the analysis.
 
@@ -28,7 +28,7 @@ This App has the following command line arguments:
 		              bids_dir output_dir {participant,group}
 
 		FreeSurfer recon-all + custom template generation.
-		
+
 		NOTE: if scripts/IsRunning is present, this pipeline assumes recon-all was
 		interrupted and removes the directory then re-runs the processing stream.
 
@@ -48,7 +48,7 @@ This App has the following command line arguments:
 		                        in the email you received after registration. To
 		                        register (for free) visit
 		                        https://surfer.nmr.mgh.harvard.edu/registration.html
-		
+
 		optional arguments:
 		  -h, --help            show this help message and exit
 		  --participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]
@@ -69,18 +69,18 @@ This App has the following command line arguments:
 		                        from different acquisitions which one should be used?
 		                        Corresponds to "acq-<acquisition_label>"
 		  --multiple_sessions {longitudinal, multiday}
-		                        For datasets with multiday sessions where you do not 
-		                        want to use the longitudinal pipeline, i.e., sessions 
-		                        were back-to-back, set this to multiday, otherwise 
+		                        For datasets with multiday sessions where you do not
+		                        want to use the longitudinal pipeline, i.e., sessions
+		                        were back-to-back, set this to multiday, otherwise
 		                        sessions with T1w data will be considered independent
 		                        sessions for longitudinal analysis.
 		  --refine_pial {T2,FLAIR,None,T1only}
-		                        If the dataset contains 3D T2 or T2 FLAIR weighted 
+		                        If the dataset contains 3D T2 or T2 FLAIR weighted
 		                        images (~1x1x1), these can be used to refine the pial
 		                        surface. The current default is to look for
 		                        appropriate T2s, then look for appropriate FLAIRs
 		                        (resolution <1.2mm isovolumetric). If you want to
-		                        ignore these, specify None or T1only to generate 
+		                        ignore these, specify None or T1only to generate
 		                        surfaces on the T1 alone.
 
 To run it in participant level mode (for one participant):
