@@ -100,7 +100,7 @@ if args.analysis_level == "participant":
     if not os.path.exists(os.path.join(output_dir, "rh.EC_average")):
         run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(output_dir, "rh.EC_average"),
             ignore_errors=True)
-    
+
     for subject_label in subjects_to_analyze:
 
         # Check for multiple sessions to combine as a multiday session or as a longitudinal stream
@@ -147,11 +147,11 @@ if args.analysis_level == "participant":
 
                 fsid = "sub-%s_ses-%s"%(subject_label, session_label)
                 timepoints.append(fsid)
-                cmd = "recon-all -subjid %s -sd %s %s -all -openmp %d"%(fsid,
+                cmd = "recon-all -subjid %s -sd %s %s -all -parallel -openmp %d"%(fsid,
                                                                         output_dir,
                                                                         input_args,
                                                                         args.n_cpus)
-                resume_cmd = "recon-all -subjid %s -sd %s -all -openmp %d"%(fsid,
+                resume_cmd = "recon-all -subjid %s -sd %s -all -parallel -openmp %d"%(fsid,
                                                                             output_dir,
                                                                             args.n_cpus)
 
@@ -172,16 +172,16 @@ if args.analysis_level == "participant":
             input_args = " ".join(["-tp %s"%tp for tp in timepoints])
             fsid = "sub-%s"%subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -base %s -sd %s %s %s -openmp %d"%(fsid,
+            cmd = "recon-all -base %s -sd %s %s %s -parallel -openmp %d"%(fsid,
                                                                 output_dir,
                                                                 input_args,
                                                                 stages,
                                                                 args.n_cpus)
-            resume_cmd = "recon-all -base %s -sd %s %s -openmp %d"%(fsid,
+            resume_cmd = "recon-all -base %s -sd %s %s -parallel -openmp %d"%(fsid,
                                                                     output_dir,
                                                                     stages,
                                                                     args.n_cpus)
-            
+
             if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                 rmtree(os.path.join(output_dir, fsid))
                 print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
@@ -194,17 +194,17 @@ if args.analysis_level == "participant":
             else:
                 print(cmd)
                 run(cmd)
-                
+
             for tp in timepoints:
                 # longitudinally process all timepoints
                 fsid = "sub-%s"%subject_label
                 stages = " ".join(["-" + stage for stage in args.stages])
-                cmd = "recon-all -long %s %s -sd %s %s -openmp %d"%(tp,
+                cmd = "recon-all -long %s %s -sd %s %s -parallel -openmp %d"%(tp,
                                                                     fsid,
                                                                     output_dir,
                                                                     stages,
                                                                     args.n_cpus)
-                
+
                 if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, tp + ".long." + fsid))
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
@@ -237,16 +237,16 @@ if args.analysis_level == "participant":
                 for FLAIR in FLAIRs:
                     if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
                         input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
-                        input_args += " -FLAIRpial"    
+                        input_args += " -FLAIRpial"
 
             fsid = "sub-%s"%subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d"%(fsid,
+            cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
                                                                   output_dir,
                                                                   input_args,
                                                                   stages,
                                                                   args.n_cpus)
-            resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d"%(fsid,
+            resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
                                                                       output_dir,
                                                                       stages,
                                                                       args.n_cpus)
@@ -283,16 +283,16 @@ if args.analysis_level == "participant":
                 for FLAIR in FLAIRs:
                     if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
                         input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
-                        input_args += " -FLAIRpial"    
+                        input_args += " -FLAIRpial"
 
             fsid = "sub-%s"%subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d"%(fsid,
+            cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
                                                                   output_dir,
                                                                   input_args,
                                                                   stages,
                                                                   args.n_cpus)
-            resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d"%(fsid,
+            resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
                                                                       output_dir,
                                                                       stages,
                                                                       args.n_cpus)
@@ -309,7 +309,7 @@ if args.analysis_level == "participant":
             else:
                 print(cmd)
                 run(cmd)
-            
+
 elif args.analysis_level == "group":    	# running group level
     if len(subjects_to_analyze) > 1:
         # generate study specific template
