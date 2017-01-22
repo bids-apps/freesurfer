@@ -17,8 +17,6 @@ RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/frees
     --exclude='freesurfer/lib/cuda' \
     --exclude='freesurfer/lib/qt'
 
-RUN /bin/bash -c 'touch /opt/freesurfer/.license'
-
 RUN apt-get install -y python3
 RUN apt-get install -y python3-pip
 RUN pip3 install nibabel
@@ -70,6 +68,7 @@ ENV PERL5LIB /opt/freesurfer/mni/lib/perl5/5.8.5
 ENV MNI_PERL5LIB /opt/freesurfer/mni/lib/perl5/5.8.5
 ENV PATH /opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV PYTHONPATH=""
+RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh
 
 RUN mkdir /scratch
 RUN mkdir /local-scratch
