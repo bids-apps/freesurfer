@@ -82,6 +82,10 @@ This App has the following command line arguments:
 		                        (resolution <1.2mm isovolumetric). If you want to
 		                        ignore these, specify None or T1only to generate
 		                        surfaces on the T1 alone.
+      --hires_mode {auto,enable,disable}
+                            Submilimiter (high resolution) processing. 'auto' -
+                            use only if <1.0mm data detected, 'enable' - force on,
+                            'disable' - force off
 
 To run it in participant level mode (for one participant):
 

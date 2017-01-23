@@ -64,7 +64,7 @@ parser.add_argument('--refine_pial', help='If the dataset contains 3D T2 or T2 F
                     ' T1only to base surfaces on the T1 alone.',
                     choices=['T2', 'FLAIR', 'None', 'T1only'],
                     default=['T2'])
-parser.add_argument('--hires_mode', help='',
+parser.add_argument('--hires_mode', help="Submilimiter (high resolution) processing. 'auto' - use only if <1.0mm data detected, 'enable' - force on, 'disable' - force off",
                     choices=['auto', 'enable', 'disable'],
                     default='auto')
 parser.add_argument('-v', '--version', action='version',
