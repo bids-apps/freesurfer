@@ -64,6 +64,9 @@ parser.add_argument('--refine_pial', help='If the dataset contains 3D T2 or T2 F
                     ' T1only to base surfaces on the T1 alone.',
                     choices=['T2', 'FLAIR', 'None', 'T1only'],
                     default=['T2'])
+parser.add_argument('--hires_mode', help='',
+                    choices=['auto', 'enable', 'disable'],
+                    default='auto')
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App example version {}'.format(__version__))
 
@@ -122,11 +125,17 @@ if args.analysis_level == "participant":
         if len(sessions) > 0 and longitudinal_study == True:
             # Running each session separately, prior to doing longitudinal pipeline
             for session_label in sessions:
-                input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
-                                                                "sub-%s"%subject_label,
-                                                                "ses-%s"%session_label,
-                                                                "anat",
-                                                                "%s_T1w.nii*"%acq_tpl))])
+                T1s = glob(os.path.join(args.bids_dir,
+                                  "sub-%s"%subject_label,
+                                  "ses-%s"%session_label,
+                                  "anat",
+                                  "%s_T1w.nii*"%acq_tpl))
+                input_args = ""
+                for T1 in T1s:
+                    if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                        input_args += " -hires"
+                    input_args += " -i %s"%T1
+
                 T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
                                         "ses-%s"%session_label, "anat",
                                         "*_T2w.nii*"))
@@ -143,7 +152,6 @@ if args.analysis_level == "participant":
                         if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
                             input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
                             input_args += " -FLAIRpial"
-
 
                 fsid = "sub-%s_ses-%s"%(subject_label, session_label)
                 timepoints.append(fsid)
@@ -213,11 +221,17 @@ if args.analysis_level == "participant":
 
         elif len(sessions) > 0 and longitudinal_study == False:
             # grab all T1s/T2s from multiple sessions and combine
-            input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
-                                                            "sub-%s"%subject_label,
-                                                            "ses-*",
-                                                            "anat",
-                                                            "%s_T1w.nii*"%acq_tpl))])
+            T1s = glob(os.path.join(args.bids_dir,
+                                    "sub-%s"%subject_label,
+                                    "ses-*",
+                                    "anat",
+                                    "%s_T1w.nii*"%acq_tpl))
+            input_args = ""
+            for T1 in T1s:
+                if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                    input_args += " -hires"
+                input_args += " -i %s"%T1
+
             T2s = glob(os.path.join(args.bids_dir,
                                     "sub-%s"%subject_label,
                                     "ses-*",
@@ -266,10 +280,15 @@ if args.analysis_level == "participant":
 
         else:
             # grab all T1s/T2s from single session (no ses-* directories)
-            input_args = " ".join(["-i %s"%f for f in glob(os.path.join(args.bids_dir,
-                                                            "sub-%s"%subject_label,
-                                                            "anat",
-                                                            "%s_T1w.nii*"%acq_tpl))])
+            T1s = glob(os.path.join(args.bids_dir,
+                       "sub-%s"%subject_label,
+                       "anat",
+                       "%s_T1w.nii*"%acq_tpl))
+            input_args = ""
+            for T1 in T1s:
+                if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                    input_args += " -hires"
+                input_args += " -i %s"%T1
             T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
                                     "*_T2w.nii*"))
             FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
