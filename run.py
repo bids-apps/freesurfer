@@ -104,8 +104,8 @@ if args.analysis_level == "participant":
         run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(output_dir, "rh.EC_average"),
             ignore_errors=True)
 
+    # check if study is truly longitudinal
     for subject_label in subjects_to_analyze:
-
         # Check for multiple sessions to combine as a multiday session or as a longitudinal stream
         session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
@@ -117,11 +117,14 @@ if args.analysis_level == "participant":
                                                 "anat",
                                                 "%s_T1w.nii*"%acq_tpl)):
                 n_valid_sessions += 1
-        if n_valid_sessions > 1 and args.multiple_sessions == "longitudinal":
-            longitudinal_study = True
+    if n_valid_sessions > 1 and args.multiple_sessions == "longitudinal":
+        longitudinal_study = True
 
+    for subject_label in subjects_to_analyze:
         timepoints = []
 
+        session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
+        sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
         if len(sessions) > 0 and longitudinal_study == True:
             # Running each session separately, prior to doing longitudinal pipeline
             for session_label in sessions:
