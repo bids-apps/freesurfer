@@ -123,10 +123,10 @@ if args.analysis_level == "participant":
             ignore_errors=True)
 
     for subject_label in subjects_to_analyze:
-        timepoints = []
-
         session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
+
+        timepoints = []
         if len(sessions) > 0 and longitudinal_study == True:
             # Running each session separately, prior to doing longitudinal pipeline
             for session_label in sessions:
