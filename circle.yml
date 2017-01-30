@@ -10,8 +10,8 @@ dependencies:
   override:
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
     - if [[ ! -d ~/data/ds114_test1 ]]; then wget -c -O ${HOME}/ds114_test1.tar "https://files.osf.io/v1/resources/9q7dv/providers/osfstorage/57e54a326c613b01d7d3ed90" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test1.tar -C ${HOME}/data; fi
-    # longitudinal data. s01 has only one session
-    - if [[ ! -d ~/data/ds114_test2_missing ]]; then wget -c -O ${HOME}/ds114_test2_missing.tar "https://files.osf.io/v1/resources/9q7dv/providers/osfstorage/57e549f9b83f6901d457d162" && mkdir -p ${HOME}/data/ds114_test2_missing && tar xf ${HOME}/ds114_test2_missing.tar -C ${HOME}/data/ds114_test2_missing --exclude='ds114_test2/sub-01/ses-retest*' --strip-components=1; fi
+    # longitudinal data. includes only one session for sub-01
+    - if [[ ! -d ~/data/ds114_test2_missing ]]; then wget -c -O ${HOME}/ds114_test2.tar "https://files.osf.io/v1/resources/9q7dv/providers/osfstorage/57e549f9b83f6901d457d162" && mkdir -p ${HOME}/data/ds114_test2_missing && tar xf ${HOME}/ds114_test2.tar -C ${HOME}/data/ds114_test2_missing --exclude='ds114_test2/sub-01/ses-retest*' --strip-components=1; fi
     - git describe --tags > version
     - docker build -t bids/${CIRCLE_PROJECT_REPONAME} . :
         timeout: 21600
