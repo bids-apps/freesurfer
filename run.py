@@ -80,6 +80,24 @@ if args.acquisition_label:
 else:
     acq_tpl = "*"
 
+# check if study is truly longitudinal
+subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
+subjects_to_analyze = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
+for subject_label in subjects_to_analyze:
+    # Check for multiple sessions to combine as a multiday session or as a longitudinal stream
+    session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
+    sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
+    longitudinal_study = False
+    n_valid_sessions = 0
+    for session_label in sessions:
+        if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                            "ses-%s"%session_label,
+                                            "anat",
+                                            "%s_T1w.nii*"%acq_tpl)):
+            n_valid_sessions += 1
+if n_valid_sessions > 1 and args.multiple_sessions == "longitudinal":
+    longitudinal_study = True
+
 subjects_to_analyze = []
 # only for a subset of subjects
 if args.participant_label:
@@ -103,22 +121,6 @@ if args.analysis_level == "participant":
     if not os.path.exists(os.path.join(output_dir, "rh.EC_average")):
         run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(output_dir, "rh.EC_average"),
             ignore_errors=True)
-
-    # check if study is truly longitudinal
-    for subject_label in subjects_to_analyze:
-        # Check for multiple sessions to combine as a multiday session or as a longitudinal stream
-        session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
-        sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
-        longitudinal_study = False
-        n_valid_sessions = 0
-        for session_label in sessions:
-            if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                                "ses-%s"%session_label,
-                                                "anat",
-                                                "%s_T1w.nii*"%acq_tpl)):
-                n_valid_sessions += 1
-    if n_valid_sessions > 1 and args.multiple_sessions == "longitudinal":
-        longitudinal_study = True
 
     for subject_label in subjects_to_analyze:
         timepoints = []
