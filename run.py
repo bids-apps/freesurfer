@@ -7,6 +7,7 @@ from glob import glob
 from subprocess import Popen, PIPE
 from shutil import rmtree
 import subprocess
+from warnings import warn
 
 def run(command, env={}, ignore_errors=False):
     merged_env = os.environ
@@ -34,8 +35,10 @@ parser.add_argument('output_dir', help='The directory where the output files '
                     'participant level analysis.')
 parser.add_argument('analysis_level', help='Level of the analysis that will be performed. '
                     'Multiple participant level analyses can be run independently '
-                    '(in parallel) using the same output_dir.',
-                    choices=['participant', 'group'])
+                    '(in parallel) using the same output_dir. '
+                    '"goup1" creates study specific group template. '
+                    '"group2 exports group stats tables for cortical parcellation and subcortical segmentation.',
+                    choices=['participant', 'group1', 'group2'])
 parser.add_argument('--participant_label', help='The label of the participant that should be analyzed. The label '
                    'corresponds to sub-<participant_label> from the BIDS spec '
                    '(so it does not include "sub-"). If this parameter is not '
@@ -67,6 +70,16 @@ parser.add_argument('--refine_pial', help='If the dataset contains 3D T2 or T2 F
 parser.add_argument('--hires_mode', help="Submilimiter (high resolution) processing. 'auto' - use only if <1.0mm data detected, 'enable' - force on, 'disable' - force off",
                     choices=['auto', 'enable', 'disable'],
                     default='auto')
+parser.add_argument('--parcellations', help='Group2 option: cortical parcellation(s) to extract stats from.',
+                    choices=["aparc", "aparc.a2009s"],
+                    default=["aparc"],
+                    nargs="+")
+parser.add_argument('--measurements', help='Group2 option: cortical measurements to extract to extract stats for.',
+                    choices=["area", "volume", "thickness", "thicknessstd", "meancurv", "gauscurv", "foldind",
+                             "curvind"],
+                    default=["thickness", "area"],
+                    nargs="+")
+
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App example version {}'.format(__version__))
 
@@ -329,7 +342,7 @@ if args.analysis_level == "participant":
                 print(cmd)
                 run(cmd)
 
-elif args.analysis_level == "group":    	# running group level
+elif args.analysis_level == "group1":    	# running group level
     if len(subjects_to_analyze) > 1:
         # generate study specific template
         fsids = ["sub-%s"%s for s in subjects_to_analyze]
@@ -348,3 +361,49 @@ elif args.analysis_level == "group":    	# running group level
                 run(cmd, env={"SUBJECTS_DIR": output_dir})
     else:
         print("Only one subject included in the analysis. Skipping group level")
+
+
+elif args.analysis_level == "group2":  # running stats tables
+    if len(subjects_to_analyze) > 0:
+        table_dir = os.path.join(output_dir, "00_group2_stats_tables")
+        if not os.path.isdir(table_dir):
+            os.makedirs(table_dir)
+        print("Writing stats tables to %s" % table_dir)
+
+        subjects = []
+        fs_long = glob(os.path.join(output_dir, "sub-*_ses-*.long.sub-*"))
+        if fs_long:
+            for s in subjects_to_analyze:
+                fs_sessions = sorted(glob(os.path.join(output_dir, "sub-{s}_ses-*.long.sub-{s}*".format(s=s))))
+                subjects += [os.path.basename(fssub) for fssub in fs_sessions]
+        else:
+            subjects = ["sub-" + s for s in subjects_to_analyze]
+        subjects = " ".join(subjects)
+
+        # create cortical stats
+        for p in args.parcellations:
+            for h in ["lh", "rh"]:
+                for m in args.measurements:
+                    table_file = os.path.join(table_dir, "{h}.{p}.{m}.tsv".format(h=h, p=p, m=m))
+                    if os.path.isfile(table_file):
+                        warn("Table file exists, delete if you want to recompute it. %s" % table_file)
+                    else:
+                        cmd = "python3 `which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
+                              "--tablefile {table_file}".format(h=h, subjects=subjects, p=p, m=m,
+                                                                table_file=table_file)
+                        print("Creating cortical stats table for {h} {p} {m}".format(h=h, p=p, m=m))
+                        run(cmd, env={"SUBJECTS_DIR": output_dir})
+
+        # create subcortical stats
+        table_file = os.path.join(table_dir, "aseg.tsv")
+        if os.path.isfile(table_file):
+            warn("Table file exists, delete if you want to recompute it. %s" % table_file)
+        else:
+            cmd = "python3 `which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
+                  "table_file}".format(subjects=subjects, table_file=table_file)
+            print("Creating subcortical stats table.")
+            run(cmd, env={"SUBJECTS_DIR": output_dir})
+
+
+    else:
+        print("No subjects included in the analysis. Skipping group2 level")

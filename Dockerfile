@@ -60,6 +60,11 @@ ENV PATH /opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:
 ENV PYTHONPATH=""
 RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh
 
+# make freesurfer python scripts python3 ready
+RUN 2to3-3.4 -w $FREESURFER_HOME/bin/aparcstats2table
+RUN 2to3-3.4 -w $FREESURFER_HOME/bin/asegstats2table
+RUN 2to3-3.4 -w $FREESURFER_HOME/bin/*.py
+
 RUN mkdir /scratch
 RUN mkdir /local-scratch
 
