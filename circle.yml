@@ -1,8 +1,9 @@
-machine:
+general:
   artifacts:
     - "~/outputs1"
     - "~/outputs2"
 
+machine:
   services:
     - docker #don't use 1.10 - caching is broken
 
