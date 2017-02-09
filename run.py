@@ -74,7 +74,7 @@ parser.add_argument('--parcellations', help='Group2 option: cortical parcellatio
                     choices=["aparc", "aparc.a2009s"],
                     default=["aparc"],
                     nargs="+")
-parser.add_argument('--measurements', help='Group2 option: cortical measurements to extract to extract stats for.',
+parser.add_argument('--measurements', help='Group2 option: cortical measurements to extract stats for.',
                     choices=["area", "volume", "thickness", "thicknessstd", "meancurv", "gauscurv", "foldind",
                              "curvind"],
                     default=["thickness"],
