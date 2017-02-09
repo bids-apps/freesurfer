@@ -77,7 +77,7 @@ parser.add_argument('--parcellations', help='Group2 option: cortical parcellatio
 parser.add_argument('--measurements', help='Group2 option: cortical measurements to extract to extract stats for.',
                     choices=["area", "volume", "thickness", "thicknessstd", "meancurv", "gauscurv", "foldind",
                              "curvind"],
-                    default=["thickness", "area"],
+                    default=["thickness"],
                     nargs="+")
 
 parser.add_argument('-v', '--version', action='version',
@@ -360,26 +360,36 @@ elif args.analysis_level == "group1":    	# running group level
                 cmd = "mris_register -curv %s %s %s"%(sphere_file, tif_file, reg_file)
                 run(cmd, env={"SUBJECTS_DIR": output_dir})
     else:
-        print("Only one subject included in the analysis. Skipping group level")
+        print("Only one subject included in the analysis. Skipping group1 level")
 
 
 elif args.analysis_level == "group2":  # running stats tables
-    if len(subjects_to_analyze) > 0:
-        table_dir = os.path.join(output_dir, "00_group2_stats_tables")
-        if not os.path.isdir(table_dir):
-            os.makedirs(table_dir)
-        print("Writing stats tables to %s" % table_dir)
+    table_dir = os.path.join(output_dir, "00_group2_stats_tables")
+    if not os.path.isdir(table_dir):
+        os.makedirs(table_dir)
+    print("Writing stats tables to %s." % table_dir)
 
-        subjects = []
-        fs_long = glob(os.path.join(output_dir, "sub-*_ses-*.long.sub-*"))
-        if fs_long:
-            for s in subjects_to_analyze:
-                fs_sessions = sorted(glob(os.path.join(output_dir, "sub-{s}_ses-*.long.sub-{s}*".format(s=s))))
+    # To make the group analysis independet of participant_level --multiple_sessions option, we are looking for
+    # *long* folders in the output_dir. If there exists one, we assume the study is longitudinal and we only
+    # consider *long* freesurfer folders. Else we search for sub-<subject_label> freesurfer folders. If subjects
+    #  cannot be found in freesurfer folder, we the user is warned.
+    subjects = []
+    if glob(os.path.join(output_dir, "sub-*_ses-*.long.sub-*")):
+        for s in subjects_to_analyze:
+            fs_sessions = sorted(glob(os.path.join(output_dir, "sub-{s}_ses-*.long.sub-{s}*".format(s=s))))
+            if fs_sessions:
                 subjects += [os.path.basename(fssub) for fssub in fs_sessions]
-        else:
-            subjects = ["sub-" + s for s in subjects_to_analyze]
-        subjects = " ".join(subjects)
+            else:
+                warn("No freesurfer sessions found for %s in %s" % (s, output_dir))
+    else:
+        for s in subjects_to_analyze:
+            if os.path.isdir(os.path.join(output_dir, "sub-" + s)):
+                subjects.append("sub-" + s)
+            else:
+                warn("No freesurfer subject found for %s in %s" % (s, output_dir))
+    subjects_str = " ".join(subjects)
 
+    if len(subjects) > 0:
         # create cortical stats
         for p in args.parcellations:
             for h in ["lh", "rh"]:
@@ -389,7 +399,7 @@ elif args.analysis_level == "group2":  # running stats tables
                         warn("Table file exists, delete if you want to recompute it. %s" % table_file)
                     else:
                         cmd = "python3 `which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
-                              "--tablefile {table_file}".format(h=h, subjects=subjects, p=p, m=m,
+                              "--tablefile {table_file}".format(h=h, subjects=subjects_str, p=p, m=m,
                                                                 table_file=table_file)
                         print("Creating cortical stats table for {h} {p} {m}".format(h=h, p=p, m=m))
                         run(cmd, env={"SUBJECTS_DIR": output_dir})
@@ -400,10 +410,11 @@ elif args.analysis_level == "group2":  # running stats tables
             warn("Table file exists, delete if you want to recompute it. %s" % table_file)
         else:
             cmd = "python3 `which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
-                  "table_file}".format(subjects=subjects, table_file=table_file)
+                  "table_file}".format(subjects=subjects_str, table_file=table_file)
             print("Creating subcortical stats table.")
             run(cmd, env={"SUBJECTS_DIR": output_dir})
 
+        print("\nTable export finished for %d subjects/sessions." % len(subjects))
 
     else:
-        print("No subjects included in the analysis. Skipping group2 level")
+        print("\nNo subjects included in the analysis. Skipping group2 level.")
