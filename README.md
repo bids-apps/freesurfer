@@ -59,7 +59,7 @@ This App has the following command line arguments:
 		                        analyzed. Multiple participants can be specified with
 		                        a space separated list.
 		  --n_cpus N_CPUS       Number of CPUs/cores available to use. (Default is 1)
-		  --stages {all,autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon2-pial,autorecon3,autorecon-all}
+		  --stages {all,autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon-pial,autorecon3,autorecon-all}
 		                        Recon-all stages to run. (Default is autorecon-all)
 		  --template_name TEMPLATE_NAME
 		                        Name for the custom group level template generated
@@ -82,10 +82,14 @@ This App has the following command line arguments:
 		                        (resolution <1.2mm isovolumetric). If you want to
 		                        ignore these, specify None or T1only to generate
 		                        surfaces on the T1 alone.
-      --hires_mode {auto,enable,disable}
-                            Submilimiter (high resolution) processing. 'auto' -
-                            use only if <1.0mm data detected, 'enable' - force on,
-                            'disable' - force off
+		  --refine_pial_acquisition_label ACQUISITION_LABEL
+                    			If the dataset contains multiple T2 or FLAIR weighted
+					images from different acquisitions which one should be
+					used? Corresponds to "acq-<acquisition_label>"
+		  --hires_mode {auto,enable,disable}
+		                        Submilimiter (high resolution) processing. 'auto' -
+		                        use only if <1.0mm data detected, 'enable' - force on,
+		                        'disable' - force off
 
 To run it in participant level mode (for one participant):
 
