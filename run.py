@@ -36,7 +36,7 @@ parser.add_argument('output_dir', help='The directory where the output files '
 parser.add_argument('analysis_level', help='Level of the analysis that will be performed. '
                     'Multiple participant level analyses can be run independently '
                     '(in parallel) using the same output_dir. '
-                    '"goup1" creates study specific group template. '
+                    '"group1" creates study specific group template. '
                     '"group2 exports group stats tables for cortical parcellation and subcortical segmentation.',
                     choices=['participant', 'group1', 'group2'])
 parser.add_argument('--participant_label', help='The label of the participant that should be analyzed. The label '
@@ -380,13 +380,13 @@ elif args.analysis_level == "group2":  # running stats tables
             if fs_sessions:
                 subjects += [os.path.basename(fssub) for fssub in fs_sessions]
             else:
-                warn("No freesurfer sessions found for %s in %s" % (s, output_dir))
+                raise Exception("No freesurfer sessions found for %s in %s" % (s, output_dir))
     else:
         for s in subjects_to_analyze:
             if os.path.isdir(os.path.join(output_dir, "sub-" + s)):
                 subjects.append("sub-" + s)
             else:
-                warn("No freesurfer subject found for %s in %s" % (s, output_dir))
+                raise Exception("No freesurfer subject found for %s in %s" % (s, output_dir))
     subjects_str = " ".join(subjects)
 
     if len(subjects) > 0:
@@ -396,23 +396,23 @@ elif args.analysis_level == "group2":  # running stats tables
                 for m in args.measurements:
                     table_file = os.path.join(table_dir, "{h}.{p}.{m}.tsv".format(h=h, p=p, m=m))
                     if os.path.isfile(table_file):
-                        warn("Table file exists, delete if you want to recompute it. %s" % table_file)
-                    else:
-                        cmd = "python3 `which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
-                              "--tablefile {table_file}".format(h=h, subjects=subjects_str, p=p, m=m,
-                                                                table_file=table_file)
-                        print("Creating cortical stats table for {h} {p} {m}".format(h=h, p=p, m=m))
-                        run(cmd, env={"SUBJECTS_DIR": output_dir})
+                        warn("Replace old file %s" % table_file)
+                        os.remove(table_file)
+                    cmd = "python3 `which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
+                          "--tablefile {table_file}".format(h=h, subjects=subjects_str, p=p, m=m,
+                                                            table_file=table_file)
+                    print("Creating cortical stats table for {h} {p} {m}".format(h=h, p=p, m=m))
+                    run(cmd, env={"SUBJECTS_DIR": output_dir})
 
         # create subcortical stats
         table_file = os.path.join(table_dir, "aseg.tsv")
         if os.path.isfile(table_file):
-            warn("Table file exists, delete if you want to recompute it. %s" % table_file)
-        else:
-            cmd = "python3 `which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
-                  "table_file}".format(subjects=subjects_str, table_file=table_file)
-            print("Creating subcortical stats table.")
-            run(cmd, env={"SUBJECTS_DIR": output_dir})
+            warn("Replace old file %s" % table_file)
+            os.remove(table_file)
+        cmd = "python3 `which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
+              "table_file}".format(subjects=subjects_str, table_file=table_file)
+        print("Creating subcortical stats table.")
+        run(cmd, env={"SUBJECTS_DIR": output_dir})
 
         print("\nTable export finished for %d subjects/sessions." % len(subjects))
 
