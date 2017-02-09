@@ -21,7 +21,8 @@ https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferMethodsCitation
 ### Usage
 This App has the following command line arguments:
 
-		$ docker run -ti --rm bids/freesurfer --help
+
+        $ docker run -ti --rm bids/freesurfer --help
         usage: run.py [-h]
                       [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
                       [--n_cpus N_CPUS]
@@ -37,7 +38,6 @@ This App has the following command line arguments:
                                       [{area,volume,thickness,thicknessstd,meancurv,gauscurv,foldind,curvind} ...]]
                       [-v]
                       bids_dir output_dir {participant,group1,group2}
-
         FreeSurfer recon-all + custom template generation.
 
         positional arguments:
