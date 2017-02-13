@@ -89,16 +89,40 @@ args = parser.parse_args()
 run("bids-validator " + args.bids_dir)
 
 subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
+
 if args.acquisition_label:
     acq_tpl = "*acq-%s*" % args.acquisition_label
 else:
     acq_tpl = "*"
 
+# if there are session folders, check if study is truly longitudinal by
+# searching for the first subject with more than one valid sessions
+multi_session_study = False
+if glob(os.path.join(args.bids_dir, "sub-*", "ses-*")):
+    subjects = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
+    for subject_label in subjects:
+        session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
+        sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
+        n_valid_sessions = 0
+        for session_label in sessions:
+            if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                                "ses-%s"%session_label,
+                                                "anat",
+                                                "%s_T1w.nii*"%acq_tpl)):
+                n_valid_sessions += 1
+        if n_valid_sessions > 1:
+            multi_session_study = True
+            break
+
+if multi_session_study and (args.multiple_sessions == "longitudinal"):
+    longitudinal_study = True
+else:
+    longitudinal_study = False
+
 if args.refine_pial_acquisition_label:
     acq_t2 = "*acq-%s*" % args.refine_pial_acquisition_label
 else:
     acq_t2 = "*"
-
 
 subjects_to_analyze = []
 # only for a subset of subjects
@@ -125,23 +149,10 @@ if args.analysis_level == "participant":
             ignore_errors=True)
 
     for subject_label in subjects_to_analyze:
-
-        # Check for multiple sessions to combine as a multiday session or as a longitudinal stream
         session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
-        longitudinal_study = False
-        n_valid_sessions = 0
-        for session_label in sessions:
-            if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                                "ses-%s"%session_label,
-                                                "anat",
-                                                "%s_T1w.nii*"%acq_tpl)):
-                n_valid_sessions += 1
-        if n_valid_sessions > 1 and args.multiple_sessions == "longitudinal":
-            longitudinal_study = True
 
         timepoints = []
-
         if len(sessions) > 0 and longitudinal_study == True:
             # Running each session separately, prior to doing longitudinal pipeline
             for session_label in sessions:
