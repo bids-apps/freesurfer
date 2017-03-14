@@ -193,7 +193,6 @@ if args.analysis_level == "participant":
                                 input_args += " -FLAIRpial"
 
                     fsid = "sub-%s_ses-%s"%(subject_label, session_label)
-                    timepoints.append(fsid)
                     cmd = "recon-all -subjid %s -sd %s %s -all -parallel -openmp %d"%(fsid,
                                                                             output_dir,
                                                                             input_args,
