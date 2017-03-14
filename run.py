@@ -155,10 +155,13 @@ if args.analysis_level == "participant":
             ignore_errors=True)
 
     for subject_label in subjects_to_analyze:
-        session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
-        sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
+        T1s = glob(os.path.join(args.bids_dir,
+                    "sub-%s"%subject_label,
+                    "ses-*",
+                    "anat",
+                    "%s_T1w.nii*"%acq_tpl))
+        sessions = set([os.path.normpath(t1).split(os.sep)[-3].split("-")[-1] for t1 in T1s])
 
-        timepoints = []
         if len(sessions) > 0 and longitudinal_study == True:
             timepoints = ["sub-%s_ses-%s"%(subject_label, session_label) for session_label in sessions]
             if (1 in args.steps):
