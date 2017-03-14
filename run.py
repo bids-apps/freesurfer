@@ -201,11 +201,13 @@ if args.analysis_level == "participant":
                                                                                 output_dir,
                                                                                 args.n_cpus)
 
-                    if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+                    if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, fsid))
                         print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                         print(cmd)
                         run(cmd)
+                    elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
+                        print("SUBJECT ALREADY SEGMENTED, SKIPPING")
                     elif os.path.exists(os.path.join(output_dir, fsid)):
                         print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                         print(resume_cmd)
@@ -234,6 +236,8 @@ if args.analysis_level == "participant":
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                     print(cmd)
                     run(cmd)
+                elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
+                    print("SUBJECT ALREADY SEGMENTED, SKIPPING")
                 elif os.path.exists(os.path.join(output_dir, fsid)):
                     print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                     print(resume_cmd)
@@ -256,8 +260,13 @@ if args.analysis_level == "participant":
                     if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, tp + ".long." + fsid))
                         print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                    print(cmd)
-                    run(cmd)
+                        print(cmd)
+                        run(cmd)
+                    elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
+                        print("SUBJECT ALREADY SEGMENTED, SKIPPING")
+                    else:
+                        print(cmd)
+                        run(cmd)
 
         elif len(sessions) > 0 and longitudinal_study == False:
             # grab all T1s/T2s from multiple sessions and combine
