@@ -46,6 +46,12 @@ parser.add_argument('--participant_label', help='The label of the participant th
                    'provided all subjects should be analyzed. Multiple '
                    'participants can be specified with a space separated list.',
                    nargs="+")
+parser.add_argument('--session_label', help='The label of the session that should be analyzed. The label '
+                   'corresponds to ses-<session_label> from the BIDS spec '
+                   '(so it does not include "ses-"). If this parameter is not '
+                   'provided all sessions should be analyzed. Multiple '
+                   'sessions can be specified with a space separated list.',
+                   nargs="+")
 parser.add_argument('--n_cpus', help='Number of CPUs/cores available to use.',
                    default=1, type=int)
 parser.add_argument('--stages', help='Autorecon stages to run.',
@@ -155,56 +161,92 @@ if args.analysis_level == "participant":
             ignore_errors=True)
 
     for subject_label in subjects_to_analyze:
-        T1s = glob(os.path.join(args.bids_dir,
-                    "sub-%s"%subject_label,
-                    "ses-*",
-                    "anat",
-                    "%s_T1w.nii*"%acq_tpl))
-        sessions = set([os.path.normpath(t1).split(os.sep)[-3].split("-")[-1] for t1 in T1s])
+        if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "ses-*")):
+            T1s = glob(os.path.join(args.bids_dir,
+                        "sub-%s"%subject_label,
+                        "ses-*",
+                        "anat",
+                        "%s_T1w.nii*"%acq_tpl))
+            sessions = set([os.path.normpath(t1).split(os.sep)[-3].split("-")[-1] for t1 in T1s])
+            if args.session_label:
+                sessions = sessions.intersect(args.session_label)
 
-        if len(sessions) > 0 and longitudinal_study == True:
-            timepoints = ["sub-%s_ses-%s"%(subject_label, session_label) for session_label in sessions]
-            if (1 in args.steps):
-                # Running each session separately, prior to doing longitudinal pipeline
-                for session_label in sessions:
-                    T1s = glob(os.path.join(args.bids_dir,
-                                      "sub-%s"%subject_label,
-                                      "ses-%s"%session_label,
-                                      "anat",
-                                      "%s_T1w.nii*"%acq_tpl))
-                    input_args = ""
-                    for T1 in T1s:
-                        if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
-                            input_args += " -hires"
-                        input_args += " -i %s"%T1
+            if len(sessions) > 0 and longitudinal_study == True:
+                timepoints = ["sub-%s_ses-%s"%(subject_label, session_label) for session_label in sessions]
+                if (1 in args.steps):
+                    # Running each session separately, prior to doing longitudinal pipeline
+                    for session_label in sessions:
+                        T1s = glob(os.path.join(args.bids_dir,
+                                          "sub-%s"%subject_label,
+                                          "ses-%s"%session_label,
+                                          "anat",
+                                          "%s_T1w.nii*"%acq_tpl))
+                        input_args = ""
+                        for T1 in T1s:
+                            if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                                input_args += " -hires"
+                            input_args += " -i %s"%T1
 
-                    T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                            "ses-%s"%session_label, "anat",
-                                            "*%s_T2w.nii*"%acq_t2))
-                    FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                            "ses-%s"%session_label, "anat",
-                                            "*%s_FLAIR.nii*"%acq_t2))
-                    if args.refine_pial == "T2":
-                        for T2 in T2s:
-                            if max(nibabel.load(T2).header.get_zooms()) < 1.2:
-                                input_args += " " + " ".join(["-T2 %s"%T2])
-                                input_args += " -T2pial"
-                    elif args.refine_pial == "FLAIR":
-                        for FLAIR in FLAIRs:
-                            if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
-                                input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
-                                input_args += " -FLAIRpial"
+                        T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                                "ses-%s"%session_label, "anat",
+                                                "*%s_T2w.nii*"%acq_t2))
+                        FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                                "ses-%s"%session_label, "anat",
+                                                "*%s_FLAIR.nii*"%acq_t2))
+                        if args.refine_pial == "T2":
+                            for T2 in T2s:
+                                if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                                    input_args += " " + " ".join(["-T2 %s"%T2])
+                                    input_args += " -T2pial"
+                        elif args.refine_pial == "FLAIR":
+                            for FLAIR in FLAIRs:
+                                if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                                    input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                                    input_args += " -FLAIRpial"
 
-                    fsid = "sub-%s_ses-%s"%(subject_label, session_label)
-                    cmd = "recon-all -subjid %s -sd %s %s -all -parallel -openmp %d"%(fsid,
-                                                                            output_dir,
-                                                                            input_args,
-                                                                            args.n_cpus)
-                    resume_cmd = "recon-all -subjid %s -sd %s -all -parallel -openmp %d"%(fsid,
+                        fsid = "sub-%s_ses-%s"%(subject_label, session_label)
+                        stages = " ".join(["-" + stage for stage in args.stages])
+                        cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
                                                                                 output_dir,
+                                                                                input_args,
+                                                                                stages,
                                                                                 args.n_cpus)
+                        resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
+                                                                                    output_dir,
+                                                                                    stages,
+                                                                                    args.n_cpus)
 
-                    if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
+                        if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
+                            rmtree(os.path.join(output_dir, fsid))
+                            print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                            print(cmd)
+                            run(cmd)
+                        elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
+                            print("SUBJECT ALREADY SEGMENTED, SKIPPING")
+                        elif os.path.exists(os.path.join(output_dir, fsid)):
+                            print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                            print(resume_cmd)
+                            run(resume_cmd)
+                        else:
+                            print(cmd)
+                            run(cmd)
+            
+                if (2 in args.steps):
+                    # creating a subject specific template
+                    input_args = " ".join(["-tp %s"%tp for tp in timepoints])
+                    fsid = "sub-%s"%subject_label
+                    stages = " ".join(["-" + stage for stage in args.stages])
+                    cmd = "recon-all -base %s -sd %s %s %s -parallel -openmp %d"%(fsid,
+                                                                        output_dir,
+                                                                        input_args,
+                                                                        stages,
+                                                                        args.n_cpus)
+                    resume_cmd = "recon-all -base %s -sd %s %s -parallel -openmp %d"%(fsid,
+                                                                            output_dir,
+                                                                            stages,
+                                                                            args.n_cpus)
+
+                    if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, fsid))
                         print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                         print(cmd)
@@ -219,28 +261,79 @@ if args.analysis_level == "participant":
                         print(cmd)
                         run(cmd)
             
-            if (2 in args.steps):
-                # creating a subject specific template
-                input_args = " ".join(["-tp %s"%tp for tp in timepoints])
+                if (3 in args.steps):
+                    for tp in timepoints:
+                        # longitudinally process all timepoints
+                        fsid = "sub-%s"%subject_label
+                        stages = " ".join(["-" + stage for stage in args.stages])
+                        cmd = "recon-all -long %s %s -sd %s %s -parallel -openmp %d"%(tp,
+                                                                            fsid,
+                                                                            output_dir,
+                                                                            stages,
+                                                                            args.n_cpus)
+
+                        if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
+                            rmtree(os.path.join(output_dir, tp + ".long." + fsid))
+                            print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                            print(cmd)
+                            run(cmd)
+                        elif os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid, "mri/aseg.mgz")):
+                            print("SUBJECT ALREADY SEGMENTED, SKIPPING")
+                        else:
+                            print(cmd)
+                            run(cmd)
+
+            elif len(sessions) > 0 and longitudinal_study == False:
+                # grab all T1s/T2s from multiple sessions and combine
+                T1s = glob(os.path.join(args.bids_dir,
+                                        "sub-%s"%subject_label,
+                                        "ses-*",
+                                        "anat",
+                                        "%s_T1w.nii*"%acq_tpl))
+                input_args = ""
+                for T1 in T1s:
+                    if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                        input_args += " -hires"
+                    input_args += " -i %s"%T1
+
+                T2s = glob(os.path.join(args.bids_dir,
+                                        "sub-%s"%subject_label,
+                                        "ses-*",
+                                        "anat",
+                                        "*%s_T2w.nii*"%acq_t2))
+                FLAIRs = glob(os.path.join(args.bids_dir,
+                                        "sub-%s"%subject_label,
+                                        "ses-*",
+                                        "anat",
+                                        "*%s_FLAIR.nii*"%acq_t2))
+                if args.refine_pial == "T2":
+                    for T2 in T2s:
+                        if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                            input_args += " " + " ".join(["-T2 %s"%T2])
+                            input_args += " -T2pial"
+                elif args.refine_pial == "FLAIR":
+                    for FLAIR in FLAIRs:
+                        if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                            input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                            input_args += " -FLAIRpial"
+
                 fsid = "sub-%s"%subject_label
                 stages = " ".join(["-" + stage for stage in args.stages])
-                cmd = "recon-all -base %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                    output_dir,
-                                                                    input_args,
-                                                                    stages,
-                                                                    args.n_cpus)
-                resume_cmd = "recon-all -base %s -sd %s %s -parallel -openmp %d"%(fsid,
-                                                                        output_dir,
-                                                                        stages,
-                                                                        args.n_cpus)
+                cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
+                                                                      output_dir,
+                                                                      input_args,
+                                                                      stages,
+                                                                      args.n_cpus)
+                resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
+                                                                          output_dir,
+                                                                          stages,
+                                                                          args.n_cpus)
 
                 if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, fsid))
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                     print(cmd)
                     run(cmd)
-                elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
-                    print("SUBJECT ALREADY SEGMENTED, SKIPPING")
                 elif os.path.exists(os.path.join(output_dir, fsid)):
                     print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                     print(resume_cmd)
@@ -248,87 +341,8 @@ if args.analysis_level == "participant":
                 else:
                     print(cmd)
                     run(cmd)
-            
-            if (3 in args.steps):
-                for tp in timepoints:
-                    # longitudinally process all timepoints
-                    fsid = "sub-%s"%subject_label
-                    stages = " ".join(["-" + stage for stage in args.stages])
-                    cmd = "recon-all -long %s %s -sd %s %s -parallel -openmp %d"%(tp,
-                                                                        fsid,
-                                                                        output_dir,
-                                                                        stages,
-                                                                        args.n_cpus)
-
-                    if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
-                        rmtree(os.path.join(output_dir, tp + ".long." + fsid))
-                        print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                        print(cmd)
-                        run(cmd)
-                    elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
-                        print("SUBJECT ALREADY SEGMENTED, SKIPPING")
-                    else:
-                        print(cmd)
-                        run(cmd)
-
-        elif len(sessions) > 0 and longitudinal_study == False:
-            # grab all T1s/T2s from multiple sessions and combine
-            T1s = glob(os.path.join(args.bids_dir,
-                                    "sub-%s"%subject_label,
-                                    "ses-*",
-                                    "anat",
-                                    "%s_T1w.nii*"%acq_tpl))
-            input_args = ""
-            for T1 in T1s:
-                if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
-                    input_args += " -hires"
-                input_args += " -i %s"%T1
-
-            T2s = glob(os.path.join(args.bids_dir,
-                                    "sub-%s"%subject_label,
-                                    "ses-*",
-                                    "anat",
-                                    "*%s_T2w.nii*"%acq_t2))
-            FLAIRs = glob(os.path.join(args.bids_dir,
-                                    "sub-%s"%subject_label,
-                                    "ses-*",
-                                    "anat",
-                                    "*%s_FLAIR.nii*"%acq_t2))
-            if args.refine_pial == "T2":
-                for T2 in T2s:
-                    if max(nibabel.load(T2).header.get_zooms()) < 1.2:
-                        input_args += " " + " ".join(["-T2 %s"%T2])
-                        input_args += " -T2pial"
-            elif args.refine_pial == "FLAIR":
-                for FLAIR in FLAIRs:
-                    if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
-                        input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
-                        input_args += " -FLAIRpial"
-
-            fsid = "sub-%s"%subject_label
-            stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                  output_dir,
-                                                                  input_args,
-                                                                  stages,
-                                                                  args.n_cpus)
-            resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
-                                                                      output_dir,
-                                                                      stages,
-                                                                      args.n_cpus)
-
-            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
-                rmtree(os.path.join(output_dir, fsid))
-                print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                print(cmd)
-                run(cmd)
-            elif os.path.exists(os.path.join(output_dir, fsid)):
-                print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
-                print(resume_cmd)
-                run(resume_cmd)
             else:
-                print(cmd)
-                run(cmd)
+                print("SKIPPING SUBJECT %s (no valid session)." % subject_label)
 
         else:
             # grab all T1s/T2s from single session (no ses-* directories)
