@@ -241,10 +241,10 @@ if args.analysis_level == "participant":
                                                                         input_args,
                                                                         stages,
                                                                         args.n_cpus)
-                    resume_cmd = "recon-all -base %s -sd %s %s -parallel -openmp %d"%(fsid,
-                                                                            output_dir,
-                                                                            stages,
-                                                                            args.n_cpus)
+#                     resume_cmd = "recon-all -base %s -sd %s %s -parallel -openmp %d"%(fsid,
+#                                                                             output_dir,
+#                                                                             stages,
+#                                                                             args.n_cpus)
 
                     if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, fsid))
@@ -252,11 +252,11 @@ if args.analysis_level == "participant":
                         print(cmd)
                         run(cmd)
                     elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
-                        print("SUBJECT ALREADY SEGMENTED, SKIPPING")
+                        print("TEMPLATE ALREADY CREATED, SKIPPING")
                     elif os.path.exists(os.path.join(output_dir, fsid)):
                         print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
-                        print(resume_cmd)
-                        run(resume_cmd)
+                        print(cmd)
+                        run(cmd)
                     else:
                         print(cmd)
                         run(cmd)
