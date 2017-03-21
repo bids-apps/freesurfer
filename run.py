@@ -169,7 +169,7 @@ if args.analysis_level == "participant":
                         "%s_T1w.nii*"%acq_tpl))
             sessions = set([os.path.normpath(t1).split(os.sep)[-3].split("-")[-1] for t1 in T1s])
             if args.session_label:
-                sessions = sessions.intersect(args.session_label)
+                sessions = sessions.intersection(args.session_label)
 
             if len(sessions) > 0 and longitudinal_study == True:
                 timepoints = ["sub-%s_ses-%s"%(subject_label, session_label) for session_label in sessions]
