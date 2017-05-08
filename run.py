@@ -161,38 +161,70 @@ if args.analysis_level == "participant":
                                   "ses-%s"%session_label,
                                   "anat",
                                   "%s_T1w.nii*"%acq_tpl))
-                input_args = ""
-                for T1 in T1s:
-                    if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
-                        input_args += " -hires"
-                    input_args += " -i %s"%T1
+                if T1s:
+                    input_args = ""
+                    for T1 in T1s:
+                        if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                            input_args += " -hires"
+                        input_args += " -i %s"%T1
 
-                T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                        "ses-%s"%session_label, "anat",
-                                        "*%s_T2w.nii*"%acq_t2))
-                FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                        "ses-%s"%session_label, "anat",
-                                        "*%s_FLAIR.nii*"%acq_t2))
-                if args.refine_pial == "T2":
-                    for T2 in T2s:
-                        if max(nibabel.load(T2).header.get_zooms()) < 1.2:
-                            input_args += " " + " ".join(["-T2 %s"%T2])
-                            input_args += " -T2pial"
-                elif args.refine_pial == "FLAIR":
-                    for FLAIR in FLAIRs:
-                        if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
-                            input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
-                            input_args += " -FLAIRpial"
+                    T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                            "ses-%s"%session_label, "anat",
+                                            "*%s_T2w.nii*"%acq_t2))
+                    FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
+                                            "ses-%s"%session_label, "anat",
+                                            "*%s_FLAIR.nii*"%acq_t2))
+                    if args.refine_pial == "T2":
+                        for T2 in T2s:
+                            if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                                input_args += " " + " ".join(["-T2 %s"%T2])
+                                input_args += " -T2pial"
+                    elif args.refine_pial == "FLAIR":
+                        for FLAIR in FLAIRs:
+                            if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                                input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                                input_args += " -FLAIRpial"
 
-                fsid = "sub-%s_ses-%s"%(subject_label, session_label)
-                timepoints.append(fsid)
-                cmd = "recon-all -subjid %s -sd %s %s -all -parallel -openmp %d"%(fsid,
-                                                                        output_dir,
-                                                                        input_args,
-                                                                        args.n_cpus)
-                resume_cmd = "recon-all -subjid %s -sd %s -all -parallel -openmp %d"%(fsid,
+                    fsid = "sub-%s_ses-%s"%(subject_label, session_label)
+                    timepoints.append(fsid)
+                    cmd = "recon-all -subjid %s -sd %s %s -all -parallel -openmp %d"%(fsid,
                                                                             output_dir,
+                                                                            input_args,
                                                                             args.n_cpus)
+                    resume_cmd = "recon-all -subjid %s -sd %s -all -parallel -openmp %d"%(fsid,
+                                                                                output_dir,
+                                                                                args.n_cpus)
+
+                    if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+                        rmtree(os.path.join(output_dir, fsid))
+                        print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                        print(cmd)
+                        run(cmd)
+                    elif os.path.exists(os.path.join(output_dir, fsid)):
+                        print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                        print(resume_cmd)
+                        run(resume_cmd)
+                    else:
+                        print(cmd)
+                        run(cmd)
+                else:
+                    print("No T1w nii files found for subject %s, session %s. Skipping session." % (subject_label,
+                                                                                                    session_label))
+
+            if timepoints:
+                # creating a subject specific template
+                input_args = " ".join(["-tp %s"%tp for tp in timepoints])
+                fsid = "sub-%s"%subject_label
+                stages = " ".join(["-" + stage for stage in args.stages])
+                cmd = "recon-all -base %s -sd %s %s %s -parallel -openmp %d"%(fsid,
+                                                                    output_dir,
+                                                                    input_args,
+                                                                    stages,
+                                                                    args.n_cpus)
+                resume_cmd = "recon-all -base %s -sd %s %s -parallel -openmp %d"%(fsid,
+                                                                        output_dir,
+                                                                        stages,
+                                                                        args.n_cpus)
 
                 if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, fsid))
@@ -207,48 +239,23 @@ if args.analysis_level == "participant":
                     print(cmd)
                     run(cmd)
 
-            # creating a subject specific template
-            input_args = " ".join(["-tp %s"%tp for tp in timepoints])
-            fsid = "sub-%s"%subject_label
-            stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -base %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                output_dir,
-                                                                input_args,
-                                                                stages,
-                                                                args.n_cpus)
-            resume_cmd = "recon-all -base %s -sd %s %s -parallel -openmp %d"%(fsid,
-                                                                    output_dir,
-                                                                    stages,
-                                                                    args.n_cpus)
+                for tp in timepoints:
+                    # longitudinally process all timepoints
+                    fsid = "sub-%s"%subject_label
+                    stages = " ".join(["-" + stage for stage in args.stages])
+                    cmd = "recon-all -long %s %s -sd %s %s -parallel -openmp %d"%(tp,
+                                                                        fsid,
+                                                                        output_dir,
+                                                                        stages,
+                                                                        args.n_cpus)
 
-            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
-                rmtree(os.path.join(output_dir, fsid))
-                print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                print(cmd)
-                run(cmd)
-            elif os.path.exists(os.path.join(output_dir, fsid)):
-                print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
-                print(resume_cmd)
-                run(resume_cmd)
+                    if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
+                        rmtree(os.path.join(output_dir, tp + ".long." + fsid))
+                        print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                    print(cmd)
+                    run(cmd)
             else:
-                print(cmd)
-                run(cmd)
-
-            for tp in timepoints:
-                # longitudinally process all timepoints
-                fsid = "sub-%s"%subject_label
-                stages = " ".join(["-" + stage for stage in args.stages])
-                cmd = "recon-all -long %s %s -sd %s %s -parallel -openmp %d"%(tp,
-                                                                    fsid,
-                                                                    output_dir,
-                                                                    stages,
-                                                                    args.n_cpus)
-
-                if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
-                    rmtree(os.path.join(output_dir, tp + ".long." + fsid))
-                    print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                print(cmd)
-                run(cmd)
+                print("No T1w nii files found for subject %s. Skipping subject." % subject_label)
 
         elif len(sessions) > 0 and longitudinal_study == False:
             # grab all T1s/T2s from multiple sessions and combine
@@ -257,57 +264,60 @@ if args.analysis_level == "participant":
                                     "ses-*",
                                     "anat",
                                     "%s_T1w.nii*"%acq_tpl))
-            input_args = ""
-            for T1 in T1s:
-                if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
-                    input_args += " -hires"
-                input_args += " -i %s"%T1
+            if T1s:
+                input_args = ""
+                for T1 in T1s:
+                    if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                        input_args += " -hires"
+                    input_args += " -i %s"%T1
 
-            T2s = glob(os.path.join(args.bids_dir,
-                                    "sub-%s"%subject_label,
-                                    "ses-*",
-                                    "anat",
-                                    "*%s_T2w.nii*"%acq_t2))
-            FLAIRs = glob(os.path.join(args.bids_dir,
-                                    "sub-%s"%subject_label,
-                                    "ses-*",
-                                    "anat",
-                                    "*%s_FLAIR.nii*"%acq_t2))
-            if args.refine_pial == "T2":
-                for T2 in T2s:
-                    if max(nibabel.load(T2).header.get_zooms()) < 1.2:
-                        input_args += " " + " ".join(["-T2 %s"%T2])
-                        input_args += " -T2pial"
-            elif args.refine_pial == "FLAIR":
-                for FLAIR in FLAIRs:
-                    if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
-                        input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
-                        input_args += " -FLAIRpial"
+                T2s = glob(os.path.join(args.bids_dir,
+                                        "sub-%s"%subject_label,
+                                        "ses-*",
+                                        "anat",
+                                        "*%s_T2w.nii*"%acq_t2))
+                FLAIRs = glob(os.path.join(args.bids_dir,
+                                        "sub-%s"%subject_label,
+                                        "ses-*",
+                                        "anat",
+                                        "*%s_FLAIR.nii*"%acq_t2))
+                if args.refine_pial == "T2":
+                    for T2 in T2s:
+                        if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                            input_args += " " + " ".join(["-T2 %s"%T2])
+                            input_args += " -T2pial"
+                elif args.refine_pial == "FLAIR":
+                    for FLAIR in FLAIRs:
+                        if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                            input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                            input_args += " -FLAIRpial"
 
-            fsid = "sub-%s"%subject_label
-            stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                  output_dir,
-                                                                  input_args,
-                                                                  stages,
-                                                                  args.n_cpus)
-            resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
+                fsid = "sub-%s"%subject_label
+                stages = " ".join(["-" + stage for stage in args.stages])
+                cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
                                                                       output_dir,
+                                                                      input_args,
                                                                       stages,
                                                                       args.n_cpus)
+                resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
+                                                                          output_dir,
+                                                                          stages,
+                                                                          args.n_cpus)
 
-            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
-                rmtree(os.path.join(output_dir, fsid))
-                print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                print(cmd)
-                run(cmd)
-            elif os.path.exists(os.path.join(output_dir, fsid)):
-                print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
-                print(resume_cmd)
-                run(resume_cmd)
+                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+                    rmtree(os.path.join(output_dir, fsid))
+                    print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                    print(cmd)
+                    run(cmd)
+                elif os.path.exists(os.path.join(output_dir, fsid)):
+                    print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                    print(resume_cmd)
+                    run(resume_cmd)
+                else:
+                    print(cmd)
+                    run(cmd)
             else:
-                print(cmd)
-                run(cmd)
+                print("No T1w nii files found for subject %s. Skipping subject." % subject_label)
 
         else:
             # grab all T1s/T2s from single session (no ses-* directories)
@@ -315,50 +325,54 @@ if args.analysis_level == "participant":
                        "sub-%s"%subject_label,
                        "anat",
                        "%s_T1w.nii*"%acq_tpl))
-            input_args = ""
-            for T1 in T1s:
-                if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
-                    input_args += " -hires"
-                input_args += " -i %s"%T1
-            T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
-                                    "*%s_T2w.nii*"%acq_t2))
-            FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
-                                    "*%s_FLAIR.nii*"%acq_t2))
-            if args.refine_pial == "T2":
-                for T2 in T2s:
-                    if max(nibabel.load(T2).header.get_zooms()) < 1.2:
-                        input_args += " " + " ".join(["-T2 %s"%T2])
-                        input_args += " -T2pial"
-            elif args.refine_pial == "FLAIR":
-                for FLAIR in FLAIRs:
-                    if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
-                        input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
-                        input_args += " -FLAIRpial"
+            if T1s:
+                input_args = ""
+                for T1 in T1s:
+                    if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                        input_args += " -hires"
+                    input_args += " -i %s"%T1
+                T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
+                                        "*%s_T2w.nii*"%acq_t2))
+                FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
+                                        "*%s_FLAIR.nii*"%acq_t2))
+                if args.refine_pial == "T2":
+                    for T2 in T2s:
+                        if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                            input_args += " " + " ".join(["-T2 %s"%T2])
+                            input_args += " -T2pial"
+                elif args.refine_pial == "FLAIR":
+                    for FLAIR in FLAIRs:
+                        if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                            input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                            input_args += " -FLAIRpial"
 
-            fsid = "sub-%s"%subject_label
-            stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                  output_dir,
-                                                                  input_args,
-                                                                  stages,
-                                                                  args.n_cpus)
-            resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
+                fsid = "sub-%s"%subject_label
+                stages = " ".join(["-" + stage for stage in args.stages])
+                cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
                                                                       output_dir,
+                                                                      input_args,
                                                                       stages,
                                                                       args.n_cpus)
+                resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
+                                                                          output_dir,
+                                                                          stages,
+                                                                          args.n_cpus)
 
-            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
-                rmtree(os.path.join(output_dir, fsid))
-                print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
-                print(cmd)
-                run(cmd)
-            elif os.path.exists(os.path.join(output_dir, fsid)):
-                print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
-                print(resume_cmd)
-                run(resume_cmd)
+                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+                    rmtree(os.path.join(output_dir, fsid))
+                    print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
+                    print(cmd)
+                    run(cmd)
+                elif os.path.exists(os.path.join(output_dir, fsid)):
+                    print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
+                    print(resume_cmd)
+                    run(resume_cmd)
+                else:
+                    print(cmd)
+                    run(cmd)
             else:
-                print(cmd)
-                run(cmd)
+                print("No T1w nii files found for subject %s. Skipping subject." % subject_label)
+
 
 elif args.analysis_level == "group1":    	# running group level
     if len(subjects_to_analyze) > 1:
