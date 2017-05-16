@@ -72,6 +72,6 @@ RUN mkdir -p /code
 COPY run.py /code/run.py
 RUN chmod +x /code/run.py
 
-COPY version /version
+COPY version /code/version
 
 ENTRYPOINT ["/code/run.py"]

@@ -24,7 +24,7 @@ def run(command, env={}, ignore_errors=False):
     if process.returncode != 0 and not ignore_errors:
         raise Exception("Non zero return code: %d"%process.returncode)
 
-__version__ = open('/version').read()
+__version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version')).read()
 
 parser = argparse.ArgumentParser(description='FreeSurfer recon-all + custom template generation.')
 parser.add_argument('bids_dir', help='The directory with the input dataset '
