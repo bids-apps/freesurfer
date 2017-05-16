@@ -350,6 +350,9 @@ if args.analysis_level == "participant":
                        "sub-%s"%subject_label,
                        "anat",
                        "%s_T1w.nii*"%acq_tpl))
+            if not T1s:
+                print("No T1w nii files found for subject %s. Skipping subject." % subject_label)
+                continue
             input_args = ""
             for T1 in T1s:
                 if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
