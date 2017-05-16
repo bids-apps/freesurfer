@@ -20,7 +20,7 @@ RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/frees
 RUN apt-get install -y python3
 RUN apt-get install -y python3-pip
 RUN pip3 install nibabel
-RUN apt-get install -y python2
+RUN apt-get install -y python2.7
 
 RUN apt-get install -y tcsh
 RUN apt-get install -y bc
