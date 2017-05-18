@@ -65,10 +65,9 @@ RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW
 RUN mkdir /scratch
 RUN mkdir /local-scratch
 
-RUN mkdir -p /code
-COPY run.py /code/run.py
-RUN chmod +x /code/run.py
+COPY run.py /run.py
+RUN chmod +x /run.py
 
 COPY version /version
 
-ENTRYPOINT ["/code/run.py"]
+ENTRYPOINT ["/run.py"]
