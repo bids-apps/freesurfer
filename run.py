@@ -430,7 +430,7 @@ elif args.analysis_level == "group2":  # running stats tables
                     if os.path.isfile(table_file):
                         warn("Replace old file %s" % table_file)
                         os.remove(table_file)
-                    cmd = "python3 `which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
+                    cmd = "python2 `which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
                           "--tablefile {table_file}".format(h=h, subjects=subjects_str, p=p, m=m,
                                                             table_file=table_file)
                     print("Creating cortical stats table for {h} {p} {m}".format(h=h, p=p, m=m))
@@ -441,7 +441,7 @@ elif args.analysis_level == "group2":  # running stats tables
         if os.path.isfile(table_file):
             warn("Replace old file %s" % table_file)
             os.remove(table_file)
-        cmd = "python3 `which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
+        cmd = "python2 `which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
               "table_file}".format(subjects=subjects_str, table_file=table_file)
         print("Creating subcortical stats table.")
         run(cmd, env={"SUBJECTS_DIR": output_dir})
