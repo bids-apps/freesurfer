@@ -21,6 +21,7 @@ RUN apt-get install -y python3
 RUN apt-get install -y python3-pip
 RUN pip3 install nibabel
 RUN apt-get install -y python2.7
+RUN apt-get install -y python-pip
 
 RUN apt-get install -y tcsh
 RUN apt-get install -y bc
