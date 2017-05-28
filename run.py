@@ -378,7 +378,8 @@ elif args.analysis_level == "group1":    	# running group level
     if len(subjects_to_analyze) > 1:
         # generate study specific template
         fsids = ["sub-%s"%s for s in subjects_to_analyze]
-        cmd = "make_average_subject --no-symlink --out " + args.template_name + " --subjects " + " ".join(fsids)
+        # skipping volumetric average due to https://www.mail-archive.com/freesurfer@nmr.mgh.harvard.edu/msg51822.html
+        cmd = "make_average_subject --no-symlink --no-vol --out " + args.template_name + " --subjects " + " ".join(fsids)
         print(cmd)
         if os.path.exists(os.path.join(output_dir, args.template_name)):
             rmtree(os.path.join(output_dir, args.template_name))
