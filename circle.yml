@@ -29,6 +29,8 @@ test:
     - docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME,,} --version
     - docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs1:/outputs bids/${CIRCLE_PROJECT_REPONAME,,} /bids_dataset /outputs participant --participant_label 01 --license_key="~/test.key" --stages autorecon1 && cat ${HOME}/outputs1/sub-01/scripts/recon-all.done :
         timeout: 21600
+    - docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test2:/bids_dataset -v ${HOME}/outputs2:/outputs bids/${CIRCLE_PROJECT_REPONAME,,} /bids_dataset /outputs participant --participant_label 01 --steps cross-sectional --session_label test --license_key="~/test.key" --stages autorecon1 && cat ${HOME}/outputs2/sub-01/scripts/recon-all.done :
+        timeout: 21600
     # group2 tests
     - docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0:/outputs bids/${CIRCLE_PROJECT_REPONAME,,} /bids_dataset /outputs group2 --license_key="~/test.key"  && mkdir -p ${HOME}/outputs1/ && sudo mv ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs1/ && cat ${HOME}/outputs1/00_group2_stats_tables/lh.aparc.thickness.tsv :
         timeout: 21600
