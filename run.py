@@ -57,10 +57,9 @@ parser.add_argument('--stages', help='Autorecon stages to run.',
                     choices=["autorecon1", "autorecon2", "autorecon2-cp", "autorecon2-wm", "autorecon-pial", "autorecon3", "autorecon-all", "all"],
                     default=["autorecon-all"],
                     nargs="+")
-parser.add_argument('--steps', help='Longitudinal steps to run.',
-                    choices=[1, 2, 3],
-                    default=[1, 2, 3],
-                    type=int,
+parser.add_argument('--steps', help='Longitudinal pipeline steps to run.',
+                    choices=['cross-sectional', 'template', 'longitudinal'],
+                    default=['cross-sectional', 'template', 'longitudinal'],
                     nargs="+")
 parser.add_argument('--template_name', help='Name for the custom group level template generated for this dataset',
                     default="average")
@@ -172,7 +171,7 @@ if args.analysis_level == "participant":
 
             if len(sessions) > 0 and longitudinal_study == True:
                 timepoints = ["sub-%s_ses-%s"%(subject_label, session_label) for session_label in sessions]
-                if (1 in args.steps):
+                if ('cross-sectional' in args.steps):
                     # Running each session separately, prior to doing longitudinal pipeline
                     for session_label in sessions:
                         T1s = glob(os.path.join(args.bids_dir,
@@ -230,7 +229,7 @@ if args.analysis_level == "participant":
                             print(cmd)
                             run(cmd)
             
-                if (2 in args.steps):
+                if ('template' in args.steps):
                     # creating a subject specific template
                     input_args = " ".join(["-tp %s"%tp for tp in timepoints])
                     fsid = "sub-%s"%subject_label
@@ -240,10 +239,6 @@ if args.analysis_level == "participant":
                                                                         input_args,
                                                                         stages,
                                                                         args.n_cpus)
-#                     resume_cmd = "recon-all -base %s -sd %s %s -parallel -openmp %d"%(fsid,
-#                                                                             output_dir,
-#                                                                             stages,
-#                                                                             args.n_cpus)
 
                     if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, fsid))
@@ -260,7 +255,7 @@ if args.analysis_level == "participant":
                         print(cmd)
                         run(cmd)
             
-                if (3 in args.steps):
+                if ('longitudinal' in args.steps):
                     for tp in timepoints:
                         # longitudinally process all timepoints
                         fsid = "sub-%s"%subject_label
