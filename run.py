@@ -63,8 +63,8 @@ parser.add_argument('--steps', help='Longitudinal pipeline steps to run.',
                     nargs="+")
 parser.add_argument('--template_name', help='Name for the custom group level template generated for this dataset',
                     default="average")
-parser.add_argument('--license_key', help='FreeSurfer license key - letters and numbers after "*" in the email you received after registration. To register (for free) visit https://surfer.nmr.mgh.harvard.edu/registration.html',
-                    required=True)
+parser.add_argument('--license_file', help='FreeSurfer license key file. To obtain it you need to register (for free) at https://surfer.nmr.mgh.harvard.edu/registration.html',
+                    required=True, type=str)
 parser.add_argument('--acquisition_label', help='If the dataset contains multiple T1 weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
 parser.add_argument('--refine_pial_acquisition_label', help='If the dataset contains multiple T2 or FLAIR weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
 parser.add_argument('--multiple_sessions', help='For datasets with multiday sessions where you do not want to '
@@ -146,6 +146,12 @@ else:
 # workaround for https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2016-July/046538.html
 output_dir = os.path.abspath(args.output_dir)
 
+if os.path.exists(args.license_file):
+	env = {'FS_LICENSE': args.license_file}
+else:
+	raise Exception("Provided license file does not exist")
+	raise Exception("Provided license file does not exist")
+
 # running participant level
 if args.analysis_level == "participant":
     if not os.path.exists(os.path.join(output_dir, "fsaverage")):
@@ -218,16 +224,16 @@ if args.analysis_level == "participant":
                             rmtree(os.path.join(output_dir, fsid))
                             print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                             print(cmd)
-                            run(cmd)
+                            run(cmd, env=env)
                         elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
                             print("SUBJECT ALREADY SEGMENTED, SKIPPING")
                         elif os.path.exists(os.path.join(output_dir, fsid)):
                             print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                             print(resume_cmd)
-                            run(resume_cmd)
+                            run(resume_cmd, env=env)
                         else:
                             print(cmd)
-                            run(cmd)
+                            run(cmd, env=env)
             
                 if ('template' in args.steps):
                     # creating a subject specific template
@@ -244,16 +250,16 @@ if args.analysis_level == "participant":
                         rmtree(os.path.join(output_dir, fsid))
                         print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                         print(cmd)
-                        run(cmd)
+                        run(cmd, env=env)
                     elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
                         print("TEMPLATE ALREADY CREATED, SKIPPING")
                     elif os.path.exists(os.path.join(output_dir, fsid)):
                         print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                         print(cmd)
-                        run(cmd)
+                        run(cmd, env=env)
                     else:
                         print(cmd)
-                        run(cmd)
+                        run(cmd, env=env)
             
                 if ('longitudinal' in args.steps):
                     for tp in timepoints:
@@ -270,12 +276,12 @@ if args.analysis_level == "participant":
                             rmtree(os.path.join(output_dir, tp + ".long." + fsid))
                             print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                             print(cmd)
-                            run(cmd)
+                            run(cmd, env=env)
                         elif os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid, "mri/aseg.mgz")):
                             print("SUBJECT ALREADY SEGMENTED, SKIPPING")
                         else:
                             print(cmd)
-                            run(cmd)
+                            run(cmd, env=env)
 
             elif len(sessions) > 0 and longitudinal_study == False:
                 # grab all T1s/T2s from multiple sessions and combine
@@ -327,14 +333,14 @@ if args.analysis_level == "participant":
                     rmtree(os.path.join(output_dir, fsid))
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                     print(cmd)
-                    run(cmd)
+                    run(cmd, env=env)
                 elif os.path.exists(os.path.join(output_dir, fsid)):
                     print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                     print(resume_cmd)
-                    run(resume_cmd)
+                    run(resume_cmd, env=env)
                 else:
                     print(cmd)
-                    run(cmd)
+                    run(cmd, env=env)
             else:
                 print("SKIPPING SUBJECT %s (no valid session)." % subject_label)
 
@@ -383,14 +389,14 @@ if args.analysis_level == "participant":
                 rmtree(os.path.join(output_dir, fsid))
                 print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                 print(cmd)
-                run(cmd)
+                run(cmd, env=env)
             elif os.path.exists(os.path.join(output_dir, fsid)):
                 print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                 print(resume_cmd)
-                run(resume_cmd)
+                run(resume_cmd, env=env)
             else:
                 print(cmd)
-                run(cmd)
+                run(cmd, env=env)
 
 elif args.analysis_level == "group1":    	# running group level
     if len(subjects_to_analyze) > 1:
@@ -401,7 +407,7 @@ elif args.analysis_level == "group1":    	# running group level
         print(cmd)
         if os.path.exists(os.path.join(output_dir, args.template_name)):
             rmtree(os.path.join(output_dir, args.template_name))
-        run(cmd, env={"SUBJECTS_DIR": output_dir})
+        run(cmd, env={"SUBJECTS_DIR": output_dir, 'FS_LICENSE': args.license_file})
         for subject_label in subjects_to_analyze:
             for hemi in ["lh", "rh"]:
                 tif_file = os.path.join(output_dir, args.template_name, hemi+".reg.template.tif")
@@ -409,7 +415,7 @@ elif args.analysis_level == "group1":    	# running group level
                 sphere_file = os.path.join(output_dir, fsid, "surf", hemi+".sphere")
                 reg_file = os.path.join(output_dir, fsid, "surf", hemi+".sphere.reg." + args.template_name)
                 cmd = "mris_register -curv %s %s %s"%(sphere_file, tif_file, reg_file)
-                run(cmd, env={"SUBJECTS_DIR": output_dir})
+                run(cmd, env={"SUBJECTS_DIR": output_dir, 'FS_LICENSE': args.license_file})
     else:
         print("Only one subject included in the analysis. Skipping group1 level")
 
@@ -453,7 +459,7 @@ elif args.analysis_level == "group2":  # running stats tables
                           "--tablefile {table_file}".format(h=h, subjects=subjects_str, p=p, m=m,
                                                             table_file=table_file)
                     print("Creating cortical stats table for {h} {p} {m}".format(h=h, p=p, m=m))
-                    run(cmd, env={"SUBJECTS_DIR": output_dir})
+                    run(cmd, env={"SUBJECTS_DIR": output_dir, 'FS_LICENSE': args.license_file})
 
         # create subcortical stats
         table_file = os.path.join(table_dir, "aseg.tsv")
@@ -463,7 +469,7 @@ elif args.analysis_level == "group2":  # running stats tables
         cmd = "python2 `which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
               "table_file}".format(subjects=subjects_str, table_file=table_file)
         print("Creating subcortical stats table.")
-        run(cmd, env={"SUBJECTS_DIR": output_dir})
+        run(cmd, env={"SUBJECTS_DIR": output_dir, 'FS_LICENSE': args.license_file})
 
         print("\nTable export finished for %d subjects/sessions." % len(subjects))
 
