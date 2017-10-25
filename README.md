@@ -71,10 +71,9 @@ This App has the following command line arguments:
           --template_name TEMPLATE_NAME
                                 Name for the custom group level template generated for
                                 this dataset
-          --license_key LICENSE_KEY
-                                FreeSurfer license key - letters and numbers after "*"
-                                in the email you received after registration. To
-                                register (for free) visit
+          --license_file LICENSE_FILE
+                                Path to FreeSurfer license key file. To obtain it you 
+								need to register (for free) visit
                                 https://surfer.nmr.mgh.harvard.edu/registration.html
           --acquisition_label ACQUISITION_LABEL
                                 If the dataset contains multiple T1 weighted images
@@ -112,7 +111,7 @@ To run it in participant level mode (for one participant):
 		-v /Users/filo/outputs:/outputs \
 		bids/freesurfer \
 		/bids_dataset /outputs participant --participant_label 01 \
-		--license_key "XXXXXXXX"
+		--license_file "license.txt"
 
 
 #### Group level
@@ -126,7 +125,7 @@ To create a study specific template run:
 		-v /Users/filo/outputs:/outputs \
 		bids/freesurfer \
 		/bids_dataset /outputs group1 \
-		--license_key "XXXXXXXX"
+		--license_file "license.txt"
 
 To export tables with aggregated measurements within regions of
 cortical parcellation and subcortical segementation run:
@@ -136,5 +135,5 @@ cortical parcellation and subcortical segementation run:
 		-v /Users/filo/outputs:/outputs \
 		bids/freesurfer \
 		/bids_dataset /outputs group2 \
-		--license_key "XXXXXXXX"
+		--license_file "license.txt"
 Also see *--parcellations* and *--measurements* arguments.
