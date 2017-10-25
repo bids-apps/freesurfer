@@ -111,7 +111,7 @@ multi_session_study = False
 if glob(os.path.join(args.bids_dir, "sub-*", "ses-*")):
     subjects = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
     for subject_label in subjects:
-        session_dirs = glob(os.path.join(args.bids_dir,"sub-%s"%subject_label,"ses-*"))
+        session_dirs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
         n_valid_sessions = 0
         for session_label in sessions:
@@ -167,27 +167,27 @@ if args.analysis_level == "participant":
     for subject_label in subjects_to_analyze:
         if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "ses-*")):
             T1s = glob(os.path.join(args.bids_dir,
-                        "sub-%s"%subject_label,
-                        "ses-*",
-                        "anat",
-                        "%s_T1w.nii*"%acq_tpl))
+                                    "sub-%s"%subject_label,
+                                    "ses-*",
+                                    "anat",
+                                    "%s_T1w.nii*"%acq_tpl))
             sessions = set([os.path.normpath(t1).split(os.sep)[-3].split("-")[-1] for t1 in T1s])
             if args.session_label:
                 sessions = sessions.intersection(args.session_label)
 
             if len(sessions) > 0 and longitudinal_study == True:
                 timepoints = ["sub-%s_ses-%s"%(subject_label, session_label) for session_label in sessions]
-                if ('cross-sectional' in args.steps):
+                if 'cross-sectional' in args.steps:
                     # Running each session separately, prior to doing longitudinal pipeline
                     for session_label in sessions:
                         T1s = glob(os.path.join(args.bids_dir,
-                                          "sub-%s"%subject_label,
-                                          "ses-%s"%session_label,
-                                          "anat",
-                                          "%s_T1w.nii*"%acq_tpl))
+                                                "sub-%s"%subject_label,
+                                                "ses-%s"%session_label,
+                                                "anat",
+                                                "%s_T1w.nii*"%acq_tpl))
                         input_args = ""
                         for T1 in T1s:
-                            if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                            if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
                                 input_args += " -hires"
                             input_args += " -i %s"%T1
 
@@ -195,8 +195,8 @@ if args.analysis_level == "participant":
                                                 "ses-%s"%session_label, "anat",
                                                 "*%s_T2w.nii*"%acq_t2))
                         FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                                "ses-%s"%session_label, "anat",
-                                                "*%s_FLAIR.nii*"%acq_t2))
+                                                   "ses-%s"%session_label, "anat",
+                                                   "*%s_FLAIR.nii*"%acq_t2))
                         if args.refine_pial == "T2":
                             for T2 in T2s:
                                 if max(nibabel.load(T2).header.get_zooms()) < 1.2:
@@ -225,7 +225,7 @@ if args.analysis_level == "participant":
                             print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                             print(cmd)
                             run(cmd, env=env)
-                        elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
+                        elif os.path.isfile(os.path.join(output_dir, fsid, "label/BA_exvivo.thresh.ctab")):
                             print("SUBJECT ALREADY SEGMENTED, SKIPPING")
                         elif os.path.exists(os.path.join(output_dir, fsid)):
                             print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
@@ -234,8 +234,8 @@ if args.analysis_level == "participant":
                         else:
                             print(cmd)
                             run(cmd, env=env)
-            
-                if ('template' in args.steps):
+
+                if 'template' in args.steps:
                     # creating a subject specific template
                     input_args = " ".join(["-tp %s"%tp for tp in timepoints])
                     fsid = "sub-%s"%subject_label
@@ -246,12 +246,12 @@ if args.analysis_level == "participant":
                                                                         stages,
                                                                         args.n_cpus)
 
-                    if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+                    if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, fsid))
                         print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                         print(cmd)
                         run(cmd, env=env)
-                    elif os.path.isfile(os.path.join(output_dir, fsid, "mri/aseg.mgz")):
+                    elif os.path.isfile(os.path.join(output_dir, fsid, "label/BA_exvivo.thresh.ctab")):
                         print("TEMPLATE ALREADY CREATED, SKIPPING")
                     elif os.path.exists(os.path.join(output_dir, fsid)):
                         print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
@@ -260,8 +260,8 @@ if args.analysis_level == "participant":
                     else:
                         print(cmd)
                         run(cmd, env=env)
-            
-                if ('longitudinal' in args.steps):
+
+                if 'longitudinal' in args.steps:
                     for tp in timepoints:
                         # longitudinally process all timepoints
                         fsid = "sub-%s"%subject_label
@@ -277,7 +277,7 @@ if args.analysis_level == "participant":
                             print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                             print(cmd)
                             run(cmd, env=env)
-                        elif os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid, "mri/aseg.mgz")):
+                        elif os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid, "label/BA_exvivo.thresh.ctab")):
                             print("SUBJECT ALREADY SEGMENTED, SKIPPING")
                         else:
                             print(cmd)
@@ -334,6 +334,8 @@ if args.analysis_level == "participant":
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                     print(cmd)
                     run(cmd, env=env)
+                elif os.path.isfile(os.path.join(output_dir, fsid, "label/BA_exvivo.thresh.ctab")):
+                    print("SUBJECT ALREADY SEGMENTED, SKIPPING")
                 elif os.path.exists(os.path.join(output_dir, fsid)):
                     print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                     print(resume_cmd)
@@ -390,6 +392,8 @@ if args.analysis_level == "participant":
                 print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                 print(cmd)
                 run(cmd, env=env)
+            elif os.path.isfile(os.path.join(output_dir, fsid, "label/BA_exvivo.thresh.ctab")):
+                print("SUBJECT ALREADY SEGMENTED, SKIPPING")
             elif os.path.exists(os.path.join(output_dir, fsid)):
                 print("SUBJECT DIR ALREADY EXISTS (without IsRunning.lh+rh), RUNNING COMMAND:")
                 print(resume_cmd)
