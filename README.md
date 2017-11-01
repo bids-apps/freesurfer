@@ -36,7 +36,8 @@ This App has the following command line arguments:
                       [--parcellations {aparc,aparc.a2009s} [{aparc,aparc.a2009s} ...]]
                       [--measurements {area,volume,thickness,thicknessstd,meancurv,gauscurv,foldind,curvind}
                                       [{area,volume,thickness,thicknessstd,meancurv,gauscurv,foldind,curvind} ...]]
-                      [-v]
+                      [-v] [--bids_validator_config BIDS_VALIDATOR_CONFIG]
+                      [--skip_bids_validator]
                       bids_dir output_dir {participant,group1,group2}
         FreeSurfer recon-all + custom template generation.
 
@@ -72,7 +73,7 @@ This App has the following command line arguments:
                                 Name for the custom group level template generated for
                                 this dataset
           --license_file LICENSE_FILE
-                                Path to FreeSurfer license key file. To obtain it you 
+                                Path to FreeSurfer license key file. To obtain it you
 								need to register (for free) visit
                                 https://surfer.nmr.mgh.harvard.edu/registration.html
           --acquisition_label ACQUISITION_LABEL
@@ -101,6 +102,12 @@ This App has the following command line arguments:
                                 [{area,volume,thickness,thicknessstd,meancurv,gauscurv,foldind,curvind} ...]
                                 Group2 option: cortical measurements to extract stats for.
           -v, --version         show program's version number and exit
+          --bids_validator_config BIDS_VALIDATOR_CONFIG
+                                JSON file specifying configuration of bids-validator:
+                                See https://github.com/INCF/bids-validator for more
+                                info
+          --skip_bids_validator
+                               skips bids validation
 
 
 #### Participant level
