@@ -9,6 +9,7 @@ from shutil import rmtree
 import subprocess
 from warnings import warn
 
+
 def run(command, env={}, ignore_errors=False):
     merged_env = os.environ
     merged_env.update(env)
@@ -19,10 +20,11 @@ def run(command, env={}, ignore_errors=False):
         line = process.stdout.readline()
         line = str(line, 'utf-8')[:-1]
         print(line)
-        if line == '' and process.poll() != None:
+        if line == '' and process.poll() is not None:
             break
     if process.returncode != 0 and not ignore_errors:
-        raise Exception("Non zero return code: %d"%process.returncode)
+        raise Exception("Non zero return code: %d" % process.returncode)
+
 
 __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version')).read()
 
@@ -40,19 +42,19 @@ parser.add_argument('analysis_level', help='Level of the analysis that will be p
                     '"group2 exports group stats tables for cortical parcellation and subcortical segmentation.',
                     choices=['participant', 'group1', 'group2'])
 parser.add_argument('--participant_label', help='The label of the participant that should be analyzed. The label '
-                   'corresponds to sub-<participant_label> from the BIDS spec '
-                   '(so it does not include "sub-"). If this parameter is not '
-                   'provided all subjects should be analyzed. Multiple '
-                   'participants can be specified with a space separated list.',
-                   nargs="+")
+                    'corresponds to sub-<participant_label> from the BIDS spec '
+                    '(so it does not include "sub-"). If this parameter is not '
+                    'provided all subjects should be analyzed. Multiple '
+                    'participants can be specified with a space separated list.',
+                    nargs="+")
 parser.add_argument('--session_label', help='The label of the session that should be analyzed. The label '
-                   'corresponds to ses-<session_label> from the BIDS spec '
-                   '(so it does not include "ses-"). If this parameter is not '
-                   'provided all sessions should be analyzed. Multiple '
-                   'sessions can be specified with a space separated list.',
-                   nargs="+")
+                    'corresponds to ses-<session_label> from the BIDS spec '
+                    '(so it does not include "ses-"). If this parameter is not '
+                    'provided all sessions should be analyzed. Multiple '
+                    'sessions can be specified with a space separated list.',
+                    nargs="+")
 parser.add_argument('--n_cpus', help='Number of CPUs/cores available to use.',
-                   default=1, type=int)
+                    default=1, type=int)
 parser.add_argument('--stages', help='Autorecon stages to run.',
                     choices=["autorecon1", "autorecon2", "autorecon2-cp", "autorecon2-wm", "autorecon-pial", "autorecon3", "autorecon-all", "all"],
                     default=["autorecon-all"],
@@ -93,10 +95,21 @@ parser.add_argument('--measurements', help='Group2 option: cortical measurements
 
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App example version {}'.format(__version__))
-
+parser.add_argument('--bids_validator_config', help='JSON file specifying configuration of '
+                    'bids-validator: See https://github.com/INCF/bids-validator for more info')
+parser.add_argument('--skip_bids_validator',
+                    help='skips bids validation',
+                    action='store_true')
 args = parser.parse_args()
 
-run("bids-validator " + args.bids_dir)
+if args.bids_validator_config:
+    run("bids-validator --config {config} {bids_dir}".format(
+        config=args.bids_validator_config,
+        bids_dir=args.bids_dir))
+elif args.skip_bids_validator:
+    print('skipping bids-validator...')
+else:
+    run("bids-validator {bids_dir}".format(bids_dir=args.bids_dir))
 
 subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
 
@@ -105,20 +118,20 @@ if args.acquisition_label:
 else:
     acq_tpl = "*"
 
-# if there are session folders, check if study is truly longitudinal by
+# if there are session folders, check if study is truly longitudinal by
 # searching for the first subject with more than one valid sessions
 multi_session_study = False
 if glob(os.path.join(args.bids_dir, "sub-*", "ses-*")):
     subjects = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
     for subject_label in subjects:
-        session_dirs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "ses-*"))
+        session_dirs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "ses-*"))
         sessions = [os.path.split(dr)[-1].split("-")[-1] for dr in session_dirs]
         n_valid_sessions = 0
         for session_label in sessions:
-            if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                                "ses-%s"%session_label,
+            if glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
+                                                "ses-%s" % session_label,
                                                 "anat",
-                                                "%s_T1w.nii*"%acq_tpl)):
+                                                "%s_T1w.nii*" % acq_tpl)):
                 n_valid_sessions += 1
         if n_valid_sessions > 1:
             multi_session_study = True
@@ -147,10 +160,10 @@ else:
 output_dir = os.path.abspath(args.output_dir)
 
 if os.path.exists(args.license_file):
-	env = {'FS_LICENSE': args.license_file}
+    env = {'FS_LICENSE': args.license_file}
 else:
-	raise Exception("Provided license file does not exist")
-	raise Exception("Provided license file does not exist")
+    raise Exception("Provided license file does not exist")
+    raise Exception("Provided license file does not exist")
 
 # running participant level
 if args.analysis_level == "participant":
@@ -165,60 +178,60 @@ if args.analysis_level == "participant":
             ignore_errors=True)
 
     for subject_label in subjects_to_analyze:
-        if glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "ses-*")):
+        if glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "ses-*")):
             T1s = glob(os.path.join(args.bids_dir,
-                                    "sub-%s"%subject_label,
+                                    "sub-%s" % subject_label,
                                     "ses-*",
                                     "anat",
-                                    "%s_T1w.nii*"%acq_tpl))
+                                    "%s_T1w.nii*" % acq_tpl))
             sessions = set([os.path.normpath(t1).split(os.sep)[-3].split("-")[-1] for t1 in T1s])
             if args.session_label:
                 sessions = sessions.intersection(args.session_label)
 
-            if len(sessions) > 0 and longitudinal_study == True:
-                timepoints = ["sub-%s_ses-%s"%(subject_label, session_label) for session_label in sessions]
+            if len(sessions) > 0 and longitudinal_study is True:
+                timepoints = ["sub-%s_ses-%s" % (subject_label, session_label) for session_label in sessions]
                 if 'cross-sectional' in args.steps:
                     # Running each session separately, prior to doing longitudinal pipeline
                     for session_label in sessions:
                         T1s = glob(os.path.join(args.bids_dir,
-                                                "sub-%s"%subject_label,
-                                                "ses-%s"%session_label,
+                                                "sub-%s" % subject_label,
+                                                "ses-%s" % session_label,
                                                 "anat",
-                                                "%s_T1w.nii*"%acq_tpl))
+                                                "%s_T1w.nii*" % acq_tpl))
                         input_args = ""
                         for T1 in T1s:
                             if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
                                 input_args += " -hires"
-                            input_args += " -i %s"%T1
+                            input_args += " -i %s" % T1
 
-                        T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                                "ses-%s"%session_label, "anat",
-                                                "*%s_T2w.nii*"%acq_t2))
-                        FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label,
-                                                   "ses-%s"%session_label, "anat",
-                                                   "*%s_FLAIR.nii*"%acq_t2))
+                        T2s = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
+                                                "ses-%s" % session_label, "anat",
+                                                "*%s_T2w.nii*" % acq_t2))
+                        FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
+                                                   "ses-%s" % session_label, "anat",
+                                                   "*%s_FLAIR.nii*" % acq_t2))
                         if args.refine_pial == "T2":
                             for T2 in T2s:
                                 if max(nibabel.load(T2).header.get_zooms()) < 1.2:
-                                    input_args += " " + " ".join(["-T2 %s"%T2])
+                                    input_args += " " + " ".join(["-T2 %s" % T2])
                                     input_args += " -T2pial"
                         elif args.refine_pial == "FLAIR":
                             for FLAIR in FLAIRs:
                                 if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
-                                    input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                                    input_args += " " + " ".join(["-FLAIR %s" % FLAIR])
                                     input_args += " -FLAIRpial"
 
-                        fsid = "sub-%s_ses-%s"%(subject_label, session_label)
+                        fsid = "sub-%s_ses-%s" % (subject_label, session_label)
                         stages = " ".join(["-" + stage for stage in args.stages])
-                        cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                                output_dir,
-                                                                                input_args,
-                                                                                stages,
-                                                                                args.n_cpus)
-                        resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
-                                                                                    output_dir,
-                                                                                    stages,
-                                                                                    args.n_cpus)
+                        cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d" % (fsid,
+                                                                                          output_dir,
+                                                                                          input_args,
+                                                                                          stages,
+                                                                                          args.n_cpus)
+                        resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d" % (fsid,
+                                                                                              output_dir,
+                                                                                              stages,
+                                                                                              args.n_cpus)
 
                         if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                             rmtree(os.path.join(output_dir, fsid))
@@ -237,14 +250,14 @@ if args.analysis_level == "participant":
 
                 if 'template' in args.steps:
                     # creating a subject specific template
-                    input_args = " ".join(["-tp %s"%tp for tp in timepoints])
-                    fsid = "sub-%s"%subject_label
+                    input_args = " ".join(["-tp %s" % tp for tp in timepoints])
+                    fsid = "sub-%s" % subject_label
                     stages = " ".join(["-" + stage for stage in args.stages])
-                    cmd = "recon-all -base %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                        output_dir,
-                                                                        input_args,
-                                                                        stages,
-                                                                        args.n_cpus)
+                    cmd = "recon-all -base %s -sd %s %s %s -parallel -openmp %d" % (fsid,
+                                                                                    output_dir,
+                                                                                    input_args,
+                                                                                    stages,
+                                                                                    args.n_cpus)
 
                     if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, fsid))
@@ -264,15 +277,15 @@ if args.analysis_level == "participant":
                 if 'longitudinal' in args.steps:
                     for tp in timepoints:
                         # longitudinally process all timepoints
-                        fsid = "sub-%s"%subject_label
+                        fsid = "sub-%s" % subject_label
                         stages = " ".join(["-" + stage for stage in args.stages])
-                        cmd = "recon-all -long %s %s -sd %s %s -parallel -openmp %d"%(tp,
-                                                                            fsid,
-                                                                            output_dir,
-                                                                            stages,
-                                                                            args.n_cpus)
+                        cmd = "recon-all -long %s %s -sd %s %s -parallel -openmp %d" % (tp,
+                                                                                        fsid,
+                                                                                        output_dir,
+                                                                                        stages,
+                                                                                        args.n_cpus)
 
-                        if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid,"scripts/IsRunning.lh+rh")):
+                        if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid, "scripts/IsRunning.lh+rh")):
                             rmtree(os.path.join(output_dir, tp + ".long." + fsid))
                             print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                             print(cmd)
@@ -283,53 +296,53 @@ if args.analysis_level == "participant":
                             print(cmd)
                             run(cmd, env=env)
 
-            elif len(sessions) > 0 and longitudinal_study == False:
+            elif len(sessions) > 0 and longitudinal_study is False:
                 # grab all T1s/T2s from multiple sessions and combine
                 T1s = glob(os.path.join(args.bids_dir,
-                                        "sub-%s"%subject_label,
+                                        "sub-%s" % subject_label,
                                         "ses-*",
                                         "anat",
-                                        "%s_T1w.nii*"%acq_tpl))
+                                        "%s_T1w.nii*" % acq_tpl))
                 input_args = ""
                 for T1 in T1s:
-                    if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                    if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
                         input_args += " -hires"
-                    input_args += " -i %s"%T1
+                    input_args += " -i %s" % T1
 
                 T2s = glob(os.path.join(args.bids_dir,
-                                        "sub-%s"%subject_label,
+                                        "sub-%s" % subject_label,
                                         "ses-*",
                                         "anat",
-                                        "*%s_T2w.nii*"%acq_t2))
+                                        "*%s_T2w.nii*" % acq_t2))
                 FLAIRs = glob(os.path.join(args.bids_dir,
-                                        "sub-%s"%subject_label,
-                                        "ses-*",
-                                        "anat",
-                                        "*%s_FLAIR.nii*"%acq_t2))
+                                           "sub-%s" % subject_label,
+                                           "ses-*",
+                                           "anat",
+                                           "*%s_FLAIR.nii*" % acq_t2))
                 if args.refine_pial == "T2":
                     for T2 in T2s:
                         if max(nibabel.load(T2).header.get_zooms()) < 1.2:
-                            input_args += " " + " ".join(["-T2 %s"%T2])
+                            input_args += " " + " ".join(["-T2 %s" % T2])
                             input_args += " -T2pial"
                 elif args.refine_pial == "FLAIR":
                     for FLAIR in FLAIRs:
                         if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
-                            input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                            input_args += " " + " ".join(["-FLAIR %s" % FLAIR])
                             input_args += " -FLAIRpial"
 
-                fsid = "sub-%s"%subject_label
+                fsid = "sub-%s" % subject_label
                 stages = " ".join(["-" + stage for stage in args.stages])
-                cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                      output_dir,
-                                                                      input_args,
-                                                                      stages,
-                                                                      args.n_cpus)
-                resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
-                                                                          output_dir,
-                                                                          stages,
-                                                                          args.n_cpus)
+                cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d" % (fsid,
+                                                                                  output_dir,
+                                                                                  input_args,
+                                                                                  stages,
+                                                                                  args.n_cpus)
+                resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d" % (fsid,
+                                                                                      output_dir,
+                                                                                      stages,
+                                                                                      args.n_cpus)
 
-                if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+                if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, fsid))
                     print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                     print(cmd)
@@ -349,45 +362,45 @@ if args.analysis_level == "participant":
         else:
             # grab all T1s/T2s from single session (no ses-* directories)
             T1s = glob(os.path.join(args.bids_dir,
-                       "sub-%s"%subject_label,
-                       "anat",
-                       "%s_T1w.nii*"%acq_tpl))
+                                    "sub-%s" % subject_label,
+                                    "anat",
+                                    "%s_T1w.nii*" % acq_tpl))
             if not T1s:
                 print("No T1w nii files found for subject %s. Skipping subject." % subject_label)
                 continue
             input_args = ""
             for T1 in T1s:
-                if (round(max(nibabel.load(T1).header.get_zooms()),1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
+                if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
                     input_args += " -hires"
-                input_args += " -i %s"%T1
-            T2s = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
-                                    "*%s_T2w.nii*"%acq_t2))
-            FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s"%subject_label, "anat",
-                                    "*%s_FLAIR.nii*"%acq_t2))
+                input_args += " -i %s" % T1
+            T2s = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "anat",
+                                    "*%s_T2w.nii*" % acq_t2))
+            FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "anat",
+                                       "*%s_FLAIR.nii*" % acq_t2))
             if args.refine_pial == "T2":
                 for T2 in T2s:
                     if max(nibabel.load(T2).header.get_zooms()) < 1.2:
-                        input_args += " " + " ".join(["-T2 %s"%T2])
+                        input_args += " " + " ".join(["-T2 %s" % T2])
                         input_args += " -T2pial"
             elif args.refine_pial == "FLAIR":
                 for FLAIR in FLAIRs:
                     if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
-                        input_args += " " + " ".join(["-FLAIR %s"%FLAIR])
+                        input_args += " " + " ".join(["-FLAIR %s" % FLAIR])
                         input_args += " -FLAIRpial"
 
-            fsid = "sub-%s"%subject_label
+            fsid = "sub-%s" % subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d"%(fsid,
-                                                                  output_dir,
-                                                                  input_args,
-                                                                  stages,
-                                                                  args.n_cpus)
-            resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d"%(fsid,
-                                                                      output_dir,
-                                                                      stages,
-                                                                      args.n_cpus)
+            cmd = "recon-all -subjid %s -sd %s %s %s -parallel -openmp %d" % (fsid,
+                                                                              output_dir,
+                                                                              input_args,
+                                                                              stages,
+                                                                              args.n_cpus)
+            resume_cmd = "recon-all -subjid %s -sd %s %s -parallel -openmp %d" % (fsid,
+                                                                                  output_dir,
+                                                                                  stages,
+                                                                                  args.n_cpus)
 
-            if os.path.isfile(os.path.join(output_dir, fsid,"scripts/IsRunning.lh+rh")):
+            if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                 rmtree(os.path.join(output_dir, fsid))
                 print("DELETING OUTPUT SUBJECT DIR AND RE-RUNNING COMMAND:")
                 print(cmd)
@@ -402,10 +415,10 @@ if args.analysis_level == "participant":
                 print(cmd)
                 run(cmd, env=env)
 
-elif args.analysis_level == "group1":    	# running group level
+elif args.analysis_level == "group1":        # running group level
     if len(subjects_to_analyze) > 1:
         # generate study specific template
-        fsids = ["sub-%s"%s for s in subjects_to_analyze]
+        fsids = ["sub-%s" % s for s in subjects_to_analyze]
         # skipping volumetric average due to https://www.mail-archive.com/freesurfer@nmr.mgh.harvard.edu/msg51822.html
         cmd = "make_average_subject --no-symlink --no-vol --out " + args.template_name + " --subjects " + " ".join(fsids)
         print(cmd)
@@ -415,10 +428,10 @@ elif args.analysis_level == "group1":    	# running group level
         for subject_label in subjects_to_analyze:
             for hemi in ["lh", "rh"]:
                 tif_file = os.path.join(output_dir, args.template_name, hemi+".reg.template.tif")
-                fsid = "sub-%s"%subject_label
+                fsid = "sub-%s" % subject_label
                 sphere_file = os.path.join(output_dir, fsid, "surf", hemi+".sphere")
                 reg_file = os.path.join(output_dir, fsid, "surf", hemi+".sphere.reg." + args.template_name)
-                cmd = "mris_register -curv %s %s %s"%(sphere_file, tif_file, reg_file)
+                cmd = "mris_register -curv %s %s %s" % (sphere_file, tif_file, reg_file)
                 run(cmd, env={"SUBJECTS_DIR": output_dir, 'FS_LICENSE': args.license_file})
     else:
         print("Only one subject included in the analysis. Skipping group1 level")
