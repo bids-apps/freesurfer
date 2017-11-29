@@ -19,7 +19,7 @@ RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/frees
 
 RUN apt-get install -y python3
 RUN apt-get install -y python3-pip
-RUN pip3 install nibabel
+RUN pip3 install nibabel pandas
 RUN apt-get install -y python2.7
 RUN apt-get install -y python-pip
 
