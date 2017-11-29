@@ -8,7 +8,8 @@ from subprocess import Popen, PIPE
 from shutil import rmtree
 import subprocess
 from warnings import warn
-
+import pandas as pd
+import re
 
 def run(command, env={}, ignore_errors=False):
     merged_env = os.environ
@@ -39,8 +40,9 @@ parser.add_argument('analysis_level', help='Level of the analysis that will be p
                     'Multiple participant level analyses can be run independently '
                     '(in parallel) using the same output_dir. '
                     '"group1" creates study specific group template. '
-                    '"group2 exports group stats tables for cortical parcellation and subcortical segmentation.',
-                    choices=['participant', 'group1', 'group2'])
+                    '"group2" exports group stats tables for cortical parcellation and subcortical segmentation.'
+                    '"group3" exports euler numbers.',
+                    choices=['participant', 'group1', 'group2', 'group3'])
 parser.add_argument('--participant_label', help='The label of the participant that should be analyzed. The label '
                     'corresponds to sub-<participant_label> from the BIDS spec '
                     '(so it does not include "sub-"). If this parameter is not '
@@ -491,3 +493,47 @@ elif args.analysis_level == "group2":  # running stats tables
 
     else:
         print("\nNo subjects included in the analysis. Skipping group2 level.")
+
+
+elif args.analysis_level == "group3":  # extract euler number
+    # This extracts the euler numbers for the orig.nofix surfaces from the recon-all.log file
+    # see Rosen et al. (2017), https://www.biorxiv.org/content/early/2017/10/01/125161
+
+    def extract_euler(logfile):
+        with open(logfile) as fi:
+            logtext = fi.read()
+        p = re.compile(r"orig.nofix lheno =\s+(-?\d+), rheno =\s+(-?\d+)")
+        results = p.findall(logtext)
+        if len(results) != 1:
+            raise Exception("Euler number could not be extracted from {}".format(logfile))
+        lh_euler, rh_euler = results[0]
+        return int(lh_euler), int(rh_euler)
+
+    euler_out_path = os.path.join(output_dir, "00_group3_quality")
+    if not os.path.isdir(euler_out_path):
+        os.makedirs(euler_out_path)
+    euler_out_file = os.path.join(euler_out_path, "euler.tsv")
+    print("Writing euler tables to %s." % euler_out_file)
+
+    # get freesurfer subjects
+    os.chdir(output_dir)
+    subjects = []
+    for s in subjects_to_analyze:
+        subjects += glob("sub-{}*".format(s))
+    # remove long subjects as they don't have orig.nofix surfaces,
+    # therefore no euler numbers
+    subjects = list(filter(lambda s: ".long.sub-" not in s, subjects))
+    if len(subjects) > 0:
+        df = pd.DataFrame([], columns=["subject", "lh_euler", "rh_euler"])
+        for subject in subjects:
+            logfile = os.path.join(output_dir, subject, "scripts/recon-all.log")
+            lh_euler, rh_euler = extract_euler(logfile)
+            df_subject = pd.DataFrame({"subject": [subject],
+                                        "lh_euler": [lh_euler],
+                                        "rh_euler": [rh_euler]},
+                                        columns=["subject", "lh_euler", "rh_euler"])
+            df = df.append(df_subject)
+        df["mean_euler_bh"] = df[["lh_euler", "rh_euler"]].mean(1)
+        df.to_csv(euler_out_file, sep="\t", index=False)
+    else:
+        print("\nNo subjects included in the analysis. Skipping group3 level.")
