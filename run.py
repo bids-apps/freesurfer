@@ -163,7 +163,6 @@ if os.path.exists(args.license_file):
     env = {'FS_LICENSE': args.license_file}
 else:
     raise Exception("Provided license file does not exist")
-    raise Exception("Provided license file does not exist")
 
 # running participant level
 if args.analysis_level == "participant":
