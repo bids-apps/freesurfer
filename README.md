@@ -25,11 +25,15 @@ This App has the following command line arguments:
         $ docker run -ti --rm bids/freesurfer --help
         usage: run.py [-h]
                       [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
+                      [--session_label SESSION_LABEL [SESSION_LABEL ...]]
                       [--n_cpus N_CPUS]
-                      [--stages {autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon2-pial,autorecon3,autorecon-all,all}
-                                [{autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon2-pial,autorecon3,autorecon-all,all} ...]]
-                      [--template_name TEMPLATE_NAME] --license_key LICENSE_KEY
+                      [--stages {autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon-pial,autorecon3,autorecon-all,all}
+                                [{autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon-pial,autorecon3,autorecon-all,all} ...]]
+                      [--steps {cross-sectional,template,longitudinal}
+                               [{cross-sectional,template,longitudinal} ...]]
+                      [--template_name TEMPLATE_NAME] --license_file LICENSE_FILE
                       [--acquisition_label ACQUISITION_LABEL]
+                      [--refine_pial_acquisition_label REFINE_PIAL_ACQUISITION_LABEL]
                       [--multiple_sessions {longitudinal,multiday}]
                       [--refine_pial {T2,FLAIR,None,T1only}]
                       [--hires_mode {auto,enable,disable}]
@@ -39,6 +43,7 @@ This App has the following command line arguments:
                       [-v] [--bids_validator_config BIDS_VALIDATOR_CONFIG]
                       [--skip_bids_validator]
                       bids_dir output_dir {participant,group1,group2}
+
         FreeSurfer recon-all + custom template generation.
 
         positional arguments:
@@ -51,10 +56,10 @@ This App has the following command line arguments:
           {participant,group1,group2}
                                 Level of the analysis that will be performed. Multiple
                                 participant level analyses can be run independently
-                                (in parallel) using the same output_dir. "goup1"
-                                creates study specific group template. "group2 exports
-                                group stats tables for cortical parcellation and
-                                subcortical segmentation.
+                                (in parallel) using the same output_dir. "group1"
+                                creates study specific group template. "group2"
+                                exports group stats tables for cortical parcellation,
+                                subcortical segmentation a table with euler numbers.
 
         optional arguments:
           -h, --help            show this help message and exit
@@ -65,21 +70,34 @@ This App has the following command line arguments:
                                 parameter is not provided all subjects should be
                                 analyzed. Multiple participants can be specified with
                                 a space separated list.
+          --session_label SESSION_LABEL [SESSION_LABEL ...]
+                                The label of the session that should be analyzed. The
+                                label corresponds to ses-<session_label> from the BIDS
+                                spec (so it does not include "ses-"). If this
+                                parameter is not provided all sessions should be
+                                analyzed. Multiple sessions can be specified with a
+                                space separated list.
           --n_cpus N_CPUS       Number of CPUs/cores available to use.
-          --stages {autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon2-pial,autorecon3,autorecon-all,all}
-                                [{autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon2-pial,autorecon3,autorecon-all,all} ...]
+          --stages {autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon-pial,autorecon3,autorecon-all,all}
+                                [{autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon-pial,autorecon3,autorecon-all,all} ...]
                                 Autorecon stages to run.
+          --steps {cross-sectional,template,longitudinal} [{cross-sectional,template,longitudinal} ...]
+                                Longitudinal pipeline steps to run.
           --template_name TEMPLATE_NAME
                                 Name for the custom group level template generated for
                                 this dataset
           --license_file LICENSE_FILE
                                 Path to FreeSurfer license key file. To obtain it you
-								need to register (for free) visit
+                                need to register (for free) at
                                 https://surfer.nmr.mgh.harvard.edu/registration.html
           --acquisition_label ACQUISITION_LABEL
                                 If the dataset contains multiple T1 weighted images
                                 from different acquisitions which one should be used?
                                 Corresponds to "acq-<acquisition_label>"
+          --refine_pial_acquisition_label REFINE_PIAL_ACQUISITION_LABEL
+                                If the dataset contains multiple T2 or FLAIR weighted
+                                images from different acquisitions which one should be
+                                used? Corresponds to "acq-<acquisition_label>"
           --multiple_sessions {longitudinal,multiday}
                                 For datasets with multiday sessions where you do not
                                 want to use the longitudinal pipeline, i.e., sessions
@@ -100,15 +118,15 @@ This App has the following command line arguments:
                                 stats from.
           --measurements {area,volume,thickness,thicknessstd,meancurv,gauscurv,foldind,curvind}
                                 [{area,volume,thickness,thicknessstd,meancurv,gauscurv,foldind,curvind} ...]
-                                Group2 option: cortical measurements to extract stats for.
+                                Group2 option: cortical measurements to extract stats
+                                for.
           -v, --version         show program's version number and exit
           --bids_validator_config BIDS_VALIDATOR_CONFIG
                                 JSON file specifying configuration of bids-validator:
                                 See https://github.com/INCF/bids-validator for more
                                 info
           --skip_bids_validator
-                               skips bids validation
-
+                                skips bids validation
 
 #### Participant level
 To run it in participant level mode (for one participant):
@@ -125,6 +143,7 @@ To run it in participant level mode (for one participant):
 After doing this for all subjects (potentially in parallel) the
 group level analyses can be run.
 
+##### Template creation
 To create a study specific template run:
 
 		docker run -ti --rm \
@@ -134,8 +153,12 @@ To create a study specific template run:
 		/bids_dataset /outputs group1 \
 		--license_file "license.txt"
 
+##### Stats and quality tables export
 To export tables with aggregated measurements within regions of
-cortical parcellation and subcortical segementation run:
+cortical parcellation and subcortical segementation, and a table with
+ euler numbers (a quality metric, see
+ [Rosen et. al, 2017](https://www.biorxiv.org/content/early/2017/10/01/125161))
+ run:
 
 		docker run -ti --rm \
 		-v /Users/filo/data/ds005:/bids_dataset:ro \
@@ -143,4 +166,11 @@ cortical parcellation and subcortical segementation run:
 		bids/freesurfer \
 		/bids_dataset /outputs group2 \
 		--license_file "license.txt"
-Also see *--parcellations* and *--measurements* arguments.
+Also see the *--parcellations* and *--measurements* arguments.
+
+This step writes ouput into `<output_dir>/00_group2_stats_tables/`. E.g.:
+
+* `lh.aparc.thickness.tsv` contains cortical thickness values for the
+left hemisphere extracted via the aparac parcellation.
+* `aseg.tsv` contains subcortical information from the aseg segmentation.
+* `euler.tsv` contains the euler numbers
