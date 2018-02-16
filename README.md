@@ -134,9 +134,10 @@ To run it in participant level mode (for one participant):
 		docker run -ti --rm \
 		-v /Users/filo/data/ds005:/bids_dataset:ro \
 		-v /Users/filo/outputs:/outputs \
+		-v /Users/filo/freesurfer_license.txt:/license.txt \
 		bids/freesurfer \
 		/bids_dataset /outputs participant --participant_label 01 \
-		--license_file "license.txt"
+		--license_file "/license.txt"
 
 
 #### Group level
@@ -149,9 +150,10 @@ To create a study specific template run:
 		docker run -ti --rm \
 		-v /Users/filo/data/ds005:/bids_dataset:ro \
 		-v /Users/filo/outputs:/outputs \
+		-v /Users/filo/freesurfer_license.txt:/license.txt \
 		bids/freesurfer \
 		/bids_dataset /outputs group1 \
-		--license_file "license.txt"
+		--license_file "/license.txt"
 
 ##### Stats and quality tables export
 To export tables with aggregated measurements within regions of
@@ -163,9 +165,10 @@ cortical parcellation and subcortical segementation, and a table with
 		docker run -ti --rm \
 		-v /Users/filo/data/ds005:/bids_dataset:ro \
 		-v /Users/filo/outputs:/outputs \
+		-v /Users/filo/freesurfer_license.txt:/license.txt \
 		bids/freesurfer \
 		/bids_dataset /outputs group2 \
-		--license_file "license.txt"
+		--license_file "/license.txt"
 Also see the *--parcellations* and *--measurements* arguments.
 
 This step writes ouput into `<output_dir>/00_group2_stats_tables/`. E.g.:
