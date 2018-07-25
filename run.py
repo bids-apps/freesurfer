@@ -232,12 +232,28 @@ if args.analysis_level == "participant":
 
                         fsid = "sub-%s_ses-%s" % (subject_label, session_label)
                         stages = " ".join(["-" + stage for stage in args.stages])
-                        cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
+
+                        cmd=""
+                        resume_cmd = ""
+
+                        if three_T == 'true':
+                            cmd = "recon-all -subjid %s -sd %s -3T %s %s -openmp %d" % (fsid,
                                                                                           output_dir,
                                                                                           input_args,
                                                                                           stages,
                                                                                           args.n_cpus)
-                        resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
+                            resume_cmd = "recon-all -subjid %s -sd %s -3T %s -openmp %d" % (fsid,
+                                                                                              output_dir,
+                                                                                              stages,
+                                                                                              args.n_cpus)
+
+                        else:
+                            cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
+                                                                                          output_dir,
+                                                                                          input_args,
+                                                                                          stages,
+                                                                                          args.n_cpus)
+                            resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
                                                                                               output_dir,
                                                                                               stages,
                                                                                               args.n_cpus)
@@ -262,7 +278,15 @@ if args.analysis_level == "participant":
                     input_args = " ".join(["-tp %s" % tp for tp in timepoints])
                     fsid = "sub-%s" % subject_label
                     stages = " ".join(["-" + stage for stage in args.stages])
-                    cmd = "recon-all -base %s -sd %s %s %s -openmp %d" % (fsid,
+
+                    if three_T == 'true':
+                        cmd = "recon-all -base %s -sd %s -3T %s %s -openmp %d" % (fsid,
+                                                                                    output_dir,
+                                                                                    input_args,
+                                                                                    stages,
+                                                                                    args.n_cpus)
+                    else:
+                        cmd = "recon-all -base %s -sd %s %s %s -openmp %d" % (fsid,
                                                                                     output_dir,
                                                                                     input_args,
                                                                                     stages,
@@ -288,7 +312,15 @@ if args.analysis_level == "participant":
                         # longitudinally process all timepoints
                         fsid = "sub-%s" % subject_label
                         stages = " ".join(["-" + stage for stage in args.stages])
-                        cmd = "recon-all -long %s %s -sd %s %s -openmp %d" % (tp,
+                        
+                        if three_T == 'true':
+                            cmd = "recon-all -long %s %s -sd %s -3T %s -openmp %d" % (tp,
+                                                                                        fsid,
+                                                                                        output_dir,
+                                                                                        stages,
+                                                                                        args.n_cpus)
+                        else:
+                            cmd = "recon-all -long %s %s -sd %s %s -openmp %d" % (tp,
                                                                                         fsid,
                                                                                         output_dir,
                                                                                         stages,
@@ -341,12 +373,24 @@ if args.analysis_level == "participant":
 
                 fsid = "sub-%s" % subject_label
                 stages = " ".join(["-" + stage for stage in args.stages])
-                cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
+
+                if three_T == 'true':
+                    cmd = "recon-all -subjid %s -sd %s -3T %s %s -openmp %d" % (fsid,
                                                                                   output_dir,
                                                                                   input_args,
                                                                                   stages,
                                                                                   args.n_cpus)
-                resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
+                    resume_cmd = "recon-all -subjid %s -sd %s -3T %s -openmp %d" % (fsid,
+                                                                                      output_dir,
+                                                                                      stages,
+                                                                                      args.n_cpus)    
+                else:
+                    cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
+                                                                                  output_dir,
+                                                                                  input_args,
+                                                                                  stages,
+                                                                                  args.n_cpus)
+                    resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
                                                                                       output_dir,
                                                                                       stages,
                                                                                       args.n_cpus)
@@ -399,12 +443,24 @@ if args.analysis_level == "participant":
 
             fsid = "sub-%s" % subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
-            cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
+            
+            if three_T == 'true':
+                cmd = "recon-all -subjid %s -sd %s -3T %s %s -openmp %d" % (fsid,
                                                                               output_dir,
                                                                               input_args,
                                                                               stages,
                                                                               args.n_cpus)
-            resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
+                resume_cmd = "recon-all -subjid %s -sd %s -3T %s -openmp %d" % (fsid,
+                                                                                  output_dir,
+                                                                                  stages,
+                                                                                  args.n_cpus)
+            else:
+                cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
+                                                                              output_dir,
+                                                                              input_args,
+                                                                              stages,
+                                                                              args.n_cpus)
+                resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
                                                                                   output_dir,
                                                                                   stages,
                                                                                   args.n_cpus)
