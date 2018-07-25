@@ -102,7 +102,14 @@ parser.add_argument('--bids_validator_config', help='JSON file specifying config
 parser.add_argument('--skip_bids_validator',
                     help='skips bids validation',
                     action='store_true')
+parser.add_argument('--3T',
+                    help='enables the two 3T specific options that recon-all supports: nu intensity correction params, and the special schwartz atlas',
+                    choices = ['true', 'false'],
+                    default = 'true')
 args = parser.parse_args()
+
+
+three_T = vars(args)['3T']
 
 if args.bids_validator_config:
     run("bids-validator --config {config} {bids_dir}".format(
@@ -119,6 +126,7 @@ if args.acquisition_label:
     acq_tpl = "*acq-%s*" % args.acquisition_label
 else:
     acq_tpl = "*"
+
 
 # if there are session folders, check if study is truly longitudinal by
 # searching for the first subject with more than one valid sessions
