@@ -41,7 +41,7 @@ This App has the following command line arguments:
                       [--measurements {area,volume,thickness,thicknessstd,meancurv,gauscurv,foldind,curvind}
                                       [{area,volume,thickness,thicknessstd,meancurv,gauscurv,foldind,curvind} ...]]
                       [-v] [--bids_validator_config BIDS_VALIDATOR_CONFIG]
-                      [--skip_bids_validator]
+                      [--skip_bids_validator] [--3T {true,false}]
                       bids_dir output_dir {participant,group1,group2}
 
         FreeSurfer recon-all + custom template generation.
@@ -127,6 +127,9 @@ This App has the following command line arguments:
                                 info
           --skip_bids_validator
                                 skips bids validation
+	  --3T {true,false}     enables the two 3T specific options that recon-all
+	  			supports: nu intensity correction params, and the 
+				special schwartz atlas
 
 #### Participant level
 To run it in participant level mode (for one participant):
