@@ -102,7 +102,14 @@ parser.add_argument('--bids_validator_config', help='JSON file specifying config
 parser.add_argument('--skip_bids_validator',
                     help='skips bids validation',
                     action='store_true')
+parser.add_argument('--3T',
+                    help='enables the two 3T specific options that recon-all supports: nu intensity correction params, and the special schwartz atlas',
+                    choices = ['true', 'false'],
+                    default = 'true')
 args = parser.parse_args()
+
+
+three_T = vars(args)['3T']
 
 if args.bids_validator_config:
     run("bids-validator --config {config} {bids_dir}".format(
@@ -119,6 +126,7 @@ if args.acquisition_label:
     acq_tpl = "*acq-%s*" % args.acquisition_label
 else:
     acq_tpl = "*"
+
 
 # if there are session folders, check if study is truly longitudinal by
 # searching for the first subject with more than one valid sessions
@@ -200,6 +208,10 @@ if args.analysis_level == "participant":
                                                 "anat",
                                                 "%s_T1w.nii*" % acq_tpl))
                         input_args = ""
+                        
+                        if three_T == 'true':
+                            input_args += " -3T"
+
                         for T1 in T1s:
                             if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
                                 input_args += " -hires"
@@ -224,6 +236,8 @@ if args.analysis_level == "participant":
 
                         fsid = "sub-%s_ses-%s" % (subject_label, session_label)
                         stages = " ".join(["-" + stage for stage in args.stages])
+
+                        
                         cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
                                                                                           output_dir,
                                                                                           input_args,
@@ -254,6 +268,7 @@ if args.analysis_level == "participant":
                     input_args = " ".join(["-tp %s" % tp for tp in timepoints])
                     fsid = "sub-%s" % subject_label
                     stages = " ".join(["-" + stage for stage in args.stages])
+
                     cmd = "recon-all -base %s -sd %s %s %s -openmp %d" % (fsid,
                                                                                     output_dir,
                                                                                     input_args,
@@ -280,6 +295,7 @@ if args.analysis_level == "participant":
                         # longitudinally process all timepoints
                         fsid = "sub-%s" % subject_label
                         stages = " ".join(["-" + stage for stage in args.stages])
+                        
                         cmd = "recon-all -long %s %s -sd %s %s -openmp %d" % (tp,
                                                                                         fsid,
                                                                                         output_dir,
@@ -305,6 +321,10 @@ if args.analysis_level == "participant":
                                         "anat",
                                         "%s_T1w.nii*" % acq_tpl))
                 input_args = ""
+
+                if three_T == 'true':
+                            input_args += " -3T"
+
                 for T1 in T1s:
                     if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
                         input_args += " -hires"
@@ -333,6 +353,7 @@ if args.analysis_level == "participant":
 
                 fsid = "sub-%s" % subject_label
                 stages = " ".join(["-" + stage for stage in args.stages])
+
                 cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
                                                                                   output_dir,
                                                                                   input_args,
@@ -369,7 +390,12 @@ if args.analysis_level == "participant":
             if not T1s:
                 print("No T1w nii files found for subject %s. Skipping subject." % subject_label)
                 continue
+
             input_args = ""
+            
+            if three_T == 'true':
+                            input_args += " -3T"
+
             for T1 in T1s:
                 if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
                     input_args += " -hires"
@@ -391,6 +417,7 @@ if args.analysis_level == "participant":
 
             fsid = "sub-%s" % subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
+            
             cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
                                                                               output_dir,
                                                                               input_args,
