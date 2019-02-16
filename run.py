@@ -94,7 +94,7 @@ parser.add_argument('--measurements', help='Group2 option: cortical measurements
                              "curvind"],
                     default=["thickness"],
                     nargs="+")
-
+parser.add_argument('--qcache', help="Enable qcache", action='store_true')
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App example version {}'.format(__version__))
 parser.add_argument('--bids_validator_config', help='JSON file specifying configuration of '
@@ -170,7 +170,8 @@ else:
 output_dir = os.path.abspath(args.output_dir)
 
 if os.path.exists(args.license_file):
-    env = {'FS_LICENSE': args.license_file}
+    absPathLic = os.path.abspath(args.license_file)
+    env = {'FS_LICENSE': absPathLic}
 else:
     raise Exception("Provided license file does not exist")
 
@@ -211,6 +212,9 @@ if args.analysis_level == "participant":
                         
                         if three_T == 'true':
                             input_args += " -3T"
+                        
+                        if args.qcache:
+                            input_args += ' -qcache'
 
                         for T1 in T1s:
                             if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
@@ -323,7 +327,10 @@ if args.analysis_level == "participant":
                 input_args = ""
 
                 if three_T == 'true':
-                            input_args += " -3T"
+                    input_args += " -3T"
+
+                if args.qcache:
+                    input_args += " -qcache"
 
                 for T1 in T1s:
                     if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
@@ -394,7 +401,10 @@ if args.analysis_level == "participant":
             input_args = ""
             
             if three_T == 'true':
-                            input_args += " -3T"
+                input_args += " -3T"
+
+            if args.qcache:
+                input_args += " -qcache"
 
             for T1 in T1s:
                 if (round(max(nibabel.load(T1).header.get_zooms()), 1) < 1.0 and args.hires_mode == "auto") or args.hires_mode == "enable":
