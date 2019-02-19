@@ -42,7 +42,7 @@ parser.add_argument('analysis_level', help='Level of the analysis that will be p
                     '(in parallel) using the same output_dir. '
                     '"group1" creates study specific group template. '
                     '"group2" exports group stats tables for cortical parcellation, subcortical segmentation '
-                                           'a table with euler numbers.',
+                                                               'a table with euler numbers.',
                     choices=['participant', 'group1', 'group2'])
 parser.add_argument('--participant_label', help='The label of the participant that should be analyzed. The label '
                     'corresponds to sub-<participant_label> from the BIDS spec '
@@ -215,10 +215,10 @@ if args.analysis_level == "participant":
                                                 "anat",
                                                 "%s_T1w.nii*" % acq_tpl))
                         input_args = ""
-                        
+
                         if three_T == 'true':
                             input_args += " -3T"
-                        
+
                         if args.qcache:
                             input_args += ' -qcache'
 
@@ -247,16 +247,16 @@ if args.analysis_level == "participant":
                         fsid = "sub-%s_ses-%s" % (subject_label, session_label)
                         stages = " ".join(["-" + stage for stage in args.stages])
 
-                        
+
                         cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
-                                                                                          output_dir,
-                                                                                          input_args,
-                                                                                          stages,
-                                                                                          args.n_cpus)
+                                                                                output_dir,
+                                                                                input_args,
+                                                                                stages,
+                                                                                args.n_cpus)
                         resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
-                                                                                              output_dir,
-                                                                                              stages,
-                                                                                              args.n_cpus)
+                                                                                    output_dir,
+                                                                                    stages,
+                                                                                    args.n_cpus)
 
                         if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                             rmtree(os.path.join(output_dir, fsid))
@@ -280,10 +280,10 @@ if args.analysis_level == "participant":
                     stages = " ".join(["-" + stage for stage in args.stages])
 
                     cmd = "recon-all -base %s -sd %s %s %s -openmp %d" % (fsid,
-                                                                                    output_dir,
-                                                                                    input_args,
-                                                                                    stages,
-                                                                                    args.n_cpus)
+                                                                          output_dir,
+                                                                          input_args,
+                                                                          stages,
+                                                                          args.n_cpus)
 
                     if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                         rmtree(os.path.join(output_dir, fsid))
@@ -305,12 +305,12 @@ if args.analysis_level == "participant":
                         # longitudinally process all timepoints
                         fsid = "sub-%s" % subject_label
                         stages = " ".join(["-" + stage for stage in args.stages])
-                        
+
                         cmd = "recon-all -long %s %s -sd %s %s -openmp %d" % (tp,
-                                                                                        fsid,
-                                                                                        output_dir,
-                                                                                        stages,
-                                                                                        args.n_cpus)
+                                                                              fsid,
+                                                                              output_dir,
+                                                                              stages,
+                                                                              args.n_cpus)
 
                         if os.path.isfile(os.path.join(output_dir, tp + ".long." + fsid, "scripts/IsRunning.lh+rh")):
                             rmtree(os.path.join(output_dir, tp + ".long." + fsid))
@@ -368,14 +368,14 @@ if args.analysis_level == "participant":
                 stages = " ".join(["-" + stage for stage in args.stages])
 
                 cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
-                                                                                  output_dir,
-                                                                                  input_args,
-                                                                                  stages,
-                                                                                  args.n_cpus)
+                                                                        output_dir,
+                                                                        input_args,
+                                                                        stages,
+                                                                        args.n_cpus)
                 resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
-                                                                                      output_dir,
-                                                                                      stages,
-                                                                                      args.n_cpus)
+                                                                            output_dir,
+                                                                            stages,
+                                                                            args.n_cpus)
 
                 if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                     rmtree(os.path.join(output_dir, fsid))
@@ -405,7 +405,7 @@ if args.analysis_level == "participant":
                 continue
 
             input_args = ""
-            
+
             if three_T == 'true':
                 input_args += " -3T"
 
@@ -433,16 +433,16 @@ if args.analysis_level == "participant":
 
             fsid = "sub-%s" % subject_label
             stages = " ".join(["-" + stage for stage in args.stages])
-            
+
             cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
-                                                                              output_dir,
-                                                                              input_args,
-                                                                              stages,
-                                                                              args.n_cpus)
+                                                                    output_dir,
+                                                                    input_args,
+                                                                    stages,
+                                                                    args.n_cpus)
             resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
-                                                                                  output_dir,
-                                                                                  stages,
-                                                                                  args.n_cpus)
+                                                                        output_dir,
+                                                                        stages,
+                                                                        args.n_cpus)
 
             if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
                 rmtree(os.path.join(output_dir, fsid))
