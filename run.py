@@ -10,6 +10,7 @@ import subprocess
 from warnings import warn
 import pandas as pd
 import re
+import errno
 
 def run(command, env={}, ignore_errors=False):
     merged_env = os.environ
@@ -177,9 +178,14 @@ else:
 
 # running participant level
 if args.analysis_level == "participant":
-    if not os.path.exists(os.path.join(output_dir, "fsaverage")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage") + " " + os.path.join(output_dir, "fsaverage"),
-            ignore_errors=True)
+    try:
+        os.symlink(os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage"),os.path.join(output_dir, "fsaverage"))
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            print("fsaverage sympolic link already exists")
+        else:
+            print("fsaverage symbolic link unable to be created because, {0}".format(str(e)))
+            raise e
     if not os.path.exists(os.path.join(output_dir, "lh.EC_average")):
         run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average") + " " + os.path.join(output_dir, "lh.EC_average"),
             ignore_errors=True)
