@@ -178,20 +178,16 @@ else:
 
 # running participant level
 if args.analysis_level == "participant":
-    try:
-        os.symlink(os.path.join(os.environ["SUBJECTS_DIR"], "fsaverage"),os.path.join(output_dir, "fsaverage"))
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            print("fsaverage sympolic link already exists")
-        else:
-            print("fsaverage symbolic link unable to be created because, {0}".format(str(e)))
-            raise e
-    if not os.path.exists(os.path.join(output_dir, "lh.EC_average")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "lh.EC_average") + " " + os.path.join(output_dir, "lh.EC_average"),
-            ignore_errors=True)
-    if not os.path.exists(os.path.join(output_dir, "rh.EC_average")):
-        run("cp -rf " + os.path.join(os.environ["SUBJECTS_DIR"], "rh.EC_average") + " " + os.path.join(output_dir, "rh.EC_average"),
-            ignore_errors=True)
+    fst_links_to_make = ["fsaverage", "lh.EC_average","rh.EC_average"]
+    for fst in fst_links_to_make:
+        try:
+            os.symlink(os.path.join(os.environ["SUBJECTS_DIR"], fst),os.path.join(output_dir, fst))
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                print("Symbolic link to {0} already exists".format(fst))
+            else:
+                print("ERROR: Symbolic link to {0} unable to be created because: {1}".format(fst,str(e)))
+                raise e
 
     for subject_label in subjects_to_analyze:
         if glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "ses-*")):
