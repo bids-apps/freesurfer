@@ -238,10 +238,10 @@ if args.analysis_level == "participant":
 
                         T2s = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                 "ses-%s" % session_label, "anat",
-                                                "%s_%s_T2w.nii*" % (acq_tp2, rec_tp2)))
+                                                "%s_%s_T2w.nii*" % (acq_t2, rec_t2)))
                         FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                    "ses-%s" % session_label, "anat",
-                                                   "%s_%s_FLAIR.nii*" % (acq_tp2, rec_tp2)))
+                                                   "%s_%s_FLAIR.nii*" % (acq_t2, rec_t2)))
                         if args.refine_pial == "T2":
                             for T2 in T2s:
                                 if (max(nibabel.load(T2).header.get_zooms()) < 1.2) | args.allow_lowresT2:
@@ -356,12 +356,12 @@ if args.analysis_level == "participant":
                                         "sub-%s" % subject_label,
                                         "ses-*",
                                         "anat",
-                                        "%s_%s_T2w.nii*" % (acq_tp2, rec_tp2)))
+                                        "%s_%s_T2w.nii*" % (acq_t2, rec_t2)))
                 FLAIRs = glob(os.path.join(args.bids_dir,
                                            "sub-%s" % subject_label,
                                            "ses-*",
                                            "anat",
-                                           "%s_%s_FLAIR.nii*" % (acq_tp2, rec_tp2)))
+                                           "%s_%s_FLAIR.nii*" % (acq_t2, rec_t2)))
                 if args.refine_pial == "T2":
                     for T2 in T2s:
                         if (max(nibabel.load(T2).header.get_zooms()) < 1.2) | args.allow_lowresT2:
@@ -426,9 +426,9 @@ if args.analysis_level == "participant":
                     input_args += " -hires"
                 input_args += " -i %s" % T1
             T2s = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "anat",
-                                    "%s_%s_T2w.nii*" % (acq_tp2, rec_tp2)))
+                                    "%s_%s_T2w.nii*" % (acq_t2, rec_t2)))
             FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "anat",
-                                       "%s_%s_FLAIR.nii*" % (acq_tp2, rec_tp2)))
+                                       "%s_%s_FLAIR.nii*" % (acq_t2, rec_t2)))
             if args.refine_pial == "T2":
                 for T2 in T2s:
                     if max(nibabel.load(T2).header.get_zooms()) < 1.2:
