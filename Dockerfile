@@ -1,4 +1,4 @@
-FROM ubuntu:trusty
+FROM ubuntu:xenial
 
 RUN apt-get update \
     && apt-get install -y wget
@@ -19,7 +19,8 @@ RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/frees
 
 RUN apt-get install -y python3
 RUN apt-get install -y python3-pip
-RUN pip3 install nibabel pandas
+RUN apt-get install -y python3-pandas
+RUN pip3 install nibabel pandas==0.21.0
 RUN apt-get install -y python2.7
 RUN apt-get install -y python-pip
 
