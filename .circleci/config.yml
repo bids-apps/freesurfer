@@ -1,10 +1,13 @@
 version: 2.1
 jobs:
   build:
-    docker:
-      - image: docker:18.01.0-ce-git
+    machine:
+      image: circleci/classic:latest
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - my_cache
       - run:
           name: Old dependencies override code
           command: |
