@@ -22,7 +22,7 @@ jobs:
             echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
           timeout: 21600
       - save_cache:
-          key: dependency-cache
+          key: my_cache
           paths:
             - ~/docker
             - ~/data
@@ -32,7 +32,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: dependency-cache
+         key: my_cache
       - run: 
           name: print version
           command: |
