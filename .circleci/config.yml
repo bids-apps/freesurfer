@@ -36,27 +36,27 @@ jobs:
       - run: 
           name: print version
           command: |
-            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME,,} --version
-            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME,,} -h
+            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME} --version
+            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME} -h
       - run: 
           name: test 1
           command: |
-            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs1:/outputs bids/${CIRCLE_PROJECT_REPONAME,,} /bids_dataset /outputs participant --participant_label 01 --license_file=/license.txt --stages autorecon1 && cat ${HOME}/outputs1/sub-01/scripts/recon-all.done :
+            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/outputs1:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs participant --participant_label 01 --license_file=/license.txt --stages autorecon1 && cat ${HOME}/outputs1/sub-01/scripts/recon-all.done :
           no_output_timeout: 6h
       - run: 
           name: test 2
           command: |
-            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test2:/bids_dataset -v ${HOME}/outputs2:/outputs bids/${CIRCLE_PROJECT_REPONAME,,} /bids_dataset /outputs participant --participant_label 01 --steps cross-sectional --session_label test --license_file=/license.txt --stages autorecon1 && cat ${HOME}/outputs2/sub-01_ses-test/scripts/recon-all.done :
+            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test2:/bids_dataset -v ${HOME}/outputs2:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs participant --participant_label 01 --steps cross-sectional --session_label test --license_file=/license.txt --stages autorecon1 && cat ${HOME}/outputs2/sub-01_ses-test/scripts/recon-all.done :
           no_output_timeout: 6h
       - run:
           name: group2 test 1
           command: |
-            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0:/outputs bids/${CIRCLE_PROJECT_REPONAME,,} /bids_dataset /outputs group2 --license_file=/license.txt  && mkdir -p ${HOME}/outputs1/ && sudo mv ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs1/ && cat ${HOME}/outputs1/00_group2_stats_tables/lh.aparc.thickness.tsv && cat ${HOME}/outputs1/00_group2_stats_tables/euler.tsv:
+            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset -v ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs group2 --license_file=/license.txt  && mkdir -p ${HOME}/outputs1/ && sudo mv ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs1/ && cat ${HOME}/outputs1/00_group2_stats_tables/lh.aparc.thickness.tsv && cat ${HOME}/outputs1/00_group2_stats_tables/euler.tsv:
           no_output_timeout: 6h
       - run:
           name: group2 test 2
           command: |
-            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test2:/bids_dataset -v ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0:/outputs bids/${CIRCLE_PROJECT_REPONAME,,} /bids_dataset /outputs group2 --license_file=/license.txt  && mkdir -p ${HOME}/outputs2/ && sudo mv ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs2/ && cat ${HOME}/outputs2/00_group2_stats_tables/lh.aparc.thickness.tsv && cat ${HOME}/outputs2/00_group2_stats_tables/euler.tsv:
+            docker run -ti --rm --read-only -v $PWD/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test2:/bids_dataset -v ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0:/outputs bids/${CIRCLE_PROJECT_REPONAME} /bids_dataset /outputs group2 --license_file=/license.txt  && mkdir -p ${HOME}/outputs2/ && sudo mv ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs2/ && cat ${HOME}/outputs2/00_group2_stats_tables/lh.aparc.thickness.tsv && cat ${HOME}/outputs2/00_group2_stats_tables/euler.tsv:
           no_output_timeout: 6h
       - store_artifacts:
           path: ~/outputs1
