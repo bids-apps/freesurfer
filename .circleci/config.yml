@@ -34,10 +34,13 @@ jobs:
       - checkout
       - restore_cache:
          key: my_cache
+      - run:
+          name: load image
+          command: docker load -i ~/docker/image.tar
       - run: 
           name: print version
           command: |
-            docker run -ti --rm --read-only -v ~/license/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME} --version
+            docker run -ti --rm --read-only -v ~/license/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v $PWD/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME} --version
             docker run -ti --rm --read-only -v ~/license/license.txt:/license.txt -v /tmp:/tmp -v /var/tmp:/var/tmp -v ${HOME}/data/ds114_test1:/bids_dataset bids/${CIRCLE_PROJECT_REPONAME} -h
       - run: 
           name: test 1
