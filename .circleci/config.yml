@@ -27,8 +27,8 @@ jobs:
             - ~/docker
             - ~/data
   test:
-    docker:
-      - image: docker:18.01.0-ce-git
+    machine:
+      image: circleci/classic:latest
     steps:
       - checkout
       - restore_cache:
@@ -65,8 +65,8 @@ jobs:
 
 
   deploy:
-    docker:
-    - image: docker:18.01.0-ce-git 
+    machine:
+      image: circleci/classic:latest
     steps:
       - deploy:
           command: |
