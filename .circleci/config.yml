@@ -19,7 +19,7 @@ jobs:
             git describe --tags > version
             docker build -t bids/${CIRCLE_PROJECT_REPONAME} .
             mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}" > ~/docker/image.tar
-            echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
+            echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbQozNzA2MwogKkNZa2VoUGFDb0Q5TQogRlM2N1BTWmRFV2lqbwoiID4gbGljZW5zZS50eHQ=" | base64 -d | sh
           no_output_timeout: 6h
       - save_cache:
           key: my_cache
