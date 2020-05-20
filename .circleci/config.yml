@@ -22,7 +22,7 @@ jobs:
             mkdir -p ~/license; echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
           no_output_timeout: 6h
       - save_cache:
-          key: my_cache
+          key: v_0-my_cache
           paths:
             - ~/docker
             - ~/data
@@ -33,7 +33,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: my_cache
+         key: v_0-my_cache
       - run:
           name: load image
           command: docker load -i ~/docker/image.tar
