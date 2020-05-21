@@ -7,7 +7,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - my_cache
+            - test_data
       - run:
           name: Old dependencies override code
           command: |
@@ -22,18 +22,22 @@ jobs:
             mkdir -p ~/license; echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
           no_output_timeout: 6h
       - save_cache:
-          key: v_0-my_cache
+          key: test_data
+          paths:
+            - ~/data
+      - save_cache:
+          key: v_0-image_cache
           paths:
             - ~/docker
-            - ~/data
             - ~/license
   test:
     machine:
       image: circleci/classic:latest
     steps:
-      - checkout
       - restore_cache:
-         key: v_0-my_cache
+         key: v_0-image_cache
+      - restore_cache:
+         key: test_data
       - run:
           name: load image
           command: docker load -i ~/docker/image.tar
