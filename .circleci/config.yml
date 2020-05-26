@@ -19,10 +19,6 @@ jobs:
             mkdir -p ~/license; echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
           no_output_timeout: 6h
       - save_cache:
-          key: test_data
-          paths:
-            - ~/data
-      - save_cache:
           key: v_0-image_cache-{{ checksum "Dockerfile" }}
           paths:
             - ~/docker
@@ -31,6 +27,7 @@ jobs:
     machine:
       image: circleci/classic:latest
     steps:
+      - checkout
       - restore_cache:
          key: v_0-image_cache-{{ checksum "Dockerfile" }}
       - restore_cache:
