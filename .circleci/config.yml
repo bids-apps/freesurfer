@@ -6,16 +6,13 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys:
-            - test_data
+         keys: 
+          - v_0-image_cache-{{ checksum "Dockerfile" }}
+          - v_0-image_cache-
       - run:
-          name: Old dependencies override code
+          name: load and build
           command: |
             if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
-            if [[ ! -d ~/data/ds114_test1 ]]; then wget -c -O ${HOME}/ds114_test1.tar "https://files.osf.io/v1/resources/9q7dv/providers/osfstorage/57e54a326c613b01d7d3ed90" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test1.tar -C ${HOME}/data; fi
-            if [[ ! -d ~/data/ds114_test2 ]]; then wget -c -O ${HOME}/ds114_test2.tar "https://files.osf.io/v1/resources/9q7dv/providers/osfstorage/57e549f9b83f6901d457d162" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test2.tar -C ${HOME}/data; fi
-            if [[ ! -d ~/data/ds114_test1_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test1_freesurfer_precomp_v6.0.0.tar "https://osf.io/j6zk2/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test1_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
-            if [[ ! -d ~/data/ds114_test2_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar "https://osf.io/yhzzj/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
             git describe --tags > version
             docker build -t bids/${CIRCLE_PROJECT_REPONAME} .
             mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}" > ~/docker/image.tar
@@ -26,7 +23,7 @@ jobs:
           paths:
             - ~/data
       - save_cache:
-          key: v_0-image_cache
+          key: v_0-image_cache-{{ checksum "Dockerfile" }}
           paths:
             - ~/docker
             - ~/license
@@ -35,9 +32,16 @@ jobs:
       image: circleci/classic:latest
     steps:
       - restore_cache:
-         key: v_0-image_cache
+         key: v_0-image_cache-{{ checksum "Dockerfile" }}
       - restore_cache:
          key: test_data
+      - run:
+          name: get data
+          command:    |
+            if [[ ! -d ~/data/ds114_test1 ]]; then wget -c -O ${HOME}/ds114_test1.tar "https://files.osf.io/v1/resources/9q7dv/providers/osfstorage/57e54a326c613b01d7d3ed90" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test1.tar -C ${HOME}/data; fi
+            if [[ ! -d ~/data/ds114_test2 ]]; then wget -c -O ${HOME}/ds114_test2.tar "https://files.osf.io/v1/resources/9q7dv/providers/osfstorage/57e549f9b83f6901d457d162" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test2.tar -C ${HOME}/data; fi
+            if [[ ! -d ~/data/ds114_test1_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test1_freesurfer_precomp_v6.0.0.tar "https://osf.io/j6zk2/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test1_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
+            if [[ ! -d ~/data/ds114_test2_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar "https://osf.io/yhzzj/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
       - run:
           name: load image
           command: docker load -i ~/docker/image.tar
