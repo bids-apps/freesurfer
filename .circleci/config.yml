@@ -8,7 +8,6 @@ jobs:
       - restore_cache:
          keys: 
           - v_0-image_cache-{{ checksum "Dockerfile" }}
-          - v_0-image_cache-
       - run:
           name: load and build
           command: |
@@ -39,6 +38,8 @@ jobs:
             if [[ ! -d ~/data/ds114_test2 ]]; then wget -c -O ${HOME}/ds114_test2.tar "https://files.osf.io/v1/resources/9q7dv/providers/osfstorage/57e549f9b83f6901d457d162" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test2.tar -C ${HOME}/data; fi
             if [[ ! -d ~/data/ds114_test1_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test1_freesurfer_precomp_v6.0.0.tar "https://osf.io/j6zk2/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test1_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
             if [[ ! -d ~/data/ds114_test2_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar "https://osf.io/yhzzj/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
+      - save_cache:
+         key: test_data
       - run:
           name: load image
           command: docker load -i ~/docker/image.tar
