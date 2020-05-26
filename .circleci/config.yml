@@ -40,6 +40,8 @@ jobs:
             if [[ ! -d ~/data/ds114_test2_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar "https://osf.io/yhzzj/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
       - save_cache:
          key: test_data
+         paths:
+          - ~/data
       - run:
           name: load image
           command: docker load -i ~/docker/image.tar
