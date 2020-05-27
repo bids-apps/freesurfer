@@ -90,10 +90,20 @@ workflows:
   version: 2.1
   build_test_deploy:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
       - test:
           requires:
             - build
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
       - deploy:
           requires:
             - build
