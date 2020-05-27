@@ -18,7 +18,7 @@ jobs:
             mkdir -p ~/license; echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
           no_output_timeout: 6h
       - save_cache:
-          key: v_0-image_cache-{{ checksum "Dockerfile" }}
+          key: v_0-image_cache-{{ checksum "Dockerfile" }}-{{ .Revision }}-{{ epoch }}
           paths:
             - ~/docker
             - ~/license
@@ -28,9 +28,9 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: v_0-image_cache-{{ checksum "Dockerfile" }}
+         key: v_0-image_cache-{{ checksum "Dockerfile" }}-{{ .Revision }}-{{ epoch }}
       - restore_cache:
-         key: test_data
+         key: v_0-test_data
       - run:
           name: get data
           command:    |
@@ -39,7 +39,7 @@ jobs:
             if [[ ! -d ~/data/ds114_test1_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test1_freesurfer_precomp_v6.0.0.tar "https://osf.io/j6zk2/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test1_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
             if [[ ! -d ~/data/ds114_test2_freesurfer_precomp_v6.0.0 ]]; then wget -c --no-check-certificate -O ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar "https://osf.io/yhzzj/?action=download&version=1" && mkdir -p ${HOME}/data && tar xf ${HOME}/ds114_test2_freesurfer_precomp_v6.0.0.tar -C ${HOME}/data; fi
       - save_cache:
-         key: test_data
+         key: v_0-test_data
          paths:
           - ~/data
       - run:
@@ -80,6 +80,12 @@ jobs:
     machine:
       image: circleci/classic:latest
     steps:
+      - checkout
+      - restore_cache:
+         key: v_0-image_cache-{{ checksum "Dockerfile" }}-{{ .Revision }}-{{ epoch }}
+      - run:
+          name: load image
+          command: docker load -i ~/docker/image.tar
       - deploy:
           command: |
             if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push bids/${CIRCLE_PROJECT_REPONAME}:latest; fi 
