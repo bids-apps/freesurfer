@@ -28,7 +28,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: v_0-image_cache-{{ checksum "Dockerfile" }}-{{ .Revision }}-{{ epoch }}
+         key: v_0-image_cache-{{ checksum "Dockerfile" }}-{{ .Revision }}
       - restore_cache:
          key: v_0-test_data
       - run:
@@ -82,7 +82,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: v_0-image_cache-{{ checksum "Dockerfile" }}-{{ .Revision }}-{{ epoch }}
+         key: v_0-image_cache-{{ checksum "Dockerfile" }}-{{ .Revision }}
       - run:
           name: load image
           command: docker load -i ~/docker/image.tar
