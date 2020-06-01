@@ -56,13 +56,14 @@ docker run --rm ${image} generate docker \
   --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ \
         FSLMULTIFILEQUIT=TRUE POSSUMDIR=/usr/share/fsl/5.0 LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
         FSLTCLSH=/usr/bin/tclsh FSLWISH=/usr/bin/wish FSLOUTPUTTYPE=NIFTI_GZ \
-  --env OS=Linux FS_OVERRIDE=0 FIX_VERTEX_AREA="" SUBJECTS_DIR=/opt/freesurfer/subjects \
+  --run-bash 'PATH=/usr/lib/fsl/5.0:$PATH' \
+  --env OS=Linux FS_OVERRIDE=0 FIX_VERTEX_AREA= SUBJECTS_DIR=/opt/freesurfer/subjects \
         FSF_OUTPUT_FORMAT=nii.gz MNI_DIR=/opt/freesurfer/mni LOCAL_DIR=/opt/freesurfer/local \
         FREESURFER_HOME=/opt/freesurfer FSFAST_HOME=/opt/freesurfer/fsfast MINC_BIN_DIR=/opt/freesurfer/mni/bin \
         MINC_LIB_DIR=/opt/freesurfer/mni/lib MNI_DATAPATH=/opt/freesurfer/mni/data \
-        FMRI_ANALYSIS_DIR=/opt/freesurfer/fsfast PERL5LIB=/opt/freesurfer/mni/lib/perl5/5.8.5 \
-        MNI_PERL5LIB=/opt/freesurfer/mni/lib/perl5/5.8.5 \
-        PATH=/usr/lib/fsl/5.0:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+        FMRI_ANALYSIS_DIR=/opt/freesurfer/fsfast PERL5LIB=/opt/freesurfer/mni/share/perl5 \
+        MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
+        PATH=/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
         PYTHONPATH="" \
   --run 'mkdir /scratch' \
   --run 'mkdir /local-scratch' \
@@ -85,15 +86,16 @@ docker run --rm ${image} generate singularity \
   --run-bash 'curl -sL https://deb.nodesource.com/setup_6.x | bash -' \
   --install nodejs \
   --run-bash 'npm install -g bids-validator@0.19.8' \
-  --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ PATH=/usr/lib/fsl/5.0:$PATH \
+  --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ \
         FSLMULTIFILEQUIT=TRUE POSSUMDIR=/usr/share/fsl/5.0 LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
         FSLTCLSH=/usr/bin/tclsh FSLWISH=/usr/bin/wish FSLOUTPUTTYPE=NIFTI_GZ \
-  --env OS=Linux FS_OVERRIDE=0 FIX_VERTEX_AREA="" SUBJECTS_DIR=/opt/freesurfer/subjects \
+  --run-bash 'PATH=/usr/lib/fsl/5.0:$PATH' \
+  --env OS=Linux FS_OVERRIDE=0 FIX_VERTEX_AREA= SUBJECTS_DIR=/opt/freesurfer/subjects \
         FSF_OUTPUT_FORMAT=nii.gz MNI_DIR=/opt/freesurfer/mni LOCAL_DIR=/opt/freesurfer/local \
         FREESURFER_HOME=/opt/freesurfer FSFAST_HOME=/opt/freesurfer/fsfast MINC_BIN_DIR=/opt/freesurfer/mni/bin \
         MINC_LIB_DIR=/opt/freesurfer/mni/lib MNI_DATAPATH=/opt/freesurfer/mni/data \
-        FMRI_ANALYSIS_DIR=/opt/freesurfer/fsfast PERL5LIB=/opt/freesurfer/mni/lib/perl5/5.8.5 \
-        MNI_PERL5LIB=/opt/freesurfer/mni/lib/perl5/5.8.5 \
+        FMRI_ANALYSIS_DIR=/opt/freesurfer/fsfast PERL5LIB=/opt/freesurfer/mni/share/perl5 \
+        MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
         PATH=/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
         PYTHONPATH="" \
   --run 'mkdir /scratch' \
