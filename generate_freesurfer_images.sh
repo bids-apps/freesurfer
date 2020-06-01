@@ -65,6 +65,7 @@ docker run --rm ${image} generate docker \
         MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
         PATH=/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
         PYTHONPATH="" \
+  --run 'mkdir root/matlab && touch root/matlab/startup.m' \
   --run 'mkdir /scratch' \
   --run 'mkdir /local-scratch' \
   --copy run.py '/run.py' \
@@ -98,6 +99,7 @@ docker run --rm ${image} generate singularity \
         MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
         PATH=/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
         PYTHONPATH="" \
+  --run 'mkdir root/matlab && touch root/matlab/startup.m' \
   --run 'mkdir /scratch' \
   --run 'mkdir /local-scratch' \
   --copy run.py '/run.py' \
