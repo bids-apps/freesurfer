@@ -48,7 +48,7 @@ docker run --rm ${image} generate docker \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
     python3 python3-pip python3-pandas python2.7 python-pip \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
-  --freesurfer version=6.0.0-min install_path=/opt/freesurfer \
+  --freesurfer version=6.0.1 install_path=/opt/freesurfer \
   --run-bash 'pip3 install nibabel pandas==0.21.0' \
   --run-bash 'curl -sL https://deb.nodesource.com/setup_6.x | bash -' \
   --install nodejs \
@@ -82,7 +82,7 @@ docker run --rm ${image} generate singularity \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
     python3 python3-pip python3-pandas python2.7 python-pip \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
-  --freesurfer version=6.0.0-min install_path=/opt/freesurfer \
+  --freesurfer version=6.0.1 install_path=/opt/freesurfer \
   --run-bash 'pip3 install nibabel pandas==0.21.0' \
   --run-bash 'curl -sL https://deb.nodesource.com/setup_6.x | bash -' \
   --install nodejs \
