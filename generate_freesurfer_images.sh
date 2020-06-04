@@ -46,7 +46,7 @@ docker run --rm ${image} generate docker \
   --base ubuntu:xenial \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
-    python3 python3-pip python3-pandas python2.7 python-pip \
+    python3 python3-pip python3-pandas python-pip \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
   --freesurfer version=6.0.1 install_path=/opt/freesurfer \
   --run-bash 'pip3 install nibabel pandas==0.21.0' \
@@ -80,7 +80,7 @@ docker run --rm ${image} generate singularity \
   --base ubuntu:xenial \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
-    python3 python3-pip python3-pandas python2.7 python-pip \
+    python3 python3-pip python3-pandas python-pip \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
   --freesurfer version=6.0.1 install_path=/opt/freesurfer \
   --run-bash 'pip3 install nibabel pandas==0.21.0' \
