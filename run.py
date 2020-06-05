@@ -69,7 +69,7 @@ parser.add_argument('--steps', help='Longitudinal pipeline steps to run.',
 parser.add_argument('--template_name', help='Name for the custom group level template generated for this dataset',
                     default="average")
 parser.add_argument('--license_file', help='Path to FreeSurfer license key file. To obtain it you need to register (for free) at https://surfer.nmr.mgh.harvard.edu/registration.html',
-                    required=True, type=str)
+                    type=str, default='/license.txt')
 parser.add_argument('--acquisition_label', help='If the dataset contains multiple T1 weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
 parser.add_argument('--refine_pial_acquisition_label', help='If the dataset contains multiple T2 or FLAIR weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
 parser.add_argument('--multiple_sessions', help='For datasets with multiday sessions where you do not want to '
