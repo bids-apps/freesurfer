@@ -46,10 +46,9 @@ docker run --rm ${image} generate docker \
   --base ubuntu:xenial \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
-    python3 python3-pip python3-pandas python-pip python3-setuptools \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
   --freesurfer version=6.0.1 install_path=/opt/freesurfer \
-  --run-bash 'pip3 install nibabel pandas==0.21.0' \
+  --miniconda use_env=base conda_install="python=3 pip pandas setuptools pandas=0.21.0" pip_install="nibabel" \
   --run-bash 'curl -sL https://deb.nodesource.com/setup_6.x | bash -' \
   --install nodejs \
   --run-bash 'npm install -g bids-validator@0.19.8' \
@@ -80,10 +79,9 @@ docker run --rm ${image} generate singularity \
   --base ubuntu:xenial \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
-    python3 python3-pip python3-pandas python-pip python3-setuptools \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
   --freesurfer version=6.0.1 install_path=/opt/freesurfer \
-  --run-bash 'pip3 install nibabel pandas==0.21.0' \
+  --miniconda use_env=base conda_install="python=3 pip pandas setuptools pandas=0.21.0" pip_install="nibabel" \
   --run-bash 'curl -sL https://deb.nodesource.com/setup_6.x | bash -' \
   --install nodejs \
   --run-bash 'npm install -g bids-validator@0.19.8' \
