@@ -127,15 +127,25 @@ else:
 
 subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
 
-if args.acquisition_label:
-    acq_tpl = "*acq-%s*" % args.acquisition_label
+#Got to combine acq_tpl and rec_tpl
+if args.acquisition_label and not args.reconstruction_label:
+    ar_tpl = "*acq-%s*" % args.acquisition_label
+elif args.reconstruction_label and not args.acquisition_label:
+    ar_tpl = "*rec-%s*" % args.reconstruction_label
+elif args.reconstruction_label and args.acquisition_label:
+    ar_tpl = "*acq-%s*_rec-%s*" % (args.acquisition_label, args.reconstruction_label)
 else:
-    acq_tpl = "*"
+    ar_tpl = "*"
 
-if args.reconstruction_label:
-    rec_tpl = "*rec-%s*" % args.reconstruction_label
+#Got to combine acq_tpl and rec_tpl
+if args.refine_pial_acquisition_label and not args.refine_pial_reconstruction_label:
+    ar_t2 = "*acq-%s*" % args.refine_pial_acquisition_label
+elif args.refine_pial_reconstruction_label and not args.refine_pial_acquisition_label:
+    ar_t2 = "*rec-%s*" % args.refine_pial_reconstruction_label
+elif args.refine_pial_reconstruction_label and args.refine_pial_acquisition_label:
+    ar_t2 = "*acq-%s*_rec-%s*" % (args.refine_pial_acquisition_label, args.refine_pial_reconstruction_label)
 else:
-    rec_tpl = "*"
+    ar_t2 = "*"
 
 # if there are session folders, check if study is truly longitudinal by
 # searching for the first subject with more than one valid sessions
@@ -150,7 +160,7 @@ if glob(os.path.join(args.bids_dir, "sub-*", "ses-*")):
             if glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                 "ses-%s" % session_label,
                                                 "anat",
-                                                "%s_T1w.nii*" % acq_tpl)):
+                                                "%s_T1w.nii*" % ar_tpl)):
                 n_valid_sessions += 1
         if n_valid_sessions > 1:
             multi_session_study = True
@@ -161,15 +171,6 @@ if multi_session_study and (args.multiple_sessions == "longitudinal"):
 else:
     longitudinal_study = False
 
-if args.refine_pial_acquisition_label:
-    acq_t2 = "*acq-%s*" % args.refine_pial_acquisition_label
-else:
-    acq_t2 = "*"
-
-if args.refine_pial_reconstruction_label:
-    rec_t2 = "*rec-%s*" % args.refine_pial_reconstruction_label
-else:
-    rec_t2 = "*"
 
 subjects_to_analyze = []
 # only for a subset of subjects
@@ -208,7 +209,7 @@ if args.analysis_level == "participant":
                                     "sub-%s" % subject_label,
                                     "ses-*",
                                     "anat",
-                                    "%s_%s_T1w.nii*" % (acq_tpl, rec_tpl)))
+                                    "%s_T1w.nii*" % (ar_tpl)))
             sessions = set([os.path.normpath(t1).split(os.sep)[-3].split("-")[-1] for t1 in T1s])
             if args.session_label:
                 sessions = sessions.intersection(args.session_label)
@@ -222,7 +223,7 @@ if args.analysis_level == "participant":
                                                 "sub-%s" % subject_label,
                                                 "ses-%s" % session_label,
                                                 "anat",
-                                                "%s_%s_T1w.nii*" % (acq_tpl, rec_tpl)))
+                                                "%s_T1w.nii*" % (ar_tpl)))
                         input_args = ""
 
                         if three_T == 'true':
@@ -238,10 +239,10 @@ if args.analysis_level == "participant":
 
                         T2s = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                 "ses-%s" % session_label, "anat",
-                                                "%s_%s_T2w.nii*" % (acq_t2, rec_t2)))
+                                                "%s_T2w.nii*" % (ar_t2)))
                         FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                    "ses-%s" % session_label, "anat",
-                                                   "%s_%s_FLAIR.nii*" % (acq_t2, rec_t2)))
+                                                   "%s_FLAIR.nii*" % (ar_t2)))
                         if args.refine_pial == "T2":
                             for T2 in T2s:
                                 if (max(nibabel.load(T2).header.get_zooms()) < 1.2) | args.allow_lowresT2:
@@ -338,7 +339,7 @@ if args.analysis_level == "participant":
                                         "sub-%s" % subject_label,
                                         "ses-*",
                                         "anat",
-                                        "%s_%s_T1w.nii*" % (acq_tpl, rec_tpl)))
+                                        "%s_T1w.nii*" % (ar_tpl)))
                 input_args = ""
 
                 if three_T == 'true':
@@ -356,12 +357,12 @@ if args.analysis_level == "participant":
                                         "sub-%s" % subject_label,
                                         "ses-*",
                                         "anat",
-                                        "%s_%s_T2w.nii*" % (acq_t2, rec_t2)))
+                                        "%s_T2w.nii*" % (ar_t2)))
                 FLAIRs = glob(os.path.join(args.bids_dir,
                                            "sub-%s" % subject_label,
                                            "ses-*",
                                            "anat",
-                                           "%s_%s_FLAIR.nii*" % (acq_t2, rec_t2)))
+                                           "%s_FLAIR.nii*" % (ar_t2)))
                 if args.refine_pial == "T2":
                     for T2 in T2s:
                         if (max(nibabel.load(T2).header.get_zooms()) < 1.2) | args.allow_lowresT2:
@@ -408,7 +409,7 @@ if args.analysis_level == "participant":
             T1s = glob(os.path.join(args.bids_dir,
                                     "sub-%s" % subject_label,
                                     "anat",
-                                    "%s_%s_T1w.nii*" % (acq_tpl, rec_tpl)))
+                                    "%s_T1w.nii*" % (ar_tpl)))
             if not T1s:
                 print("No T1w nii files found for subject %s. Skipping subject." % subject_label)
                 continue
@@ -426,9 +427,9 @@ if args.analysis_level == "participant":
                     input_args += " -hires"
                 input_args += " -i %s" % T1
             T2s = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "anat",
-                                    "%s_%s_T2w.nii*" % (acq_t2, rec_t2)))
+                                    "%s_T2w.nii*" % (ar_t2)))
             FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "anat",
-                                       "%s_%s_FLAIR.nii*" % (acq_t2, rec_t2)))
+                                       "%s_FLAIR.nii*" % (ar_t2)))
             if args.refine_pial == "T2":
                 for T2 in T2s:
                     if max(nibabel.load(T2).header.get_zooms()) < 1.2:
