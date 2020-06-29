@@ -46,7 +46,7 @@ docker run --rm ${image} generate docker \
   --base ubuntu:xenial \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
-    libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
+    libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
   --freesurfer version=6.0.1 install_path=/opt/freesurfer \
   --miniconda use_env=base conda_install="python=3 pip pandas setuptools pandas=0.21.0" pip_install="nibabel" \
   --run-bash 'curl -sL https://deb.nodesource.com/setup_6.x | bash -' \
@@ -78,7 +78,7 @@ docker run --rm ${image} generate singularity \
   --base ubuntu:xenial \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
-    libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
+    libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
   --freesurfer version=6.0.1 install_path=/opt/freesurfer \
   --miniconda use_env=base conda_install="python=3 pip pandas setuptools pandas=0.21.0" pip_install="nibabel" \
   --run-bash 'curl -sL https://deb.nodesource.com/setup_6.x | bash -' \
