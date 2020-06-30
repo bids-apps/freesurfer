@@ -71,7 +71,9 @@ parser.add_argument('--template_name', help='Name for the custom group level tem
 parser.add_argument('--license_file', help='Path to FreeSurfer license key file. To obtain it you need to register (for free) at https://surfer.nmr.mgh.harvard.edu/registration.html',
                     type=str, default='/license.txt')
 parser.add_argument('--acquisition_label', help='If the dataset contains multiple T1 weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
+parser.add_argument('--reconstruction_label', help='If the dataset contains multiple T1 weighted images from different reconstructions which one should be used? Corresponds to "rec-<reconstruction_label>"')
 parser.add_argument('--refine_pial_acquisition_label', help='If the dataset contains multiple T2 or FLAIR weighted images from different acquisitions which one should be used? Corresponds to "acq-<acquisition_label>"')
+parser.add_argument('--refine_pial_reconstruction_label', help='If the dataset contains multiple T2 or FLAIR weighted images from different reconstructions which one should be used? Corresponds to "rec-<reconstruction_label>"')
 parser.add_argument('--multiple_sessions', help='For datasets with multiday sessions where you do not want to '
                     'use the longitudinal pipeline, i.e., sessions were back-to-back, '
                     'set this to multiday, otherwise sessions with T1w data will be '
@@ -83,6 +85,8 @@ parser.add_argument('--refine_pial', help='If the dataset contains 3D T2 or T2 F
                     ' T1only to base surfaces on the T1 alone.',
                     choices=['T2', 'FLAIR', 'None', 'T1only'],
                     default=['T2'])
+parser.add_argument('--allow_lowresT2', help='Use T2 images that are lower resolution than (~1x1x1), to refine pial surface.',
+                    action='store_true')
 parser.add_argument('--hires_mode', help="Submilimiter (high resolution) processing. 'auto' - use only if <1.0mm data detected, 'enable' - force on, 'disable' - force off",
                     choices=['auto', 'enable', 'disable'],
                     default='auto')
@@ -123,11 +127,25 @@ else:
 
 subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
 
-if args.acquisition_label:
-    acq_tpl = "*acq-%s*" % args.acquisition_label
+#Got to combine acq_tpl and rec_tpl
+if args.acquisition_label and not args.reconstruction_label:
+    ar_tpl = "*acq-%s*" % args.acquisition_label
+elif args.reconstruction_label and not args.acquisition_label:
+    ar_tpl = "*rec-%s*" % args.reconstruction_label
+elif args.reconstruction_label and args.acquisition_label:
+    ar_tpl = "*acq-%s*_rec-%s*" % (args.acquisition_label, args.reconstruction_label)
 else:
-    acq_tpl = "*"
+    ar_tpl = "*"
 
+#Got to combine acq_tpl and rec_tpl
+if args.refine_pial_acquisition_label and not args.refine_pial_reconstruction_label:
+    ar_t2 = "*acq-%s*" % args.refine_pial_acquisition_label
+elif args.refine_pial_reconstruction_label and not args.refine_pial_acquisition_label:
+    ar_t2 = "*rec-%s*" % args.refine_pial_reconstruction_label
+elif args.refine_pial_reconstruction_label and args.refine_pial_acquisition_label:
+    ar_t2 = "*acq-%s*_rec-%s*" % (args.refine_pial_acquisition_label, args.refine_pial_reconstruction_label)
+else:
+    ar_t2 = "*"
 
 # if there are session folders, check if study is truly longitudinal by
 # searching for the first subject with more than one valid sessions
@@ -142,7 +160,7 @@ if glob(os.path.join(args.bids_dir, "sub-*", "ses-*")):
             if glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                 "ses-%s" % session_label,
                                                 "anat",
-                                                "%s_T1w.nii*" % acq_tpl)):
+                                                "%s_T1w.nii*" % ar_tpl)):
                 n_valid_sessions += 1
         if n_valid_sessions > 1:
             multi_session_study = True
@@ -153,10 +171,6 @@ if multi_session_study and (args.multiple_sessions == "longitudinal"):
 else:
     longitudinal_study = False
 
-if args.refine_pial_acquisition_label:
-    acq_t2 = "*acq-%s*" % args.refine_pial_acquisition_label
-else:
-    acq_t2 = "*"
 
 subjects_to_analyze = []
 # only for a subset of subjects
@@ -195,7 +209,7 @@ if args.analysis_level == "participant":
                                     "sub-%s" % subject_label,
                                     "ses-*",
                                     "anat",
-                                    "%s_T1w.nii*" % acq_tpl))
+                                    "%s_T1w.nii*" % (ar_tpl)))
             sessions = set([os.path.normpath(t1).split(os.sep)[-3].split("-")[-1] for t1 in T1s])
             if args.session_label:
                 sessions = sessions.intersection(args.session_label)
@@ -209,7 +223,7 @@ if args.analysis_level == "participant":
                                                 "sub-%s" % subject_label,
                                                 "ses-%s" % session_label,
                                                 "anat",
-                                                "%s_T1w.nii*" % acq_tpl))
+                                                "%s_T1w.nii*" % (ar_tpl)))
                         input_args = ""
 
                         if three_T == 'true':
@@ -225,18 +239,18 @@ if args.analysis_level == "participant":
 
                         T2s = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                 "ses-%s" % session_label, "anat",
-                                                "*%s_T2w.nii*" % acq_t2))
+                                                "%s_T2w.nii*" % (ar_t2)))
                         FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                    "ses-%s" % session_label, "anat",
-                                                   "*%s_FLAIR.nii*" % acq_t2))
+                                                   "%s_FLAIR.nii*" % (ar_t2)))
                         if args.refine_pial == "T2":
                             for T2 in T2s:
-                                if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                                if (max(nibabel.load(T2).header.get_zooms()) < 1.2) | args.allow_lowresT2:
                                     input_args += " " + " ".join(["-T2 %s" % T2])
                                     input_args += " -T2pial"
                         elif args.refine_pial == "FLAIR":
                             for FLAIR in FLAIRs:
-                                if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                                if (max(nibabel.load(FLAIR).header.get_zooms()) < 1.2) | args.allow_lowresT2:
                                     input_args += " " + " ".join(["-FLAIR %s" % FLAIR])
                                     input_args += " -FLAIRpial"
 
@@ -325,7 +339,7 @@ if args.analysis_level == "participant":
                                         "sub-%s" % subject_label,
                                         "ses-*",
                                         "anat",
-                                        "%s_T1w.nii*" % acq_tpl))
+                                        "%s_T1w.nii*" % (ar_tpl)))
                 input_args = ""
 
                 if three_T == 'true':
@@ -343,20 +357,20 @@ if args.analysis_level == "participant":
                                         "sub-%s" % subject_label,
                                         "ses-*",
                                         "anat",
-                                        "*%s_T2w.nii*" % acq_t2))
+                                        "%s_T2w.nii*" % (ar_t2)))
                 FLAIRs = glob(os.path.join(args.bids_dir,
                                            "sub-%s" % subject_label,
                                            "ses-*",
                                            "anat",
-                                           "*%s_FLAIR.nii*" % acq_t2))
+                                           "%s_FLAIR.nii*" % (ar_t2)))
                 if args.refine_pial == "T2":
                     for T2 in T2s:
-                        if max(nibabel.load(T2).header.get_zooms()) < 1.2:
+                        if (max(nibabel.load(T2).header.get_zooms()) < 1.2) | args.allow_lowresT2:
                             input_args += " " + " ".join(["-T2 %s" % T2])
                             input_args += " -T2pial"
                 elif args.refine_pial == "FLAIR":
                     for FLAIR in FLAIRs:
-                        if max(nibabel.load(FLAIR).header.get_zooms()) < 1.2:
+                        if (max(nibabel.load(FLAIR).header.get_zooms()) < 1.2) | args.allow_lowresT2:
                             input_args += " " + " ".join(["-FLAIR %s" % FLAIR])
                             input_args += " -FLAIRpial"
 
@@ -395,7 +409,7 @@ if args.analysis_level == "participant":
             T1s = glob(os.path.join(args.bids_dir,
                                     "sub-%s" % subject_label,
                                     "anat",
-                                    "%s_T1w.nii*" % acq_tpl))
+                                    "%s_T1w.nii*" % (ar_tpl)))
             if not T1s:
                 print("No T1w nii files found for subject %s. Skipping subject." % subject_label)
                 continue
@@ -413,9 +427,9 @@ if args.analysis_level == "participant":
                     input_args += " -hires"
                 input_args += " -i %s" % T1
             T2s = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "anat",
-                                    "*%s_T2w.nii*" % acq_t2))
+                                    "%s_T2w.nii*" % (ar_t2)))
             FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "anat",
-                                       "*%s_FLAIR.nii*" % acq_t2))
+                                       "%s_FLAIR.nii*" % (ar_t2)))
             if args.refine_pial == "T2":
                 for T2 in T2s:
                     if max(nibabel.load(T2).header.get_zooms()) < 1.2:
