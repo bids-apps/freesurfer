@@ -107,7 +107,7 @@ jobs:
             if [[ -e ~/docker/image_fs7.tar ]]; then docker load -i ~/docker/image_fs7.tar; fi
             git describe --tags > version
             docker build -t bids/${CIRCLE_PROJECT_REPONAME}_fs7 -f Dockerfile_fs7 .
-            mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}" > ~/docker/image.tar
+            mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}_fs7" > ~/docker/image.tar
             mkdir -p ~/license; echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
           no_output_timeout: 6h
       - save_cache:
