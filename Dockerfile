@@ -100,7 +100,7 @@ RUN export PATH="/opt/miniconda-latest/bin:$PATH" \
     && conda config --system --prepend channels conda-forge \
     && conda config --system --set auto_update_conda false \
     && conda config --system --set show_channel_urls true \
-    && sync && conda clean -tipsy && sync \
+    && sync && conda clean -tip && sync \
     && conda install -y -q --name base \
            'python=3' \
            'pip' \
