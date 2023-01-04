@@ -12,10 +12,8 @@ jobs:
     - run:
         name: load and build
         command: |
-          if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
-          git describe --tags > version
-          docker build -t bids/${CIRCLE_PROJECT_REPONAME} .
-          mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}" > ~/docker/image.tar
+          wget https://raw.githubusercontent.com/bids-apps/maintenance-tools/main/circleci/build_docker.sh
+          bash build_docker.sh   
           mkdir -p ~/license; echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
         no_output_timeout: 6h
     - save_cache:
@@ -132,13 +130,8 @@ jobs:
         command: docker load -i ~/docker/image.tar
     - run:
         command: |
-          if [[ -n "$DOCKER_PASS" ]]; then
-            docker login -u $DOCKER_USER -p $DOCKER_PASS && docker push bids/${CIRCLE_PROJECT_REPONAME}:latest;
-          fi
-          if [[ -n "$DOCKER_PASS" ]]; then
-            docker login -u $DOCKER_USER -p $DOCKER_PASS && docker tag bids/${CIRCLE_PROJECT_REPONAME} bids/${CIRCLE_PROJECT_REPONAME}:$CIRCLE_TAG && \
-            docker push bids/${CIRCLE_PROJECT_REPONAME}:$CIRCLE_TAG;
-          fi
+          wget https://raw.githubusercontent.com/bids-apps/maintenance-tools/main/circleci/push_docker.sh
+          bash push_docker.sh  
         no_output_timeout: 6h
 
 workflows:
