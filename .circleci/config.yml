@@ -196,6 +196,8 @@ workflows:
           branches:
             only: /.*/
     - deploy:
+        context:
+        - dockerhub
         requires:
         - test
         filters:
