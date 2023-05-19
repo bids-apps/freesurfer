@@ -48,9 +48,9 @@ jobs:
 
     - name: print version
       run: |
-        docker run -ti --rm --read-only \
+        docker run -t --rm --read-only \
             bids/freesurfer:latest --version
-        docker run -ti --rm --read-only \
+        docker run -t --rm --read-only \
             bids/freesurfer:latest --help
 
     - name: get data
