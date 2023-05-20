@@ -31,3 +31,6 @@ repos:
     language: docker_image
     types: [dockerfile]
     entry: ghcr.io/hadolint/hadolint hadolint
+
+ci:
+  skip: [hadolint-docker]
