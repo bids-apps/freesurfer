@@ -43,7 +43,7 @@ image="repronim/neurodocker@sha256:5b80804139b317e6180ae0b0de39aeff5731b27b224e6
 
 # Generate a dockerfile for building BIDS-Apps Freesurfer container
 docker run --rm ${image} generate docker \
-  --base-image ubuntu:xenial \
+  --base-image ubuntu:jammy \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
@@ -73,7 +73,7 @@ docker run --rm ${image} generate docker \
 > Dockerfile
 
 docker run --rm ${image} generate docker \
-  --base-image ubuntu:xenial \
+  --base-image ubuntu:jammy \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
@@ -105,7 +105,7 @@ docker run --rm ${image} generate docker \
 
 # Generate a singularity recipe for building BIDS-Apps Freesurfer container
 docker run --rm ${image} generate singularity \
-  --base-image ubuntu:xenial \
+  --base-image ubuntu:jammy \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
@@ -136,7 +136,7 @@ docker run --rm ${image} generate singularity \
 
 
 docker run --rm ${image} generate singularity \
-  --base-image ubuntu:xenial \
+  --base-image ubuntu:jammy \
   --pkg-manager apt \
   --install tcsh bc tar libgomp1 perl-modules wget curl \
     libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
