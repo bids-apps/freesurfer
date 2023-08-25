@@ -286,8 +286,8 @@ jobs:
               --license_file=/license.txt
 
           mkdir -p ${HOME}/outputs1/
-          sudo mv ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs1/ 
-          cat ${HOME}/outputs1/00_group2_stats_tables/lh.aparc.thickness.tsv 
+          sudo mv ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs1/
+          cat ${HOME}/outputs1/00_group2_stats_tables/lh.aparc.thickness.tsv
           cat ${HOME}/outputs1/00_group2_stats_tables/euler.tsv
         no_output_timeout: 6h
     - run:
@@ -301,11 +301,11 @@ jobs:
               /bids_dataset \
               /outputs \
               group2 \
-              --license_file=/license.txt 
+              --license_file=/license.txt
 
-          mkdir -p ${HOME}/outputs2/ 
-          sudo mv ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs2/ 
-          cat ${HOME}/outputs2/00_group2_stats_tables/lh.aparc.thickness.tsv 
+          mkdir -p ${HOME}/outputs2/
+          sudo mv ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs2/
+          cat ${HOME}/outputs2/00_group2_stats_tables/lh.aparc.thickness.tsv
           cat ${HOME}/outputs2/00_group2_stats_tables/euler.tsv
         no_output_timeout: 6h
     - store_artifacts:
