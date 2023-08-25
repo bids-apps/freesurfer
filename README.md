@@ -1,4 +1,5 @@
 ## Freesurfer recon-all BIDS App
+
 ### Description
 This app implements surface reconstruction using Freesurfer. It reconstructs the surface for each subject individually and then
 creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates) unless instructed to combine data across sessions.
@@ -128,7 +129,7 @@ This App has the following command line arguments:
           --skip_bids_validator
                                 skips bids validation
 	  --3T {true,false}     enables the two 3T specific options that recon-all
-	  			supports: nu intensity correction params, and the 
+	  			supports: nu intensity correction params, and the
 				special schwartz atlas
 
 #### Participant level

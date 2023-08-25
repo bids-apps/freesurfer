@@ -1,0 +1,36 @@
+---
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: check-yaml
+  - id: check-json
+  - id: check-added-large-files
+  - id: check-case-conflict
+  - id: check-merge-conflict
+
+
+- repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+  rev: 0.2.3
+  hooks:
+  - id: yamlfmt
+    args: [--mapping, '2', --sequence, '2', --offset, '0']
+
+
+- repo: https://github.com/hadolint/hadolint
+  rev: v2.12.1-beta
+  hooks:
+  - id: hadolint-docker
+    name: Lint Dockerfiles
+    description: Runs hadolint Docker image to lint Dockerfiles
+    language: docker_image
+    types: [dockerfile]
+    entry: ghcr.io/hadolint/hadolint hadolint
+
+ci:
+  skip: [hadolint-docker]

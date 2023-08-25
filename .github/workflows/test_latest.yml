@@ -1,0 +1,170 @@
+---
+name: test latest image
+
+on:
+  schedule:
+  - cron: 0 0 1 * *
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+jobs:
+
+  test_dataset_without_session:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tree
+
+    - name: Clone repo
+      uses: actions/checkout@v3
+
+    - name: pull docker image
+      run: docker pull bids/freesurfer:latest
+
+    - name: add license
+      run: |
+        mkdir -p ~/license
+        echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
+
+    - name: print version
+      run: |
+        docker run -t --rm --read-only \
+            bids/freesurfer:latest --version
+        docker run -t --rm --read-only \
+            bids/freesurfer:latest --help
+
+    - name: get data
+      run: |
+        wget https://raw.githubusercontent.com/bids-apps/maintenance-tools/main/utils/get_data_from_osf.sh
+        bash get_data_from_osf.sh ds114_test1
+        bash get_data_from_osf.sh ds114_test1_freesurfer_precomp_v6.0.0
+
+    - name: prepare output dir
+      run: |
+        mkdir -p ${HOME}/outputs1
+
+    - name: dataset with no session - participant 01
+      run: |
+        docker run -t --rm --read-only \
+          -v ${HOME}/data/ds114_test1:/bids_dataset \
+          -v ${HOME}/outputs1:/outputs \
+          -v ${HOME}/license/license.txt:/license.txt \
+          --tmpfs /tmp \
+          --tmpfs /var/tmp \
+            bids/freesurfer:latest \
+              /bids_dataset /outputs participant \
+                --participant_label 01 \
+                --license_file=/license.txt --stages autorecon1
+
+        cat ${HOME}/outputs1/sub-01/scripts/recon-all.done
+
+    - name: check output
+      run: tree ${HOME}/outputs1
+
+    - name: dataset with no session - group
+      run: |
+        docker run -t --rm --read-only \
+        -v ${HOME}/data/ds114_test1:/bids_dataset \
+        -v ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0:/outputs \
+        -v ${HOME}/license/license.txt:/license.txt \
+        --tmpfs /tmp \
+        --tmpfs /var/tmp \
+          bids/freesurfer \
+            /bids_dataset \
+            /outputs \
+            group2 \
+              --license_file=/license.txt
+
+        mkdir -p ${HOME}/outputs1_group/
+        sudo mv ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs1_group/
+        cat ${HOME}/outputs1_group/00_group2_stats_tables/lh.aparc.thickness.tsv
+        cat ${HOME}/outputs1_group/00_group2_stats_tables/euler.tsv
+
+  test_dataset_with_session:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tree
+
+    - name: Clone repo
+      uses: actions/checkout@v3
+
+    - name: pull docker image
+      run: docker pull bids/freesurfer:latest
+
+    - name: add license
+      run: |
+        mkdir -p ~/license
+        echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
+
+    - name: print version
+      run: |
+        docker run -t --rm --read-only \
+            bids/freesurfer:latest --version
+        docker run -t --rm --read-only \
+            bids/freesurfer:latest --help
+
+    - name: get data
+      run: |
+        wget https://raw.githubusercontent.com/bids-apps/maintenance-tools/main/utils/get_data_from_osf.sh
+        bash get_data_from_osf.sh ds114_test2
+        bash get_data_from_osf.sh ds114_test2_freesurfer_precomp_v6.0.0
+
+    - name: prepare output dir
+      run: |
+        mkdir -p ${HOME}/outputs2
+
+    - name: dataset with session - participant 01
+      run: |
+        docker run -t --rm --read-only \
+          -v ${HOME}/data/ds114_test2:/bids_dataset \
+          -v ${HOME}/outputs2:/outputs \
+          -v ${HOME}/license/license.txt:/license.txt \
+          --tmpfs /tmp \
+          --tmpfs /var/tmp \
+            bids/freesurfer:latest \
+              /bids_dataset /outputs participant \
+                --participant_label 01 \
+                --license_file=/license.txt \
+                --stages autorecon1 \
+                --steps cross-sectional \
+                --session_label test
+
+        cat ${HOME}/outputs2/sub-01_ses-test/scripts/recon-all.done
+
+    - name: check output
+      run: tree ${HOME}/outputs2
+
+    - name: dataset with session - group
+      run: |
+        docker run -t --rm --read-only \
+        -v ${HOME}/data/ds114_test2:/bids_dataset \
+        -v ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0:/outputs \
+        -v ${HOME}/license/license.txt:/license.txt \
+        --tmpfs /tmp \
+        --tmpfs /var/tmp \
+          bids/freesurfer \
+            /bids_dataset \
+            /outputs \
+            group2 \
+            --license_file=/license.txt
+
+        mkdir -p ${HOME}/outputs2_group/
+        sudo mv ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs2_group/
+        cat ${HOME}/outputs2_group/00_group2_stats_tables/lh.aparc.thickness.tsv
+        cat ${HOME}/outputs2_group/00_group2_stats_tables/euler.tsv
