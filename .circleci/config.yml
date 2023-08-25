@@ -3,7 +3,6 @@ version: 2.1
 jobs:
 
   build:
-
     machine:
       image: ubuntu-2204:2022.10.2
     parameters:
@@ -17,13 +16,15 @@ jobs:
     - run:
         name: load and build
         command: |
-          if [[ -e ~/docker/image_fs<< parameters.version >>.tar ]]; then docker load -i ~/docker/image_fs<< parameters.version >>.tar; fi
+          tar_name=image_fs<< parameters.version >>.tar
+          if [[ -e ~/docker/${tar_name} ]]; then
+            docker load -i ~/docker/${tar_name}
+          fi
           git describe --tags > version
           docker build -t bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> -f Dockerfile_fs<< parameters.version >> .
-          mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >>" > ~/docker/image_fs<< parameters.version >>.tar
+          mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >>" > ~/docker/${tar_name}
           mkdir -p ~/license
           echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
-
     - save_cache:
         key: v_0-image_cache_fs<< parameters.version >>-{{ checksum "Dockerfile_fs<< parameters.version >>" }}-{{ .Revision }}-{{ epoch }}
         paths:
@@ -86,6 +87,7 @@ jobs:
             -v /tmp/workspace/ds114_test1:/bids_dataset \
             --tmpfs /tmp --tmpfs /var/tmp \
               bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> --version
+
     - run:
         name: print help
         command: |
