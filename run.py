@@ -517,7 +517,7 @@ elif args.analysis_level == "group2":  # running stats tables
                 raise Exception("No freesurfer subject found for %s in %s" % (s, output_dir))
     subjects_str = " ".join(subjects)
 
-    # The call to python2 is only required if we're running Freesurfer 6, we'll need to check version 
+    # The call to python2 is only required if we're running Freesurfer 6, we'll need to check version
     # and modify the calls accordingly.
     with open(os.path.join(os.environ['FREESURFER_HOME'], 'build-stamp.txt'), 'r') as h:
         bs = h.read()
