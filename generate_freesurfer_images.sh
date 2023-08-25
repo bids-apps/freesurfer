@@ -70,7 +70,7 @@ docker run --rm ${image} generate docker \
   --run  'chmod +x /run.py' \
   --copy version '/version' \
   --entrypoint '/neurodocker/startup.sh /run.py' \
-> Dockerfile
+> Dockerfile_fs6
 
 docker run --rm ${image} generate docker \
   --base-image ubuntu:jammy \
@@ -132,7 +132,7 @@ docker run --rm ${image} generate singularity \
   --run  'chmod +x /run.py' \
   --copy version '/version' \
   --entrypoint '/neurodocker/startup.sh /run.py' \
-> Singularity
+> Singularity_fs6
 
 
 docker run --rm ${image} generate singularity \
