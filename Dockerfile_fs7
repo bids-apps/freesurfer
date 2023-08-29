@@ -13,6 +13,7 @@ RUN apt-get update -qq \
                   libxext-dev \
                   libxt-dev \
                   perl-modules \
+                  python2 \
                   tar \
                   tcsh \
                   wget \
@@ -130,6 +131,7 @@ ENV OS="Linux" \
     MNI_PERL5LIB="/opt/freesurfer/mni/share/perl5/" \
     PATH="/opt/miniconda-latest/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     PYTHONPATH=""
+RUN mv /opt/freesurfer/freesurfer /opt/fstmp && rm -rf /opt/freesurfer && mv /opt/fstmp /opt/freesurfer
 RUN mkdir root/matlab && touch root/matlab/startup.m
 RUN mkdir /scratch
 RUN mkdir /local-scratch
@@ -169,7 +171,8 @@ RUN printf '{ \
           "libxt-dev", \
           "libxext-dev", \
           "libglu1-mesa", \
-          "libpython2.7-stdlib" \
+          "libpython2.7-stdlib", \
+          "python2" \
         ], \
         "opts": null \
       } \
@@ -177,7 +180,7 @@ RUN printf '{ \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "apt-get update -qq \\\\\\n    && apt-get install -y -q --no-install-recommends \\\\\\n           bc \\\\\\n           curl \\\\\\n           libglu1-mesa \\\\\\n           libgomp1 \\\\\\n           libpython2.7-stdlib \\\\\\n           libsm-dev \\\\\\n           libx11-dev \\\\\\n           libxext-dev \\\\\\n           libxt-dev \\\\\\n           perl-modules \\\\\\n           tar \\\\\\n           tcsh \\\\\\n           wget \\\\\\n    && rm -rf /var/lib/apt/lists/*" \
+        "command": "apt-get update -qq \\\\\\n    && apt-get install -y -q --no-install-recommends \\\\\\n           bc \\\\\\n           curl \\\\\\n           libglu1-mesa \\\\\\n           libgomp1 \\\\\\n           libpython2.7-stdlib \\\\\\n           libsm-dev \\\\\\n           libx11-dev \\\\\\n           libxext-dev \\\\\\n           libxt-dev \\\\\\n           perl-modules \\\\\\n           python2 \\\\\\n           tar \\\\\\n           tcsh \\\\\\n           wget \\\\\\n    && rm -rf /var/lib/apt/lists/*" \
       } \
     }, \
     { \
@@ -281,6 +284,12 @@ RUN printf '{ \
         "MNI_PERL5LIB": "/opt/freesurfer/mni/share/perl5/", \
         "PATH": "/opt/miniconda-latest/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", \
         "PYTHONPATH": "" \
+      } \
+    }, \
+    { \
+      "name": "run", \
+      "kwds": { \
+        "command": "mv /opt/freesurfer/freesurfer /opt/fstmp && rm -rf /opt/freesurfer && mv /opt/fstmp /opt/freesurfer" \
       } \
     }, \
     { \

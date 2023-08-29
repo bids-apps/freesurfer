@@ -66,6 +66,7 @@ apt-get install -y -q --no-install-recommends \
     libxext-dev \
     libxt-dev \
     perl-modules \
+    python2 \
     tar \
     tcsh \
     wget
@@ -145,6 +146,8 @@ rm -rf /var/lib/apt/lists/*
 
 bash -c 'npm install -g bids-validator@1.12.0'
 
+ls
+
 mkdir root/matlab && touch root/matlab/startup.m
 
 mkdir /scratch
@@ -182,7 +185,8 @@ printf '{ \
           "libxt-dev", \
           "libxext-dev", \
           "libglu1-mesa", \
-          "libpython2.7-stdlib" \
+          "libpython2.7-stdlib", \
+          "python2" \
         ], \
         "opts": null \
       } \
@@ -190,7 +194,7 @@ printf '{ \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "apt-get update -qq\\napt-get install -y -q --no-install-recommends \\\\\\n    bc \\\\\\n    curl \\\\\\n    libglu1-mesa \\\\\\n    libgomp1 \\\\\\n    libpython2.7-stdlib \\\\\\n    libsm-dev \\\\\\n    libx11-dev \\\\\\n    libxext-dev \\\\\\n    libxt-dev \\\\\\n    perl-modules \\\\\\n    tar \\\\\\n    tcsh \\\\\\n    wget\\nrm -rf /var/lib/apt/lists/*" \
+        "command": "apt-get update -qq\\napt-get install -y -q --no-install-recommends \\\\\\n    bc \\\\\\n    curl \\\\\\n    libglu1-mesa \\\\\\n    libgomp1 \\\\\\n    libpython2.7-stdlib \\\\\\n    libsm-dev \\\\\\n    libx11-dev \\\\\\n    libxext-dev \\\\\\n    libxt-dev \\\\\\n    perl-modules \\\\\\n    python2 \\\\\\n    tar \\\\\\n    tcsh \\\\\\n    wget\\nrm -rf /var/lib/apt/lists/*" \
       } \
     }, \
     { \
@@ -294,6 +298,12 @@ printf '{ \
         "MNI_PERL5LIB": "/opt/freesurfer/mni/share/perl5/", \
         "PATH": "/opt/miniconda-latest/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", \
         "PYTHONPATH": "" \
+      } \
+    }, \
+    { \
+      "name": "run", \
+      "kwds": { \
+        "command": "ls" \
       } \
     }, \
     { \

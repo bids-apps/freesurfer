@@ -53,8 +53,10 @@ do
     if [ $VERSION = "6.0.1" ]
     then
       OUTFILE=${OUTFILEBASE}_fs6
+      MVCMD="ls"
     else
       OUTFILE=${OUTFILEBASE}_fs7
+      MVCMD="mv /opt/freesurfer/freesurfer /opt/fstmp && rm -rf /opt/freesurfer && mv /opt/fstmp /opt/freesurfer"
     fi
 
     # Generate a dockerfile for building BIDS-Apps Freesurfer container
@@ -62,7 +64,7 @@ do
       --base-image ubuntu:jammy \
       --pkg-manager apt \
       --install tcsh bc tar libgomp1 perl-modules wget curl \
-        libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
+        libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib python2 \
       --freesurfer version=${VERSION} install_path=/opt/freesurfer \
       --miniconda version=latest mamba=true conda_install="pandas" pip_install="nibabel" \
       --run-bash 'curl -sL https://deb.nodesource.com/setup_18.x | bash -' \
@@ -79,6 +81,7 @@ do
             MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
             PATH=/opt/miniconda-latest/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
             PYTHONPATH="" \
+      --run "${MVCMD}" \
       --run 'mkdir root/matlab && touch root/matlab/startup.m' \
       --run 'mkdir /scratch' \
       --run 'mkdir /local-scratch' \
