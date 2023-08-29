@@ -64,10 +64,10 @@ do
       --install tcsh bc tar libgomp1 perl-modules wget curl \
         libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
       --freesurfer version=${VERSION} install_path=/opt/freesurfer \
-      --miniconda version=latest conda_install="python=3 pip pandas setuptools pandas=0.21.0" pip_install="nibabel" \
-      --run-bash 'curl -sL https://deb.nodesource.com/setup_6.x | bash -' \
+      --miniconda version=latest mamba=true conda_install="pandas" pip_install="nibabel" \
+      --run-bash 'curl -sL https://deb.nodesource.com/setup_16.x | bash -' \
       --install nodejs \
-      --run-bash 'npm install -g bids-validator@0.19.8' \
+      --run-bash 'npm install -g bids-validator@1.12.0' \
       --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ \
             FSLMULTIFILEQUIT=TRUE POSSUMDIR=/usr/share/fsl/5.0 LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
             FSLTCLSH=/usr/bin/tclsh FSLWISH=/usr/bin/wish FSLOUTPUTTYPE=NIFTI_GZ \

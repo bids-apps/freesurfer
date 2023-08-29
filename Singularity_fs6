@@ -114,6 +114,8 @@ curl -fsSL -o "$conda_installer" https://repo.continuum.io/miniconda/Miniconda3-
 bash "$conda_installer" -b -p /opt/miniconda-latest
 rm -f "$conda_installer"
 conda update -yq -nbase conda
+conda install -yq -nbase conda-libmamba-solver
+conda config --set solver libmamba
 # Prefer packages in conda-forge
 conda config --system --prepend channels conda-forge
 # Packages in lower-priority channels not considered if a package with the same
@@ -126,11 +128,7 @@ conda config --system --set show_channel_urls true
 # Enable `conda activate`
 conda init bash
 conda install -y  --name base \
-    "python=3" \
-    "pip" \
-    "pandas" \
-    "setuptools" \
-    "pandas=0.21.0"
+    "pandas"
 bash -c "source activate base
   python -m pip install --no-cache-dir  \
       "nibabel""
@@ -138,14 +136,14 @@ bash -c "source activate base
 sync && conda clean --all --yes && sync
 rm -rf ~/.cache/pip/*
 
-bash -c 'curl -sL https://deb.nodesource.com/setup_6.x | bash -'
+bash -c 'curl -sL https://deb.nodesource.com/setup_16.x | bash -'
 
 apt-get update -qq
 apt-get install -y -q --no-install-recommends \
     nodejs
 rm -rf /var/lib/apt/lists/*
 
-bash -c 'npm install -g bids-validator@0.19.8'
+bash -c 'npm install -g bids-validator@1.12.0'
 
 mkdir root/matlab && touch root/matlab/startup.m
 
@@ -234,13 +232,13 @@ printf '{ \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "apt-get update -qq\\napt-get install -y -q --no-install-recommends \\\\\\n    bzip2 \\\\\\n    ca-certificates \\\\\\n    curl\\nrm -rf /var/lib/apt/lists/*\\n# Install dependencies.\\nexport PATH=\\"/opt/miniconda-latest/bin:$PATH\\"\\necho \\"Downloading Miniconda installer ...\\"\\nconda_installer=\\"/tmp/miniconda.sh\\"\\ncurl -fsSL -o \\"$conda_installer\\" https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh\\nbash \\"$conda_installer\\" -b -p /opt/miniconda-latest\\nrm -f \\"$conda_installer\\"\\nconda update -yq -nbase conda\\n# Prefer packages in conda-forge\\nconda config --system --prepend channels conda-forge\\n# Packages in lower-priority channels not considered if a package with the same\\n# name exists in a higher priority channel. Can dramatically speed up installations.\\n# Conda recommends this as a default\\n# https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-channels.html\\nconda config --set channel_priority strict\\nconda config --system --set auto_update_conda false\\nconda config --system --set show_channel_urls true\\n# Enable `conda activate`\\nconda init bash\\nconda install -y  --name base \\\\\\n    \\"python=3\\" \\\\\\n    \\"pip\\" \\\\\\n    \\"pandas\\" \\\\\\n    \\"setuptools\\" \\\\\\n    \\"pandas=0.21.0\\"\\nbash -c \\"source activate base\\n  python -m pip install --no-cache-dir  \\\\\\n      \\"nibabel\\"\\"\\n# Clean up\\nsync && conda clean --all --yes && sync\\nrm -rf ~/.cache/pip/*" \
+        "command": "apt-get update -qq\\napt-get install -y -q --no-install-recommends \\\\\\n    bzip2 \\\\\\n    ca-certificates \\\\\\n    curl\\nrm -rf /var/lib/apt/lists/*\\n# Install dependencies.\\nexport PATH=\\"/opt/miniconda-latest/bin:$PATH\\"\\necho \\"Downloading Miniconda installer ...\\"\\nconda_installer=\\"/tmp/miniconda.sh\\"\\ncurl -fsSL -o \\"$conda_installer\\" https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh\\nbash \\"$conda_installer\\" -b -p /opt/miniconda-latest\\nrm -f \\"$conda_installer\\"\\nconda update -yq -nbase conda\\nconda install -yq -nbase conda-libmamba-solver\\nconda config --set solver libmamba\\n# Prefer packages in conda-forge\\nconda config --system --prepend channels conda-forge\\n# Packages in lower-priority channels not considered if a package with the same\\n# name exists in a higher priority channel. Can dramatically speed up installations.\\n# Conda recommends this as a default\\n# https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-channels.html\\nconda config --set channel_priority strict\\nconda config --system --set auto_update_conda false\\nconda config --system --set show_channel_urls true\\n# Enable `conda activate`\\nconda init bash\\nconda install -y  --name base \\\\\\n    \\"pandas\\"\\nbash -c \\"source activate base\\n  python -m pip install --no-cache-dir  \\\\\\n      \\"nibabel\\"\\"\\n# Clean up\\nsync && conda clean --all --yes && sync\\nrm -rf ~/.cache/pip/*" \
       } \
     }, \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "bash -c '"'"'curl -sL https://deb.nodesource.com/setup_6.x | bash -'"'"'" \
+        "command": "bash -c '"'"'curl -sL https://deb.nodesource.com/setup_16.x | bash -'"'"'" \
       } \
     }, \
     { \
@@ -261,7 +259,7 @@ printf '{ \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "bash -c '"'"'npm install -g bids-validator@0.19.8'"'"'" \
+        "command": "bash -c '"'"'npm install -g bids-validator@1.12.0'"'"'" \
       } \
     }, \
     { \
