@@ -23,18 +23,18 @@ jobs:
           git describe --tags > version
           docker build -t bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> -f Dockerfile_fs<< parameters.version >> .
           mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >>" > ~/docker/${tar_name}
-          mkdir -p ~/license
+          mkdir -p ~/license_fs<< parameters.version >>
           echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
     - save_cache:
         key: v_0-image_cache_fs<< parameters.version >>-{{ checksum "Dockerfile_fs<< parameters.version >>" }}-{{ .Revision }}-{{ epoch }}
         paths:
         - ~/docker
-        - ~/license
+        - ~/license_fs<< parameters.version >>
     - persist_to_workspace:
         root: /home/circleci
         paths:
         - docker/image_fs<< parameters.version >>.tar
-        - license/license.txt
+        - license_fs<< parameters.version >>/license.txt
 
   get_data:
     machine:
@@ -83,7 +83,7 @@ jobs:
         name: print version
         command: |
           docker run -ti --rm --read-only \
-            -v /tmp/workspace/license/license.txt:/license.txt \
+            -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
             -v /tmp/workspace/ds114_test1:/bids_dataset \
             --tmpfs /tmp --tmpfs /var/tmp \
               bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> --version
@@ -92,7 +92,7 @@ jobs:
         name: print help
         command: |
           docker run -ti --rm --read-only \
-            -v /tmp/workspace/license/license.txt:/license.txt \
+            -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
             -v /tmp/workspace/data/ds114_test1:/bids_dataset \
             --tmpfs /tmp --tmpfs /var/tmp \
               bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> -h
@@ -103,7 +103,7 @@ jobs:
         name: test 1
         command: |
           docker run -ti --rm --read-only \
-            -v /tmp/workspace/license/license.txt:/license.txt \
+            -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
             -v /tmp/workspace/data/ds114_test1:/bids_dataset \
             -v ${HOME}/outputs1:/outputs \
             --tmpfs /tmp --tmpfs /var/tmp \
@@ -121,7 +121,7 @@ jobs:
         name: test 2
         command: |
           docker run -ti --rm --read-only \
-            -v /tmp/workspace/license/license.txt:/license.txt \
+            -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
             -v /tmp/workspace/data/ds114_test2:/bids_dataset \
             -v ${HOME}/outputs2:/outputs \
             --tmpfs /tmp --tmpfs /var/tmp \
@@ -141,7 +141,7 @@ jobs:
         name: group2 test 1
         command: |
           docker run -ti --rm --read-only \
-            -v /tmp/workspace/license/license.txt:/license.txt \
+            -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
             -v /tmp/workspace/data/ds114_test1:/bids_dataset \
             -v /tmp/workspace/data/ds114_test1_freesurfer_precomp_v6.0.0:/outputs \
             --tmpfs /tmp --tmpfs /var/tmp \
@@ -159,7 +159,7 @@ jobs:
         name: group2 test 2
         command: |
           docker run -ti --rm --read-only \
-            -v /tmp/workspace/license/license.txt:/license.txt \
+            -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
             -v /tmp/workspace/data/ds114_test2:/bids_dataset \
             -v /tmp/workspace/data/ds114_test2_freesurfer_precomp_v6.0.0:/outputs \
             --tmpfs /tmp --tmpfs /var/tmp \
