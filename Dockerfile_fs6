@@ -138,7 +138,7 @@ COPY ["run.py", \
 RUN chmod +x /run.py
 COPY ["version", \
       "/version"]
-ENTRYPOINT ["/neurodocker/startup.sh", "/run.py"]
+ENTRYPOINT ["python", "/run.py"]
 
 # Save specification to JSON.
 RUN printf '{ \
@@ -331,7 +331,7 @@ RUN printf '{ \
       "name": "entrypoint", \
       "kwds": { \
         "args": [ \
-          "/neurodocker/startup.sh", \
+          "python", \
           "/run.py" \
         ] \
       } \

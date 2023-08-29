@@ -342,7 +342,7 @@ printf '{ \
       "name": "entrypoint", \
       "kwds": { \
         "args": [ \
-          "/neurodocker/startup.sh", \
+          "python", \
           "/run.py" \
         ] \
       } \
@@ -352,4 +352,4 @@ printf '{ \
 # End saving to specification to JSON.
 
 %runscript
-/neurodocker/startup.sh /run.py
+python /run.py

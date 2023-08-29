@@ -85,7 +85,7 @@ do
       --copy run.py '/run.py' \
       --run  'chmod +x /run.py' \
       --copy version '/version' \
-      --entrypoint '/neurodocker/startup.sh /run.py' \
+      --entrypoint 'python /run.py' \
     > $OUTFILE
   done
 done
