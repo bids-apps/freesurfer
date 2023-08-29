@@ -136,7 +136,7 @@ bash -c "source activate base
 sync && conda clean --all --yes && sync
 rm -rf ~/.cache/pip/*
 
-bash -c 'curl -sL https://deb.nodesource.com/setup_16.x | bash -'
+bash -c 'curl -sL https://deb.nodesource.com/setup_18.x | bash -'
 
 apt-get update -qq
 apt-get install -y -q --no-install-recommends \
@@ -238,7 +238,7 @@ printf '{ \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "bash -c '"'"'curl -sL https://deb.nodesource.com/setup_16.x | bash -'"'"'" \
+        "command": "bash -c '"'"'curl -sL https://deb.nodesource.com/setup_18.x | bash -'"'"'" \
       } \
     }, \
     { \

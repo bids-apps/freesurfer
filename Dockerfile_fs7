@@ -100,7 +100,7 @@ RUN apt-get update -qq \
     # Clean up
     && sync && conda clean --all --yes && sync \
     && rm -rf ~/.cache/pip/*
-RUN bash -c 'curl -sL https://deb.nodesource.com/setup_16.x | bash -'
+RUN bash -c 'curl -sL https://deb.nodesource.com/setup_18.x | bash -'
 RUN apt-get update -qq \
            && apt-get install -y -q --no-install-recommends \
                   nodejs \
@@ -225,7 +225,7 @@ RUN printf '{ \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "bash -c '"'"'curl -sL https://deb.nodesource.com/setup_16.x | bash -'"'"'" \
+        "command": "bash -c '"'"'curl -sL https://deb.nodesource.com/setup_18.x | bash -'"'"'" \
       } \
     }, \
     { \

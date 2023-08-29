@@ -65,7 +65,7 @@ do
         libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib\
       --freesurfer version=${VERSION} install_path=/opt/freesurfer \
       --miniconda version=latest mamba=true conda_install="pandas" pip_install="nibabel" \
-      --run-bash 'curl -sL https://deb.nodesource.com/setup_16.x | bash -' \
+      --run-bash 'curl -sL https://deb.nodesource.com/setup_18.x | bash -' \
       --install nodejs \
       --run-bash 'npm install -g bids-validator@1.12.0' \
       --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ \
