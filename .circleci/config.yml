@@ -24,7 +24,10 @@ jobs:
           docker build -t bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> -f Dockerfile_fs<< parameters.version >> .
           mkdir -p ~/docker; docker save "bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >>" > ~/docker/${tar_name}
           mkdir -p ~/license_fs<< parameters.version >>
+          mkdir -p ~/license
           echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
+          cp ~/license/license.txt ~/license_fs<< parameters.version >>/license.txt
+          rm -r ~/license
     - save_cache:
         key: v_0-image_cache_fs<< parameters.version >>-{{ checksum "Dockerfile_fs<< parameters.version >>" }}-{{ .Revision }}-{{ epoch }}
         paths:
