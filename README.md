@@ -2,7 +2,7 @@
 
 ### Description
 This app implements surface reconstruction using Freesurfer. It reconstructs the surface for each subject individually and then
-creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates) unless instructed to combine data across sessions.
+creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates) unless instructed to combine data across sessions. This app is available for both Freesurfer 6 and 7.
 
 The current Freesurfer version for Freesurfer 6 is based on: freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz
 The current Freesurfer version for Freesurfer 7 is based on: freesurfer-linux-centos7_x86_64-7.4.1.tar.gz
