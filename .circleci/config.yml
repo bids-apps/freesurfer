@@ -111,7 +111,7 @@ jobs:
             -v ${HOME}/outputs1:/outputs \
             --tmpfs /tmp --tmpfs /var/tmp \
               bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> \
-                /bids_dataset
+                /bids_dataset \
                 /outputs \
                 participant \
                 --participant_label 01 \
