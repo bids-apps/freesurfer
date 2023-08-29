@@ -43,7 +43,7 @@ image="repronim/neurodocker@sha256:5b80804139b317e6180ae0b0de39aeff5731b27b224e6
 for TARGET in docker singularity
 do
   if [ $TARGET = docker ]
-  then 
+  then
     OUTFILEBASE=Dockerfile
   else
     OUTFILEBASE=Singularity
