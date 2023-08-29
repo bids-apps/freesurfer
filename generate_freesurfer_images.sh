@@ -39,7 +39,7 @@
 #
 ###############################################################################
 
-image="repronim/neurodocker@sha256:5b80804139b317e6180ae0b0de39aeff5731b27b224e6af4d1b46e040e4785a7"
+image="repronim/neurodocker@sha256:e552690641a7175ece97e0ef05dd2679d7f916a5bb6864aa92515bd350c24758"
 for TARGET in docker singularity
 do
   if [ $TARGET = docker ]
