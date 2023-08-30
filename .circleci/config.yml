@@ -233,10 +233,10 @@ workflows:
             only: /.*/
 
     - build:
+        name: build_<< matrix.version >>
         matrix:
           parameters:
             version: ['6', '7']
-        name: build_<< parameters.version >>
         filters:
           tags:
             only: /.*/
@@ -248,7 +248,7 @@ workflows:
           parameters:
             version: ['6', '7']
         requires:
-        - build_<< parameters.version >>
+        - build_<< matrix.version >>
         - get_data
         filters:
           tags:
