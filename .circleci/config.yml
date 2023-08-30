@@ -236,6 +236,7 @@ workflows:
         matrix:
           parameters:
             version: ['6', '7']
+        name: build_<< parameters.version >>
         filters:
           tags:
             only: /.*/
@@ -247,7 +248,7 @@ workflows:
           parameters:
             version: ['6', '7']
         requires:
-        - build
+        - build_<< parameters.version >>
         - get_data
         filters:
           tags:
