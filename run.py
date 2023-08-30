@@ -517,6 +517,15 @@ elif args.analysis_level == "group2":  # running stats tables
                 raise Exception("No freesurfer subject found for %s in %s" % (s, output_dir))
     subjects_str = " ".join(subjects)
 
+    # The call to python2 is only required if we're running Freesurfer 6, we'll need to check version
+    # and modify the calls accordingly.
+    with open(os.path.join(os.environ['FREESURFER_HOME'], 'build-stamp.txt'), 'r') as h:
+        bs = h.read()
+    if '-7.' in bs:
+        cmd_start = ''
+    else:
+        cmd_start = 'python2 '
+
     if len(subjects) > 0:
         # create cortical stats
         for p in args.parcellations:
@@ -526,7 +535,7 @@ elif args.analysis_level == "group2":  # running stats tables
                     if os.path.isfile(table_file):
                         warn("Replace old file %s" % table_file)
                         os.remove(table_file)
-                    cmd = "python2 `which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
+                    cmd = cmd_start + "`which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
                           "--tablefile {table_file}".format(h=h, subjects=subjects_str, p=p, m=m,
                                                             table_file=table_file)
                     print("Creating cortical stats table for {h} {p} {m}".format(h=h, p=p, m=m))
@@ -537,7 +546,7 @@ elif args.analysis_level == "group2":  # running stats tables
         if os.path.isfile(table_file):
             warn("Replace old file %s" % table_file)
             os.remove(table_file)
-        cmd = "python2 `which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
+        cmd = cmd_start + "`which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
               "table_file}".format(subjects=subjects_str, table_file=table_file)
         print("Creating subcortical stats table.")
         run(cmd, env={"SUBJECTS_DIR": output_dir, 'FS_LICENSE': args.license_file})
