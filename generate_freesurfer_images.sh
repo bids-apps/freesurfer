@@ -66,7 +66,7 @@ do
       --install tcsh bc tar libgomp1 perl-modules wget curl \
         libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib python2 \
       --freesurfer version=${VERSION} install_path=$INSTALL_DIR \
-      --miniconda version=latest mamba=true conda_install="pandas" pip_install="nibabel" \
+      --miniconda version=latest mamba=true conda_install="pandas=1.5.3" pip_install="nibabel" \
       --run-bash 'curl -sL https://deb.nodesource.com/setup_18.x | bash -' \
       --install nodejs \
       --run-bash 'npm install -g bids-validator@1.12.0' \
