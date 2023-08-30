@@ -154,7 +154,7 @@ jobs:
                 group2 \
                 --license_file=/license.txt
 
-          sudo mv ${HOME}/data/ds114_test1_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs1/
+          sudo mv /tmp/workspace/data/ds114_test1_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs1/
           cat ${HOME}/outputs1/00_group2_stats_tables/lh.aparc.thickness.tsv
           cat ${HOME}/outputs1/00_group2_stats_tables/euler.tsv
 
@@ -170,7 +170,7 @@ jobs:
                 /bids_dataset /outputs group2 \
                 --license_file=/license.txt
 
-          sudo mv ${HOME}/data/ds114_test2_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs2/
+          sudo mv /tmp/workspace/data/ds114_test2_freesurfer_precomp_v6.0.0/00_group* ${HOME}/outputs2/
           cat ${HOME}/outputs2/00_group2_stats_tables/lh.aparc.thickness.tsv
           cat ${HOME}/outputs2/00_group2_stats_tables/euler.tsv
 
