@@ -131,7 +131,6 @@ ENV OS="Linux" \
     MNI_PERL5LIB="/opt/freesurfer/mni/share/perl5/" \
     PATH="/opt/miniconda-latest/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     PYTHONPATH=""
-RUN ls
 RUN mkdir root/matlab && touch root/matlab/startup.m
 RUN mkdir /scratch
 RUN mkdir /local-scratch
@@ -284,12 +283,6 @@ RUN printf '{ \
         "MNI_PERL5LIB": "/opt/freesurfer/mni/share/perl5/", \
         "PATH": "/opt/miniconda-latest/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", \
         "PYTHONPATH": "" \
-      } \
-    }, \
-    { \
-      "name": "run", \
-      "kwds": { \
-        "command": "ls" \
       } \
     }, \
     { \
