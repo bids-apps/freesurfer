@@ -198,20 +198,25 @@ jobs:
 
               # make sure we have a lowercase repo
               user_name="bids"
-              repo_name=$(echo "${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >>" | tr '[:upper:]' '[:lower:]')
+              repo_name=$(echo "${CIRCLE_PROJECT_REPONAME}" | tr '[:upper:]' '[:lower:]')
+              FSVERSION=v<< parameters.version >>
 
               if [[ -n "${DOCKER_TOKEN}" ]]; then
                   echo "${DOCKER_TOKEN}" | docker login -u "${DOCKER_USER}" --password-stdin
 
                   : "Pushing to DockerHub ${user_name}/${repo_name}:unstable"
-                  docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:unstable"
-                  docker push "${user_name}/${repo_name}:unstable"
+                  docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FSVERSION}-unstable"
+                  docker push "${user_name}/${repo_name}:${FSVERSION}-unstable"
 
-                  if [[ -n "${CIRCLE_TAG}" ]]; then
-                      : "Pushing to DockerHub ${user_name}/${repo_name}:${CIRCLE_TAG}"
-                      docker push "${user_name}/${repo_name}:latest"
-                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${CIRCLE_TAG}"
-                      docker push "${user_name}/${repo_name}:${CIRCLE_TAG}"
+                  if [[  -n "${CIRCLE_TAG}" ]]; then
+                      : "Pushing to DockerHub ${user_name}/${repo_name}:${FSVERSION}-${CIRCLE_TAG}"
+                      if [[ FSVERSION -eq v6 ]]; then 
+                         docker push "${user_name}/${repo_name}:latest"
+                      fi
+
+                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FSVERSION}"
+                      docker push ${user_name}/${repo_name}:${FSVERSION}
+                      docker push "${user_name}/${repo_name}:${FSVERSION}-${CIRCLE_TAG}"
                   fi
 
               fi
@@ -263,7 +268,7 @@ workflows:
         context:
         - dockerhub
         requires:
-        - test
+        - test_<< matrix.version >>
         filters:
           branches:
             ignore: /.*/
