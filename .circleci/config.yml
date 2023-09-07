@@ -5,15 +5,12 @@ jobs:
   build:
     machine:
       image: ubuntu-2204:2022.10.2
-    resource_class: xlarge
+    resource_class: large
     parameters:
       version:
         type: string
     steps:
     - checkout
-    - restore_cache:
-        keys:
-        - v_0-image_cache_fs<< parameters.version >>-{{ checksum "Dockerfile_fs<< parameters.version >>" }}
     - run:
         name: load and build
         command: |
@@ -29,11 +26,6 @@ jobs:
           echo "cHJpbnRmICJEeWxhbi5OaWVsc29uQGdtYWlsLmNvbVxuMzcwNjNcbiAqQ1lrZWhQYUNvRDlNXG4gRlM2N1BTWmRFV2lqb1xuIiA+IH4vbGljZW5zZS9saWNlbnNlLnR4dA==" | base64 -d | sh
           cp ~/license/license.txt ~/license_fs<< parameters.version >>/license.txt
           rm -r ~/license
-    - save_cache:
-        key: v_0-image_cache_fs<< parameters.version >>-{{ checksum "Dockerfile_fs<< parameters.version >>" }}-{{ .Revision }}-{{ epoch }}
-        paths:
-        - ~/docker
-        - ~/license_fs<< parameters.version >>
     - persist_to_workspace:
         root: /home/circleci
         paths:
