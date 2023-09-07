@@ -199,30 +199,30 @@ jobs:
               # make sure we have a lowercase repo
               user_name="bids"
               repo_name=$(echo "${CIRCLE_PROJECT_REPONAME}" | tr '[:upper:]' '[:lower:]')
-              FSMAJORVERSION=<< parameters.version >>
-              if [[ FSMAJORVERSION -eq 6 ]]; then
-                FSVERSION=6.0.1
+              FS_MAJOR_VERSION=<< parameters.version >>
+              if [[ FS_MAJOR_VERSION -eq 6 ]]; then
+                FS_VERSION=6.0.1
               else
-                FSVERSION=7.4.1
+                FS_VERSION=7.4.1
               fi
 
               if [[ -n "${DOCKER_TOKEN}" ]]; then
                   echo "${DOCKER_TOKEN}" | docker login -u "${DOCKER_USER}" --password-stdin
 
                   : "Pushing to DockerHub ${user_name}/${repo_name}:unstable"
-                  docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FSVERSION}-unstable"
-                  docker push "${user_name}/${repo_name}:${FSVERSION}-unstable"
+                  docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FS_VERSION}-unstable"
+                  docker push "${user_name}/${repo_name}:${FS_VERSION}-unstable"
 
                   if [[  -n "${CIRCLE_TAG}" ]]; then
-                      : "Pushing to DockerHub ${user_name}/${repo_name}:${FSVERSION}-${CIRCLE_TAG}"
-                      if [[ FSMAJORVERSION -eq 6 ]]; then
+                      : "Pushing to DockerHub ${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
+                      if [[ FS_MAJOR_VERSION -eq 6 ]]; then
                          docker push "${user_name}/${repo_name}:latest"
                       fi
 
-                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FSMAJORVERSION}"
-                      docker push ${user_name}/${repo_name}:${FSMAJORVERSION}
-                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FSVERSION}-${CIRCLE_TAG}"
-                      docker push "${user_name}/${repo_name}:${FSVERSION}-${CIRCLE_TAG}"
+                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FS_MAJOR_VERSION}"
+                      docker push ${user_name}/${repo_name}:${FS_MAJOR_VERSION}
+                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
+                      docker push "${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
                   fi
 
               fi
