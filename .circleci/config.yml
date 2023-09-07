@@ -5,6 +5,7 @@ jobs:
   build:
     machine:
       image: ubuntu-2204:2022.10.2
+    resource_class: large
     parameters:
       version:
         type: string
