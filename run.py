@@ -15,6 +15,7 @@ import errno
 def run(command, env={}, ignore_errors=False):
     merged_env = os.environ
     merged_env.update(env)
+
     # DEBUG env triggers freesurfer to produce gigabytes of files
     merged_env.pop('DEBUG', None)
     process = Popen(command, stdout=PIPE, stderr=subprocess.STDOUT, shell=True, env=merged_env)
@@ -27,7 +28,17 @@ def run(command, env={}, ignore_errors=False):
     if process.returncode != 0 and not ignore_errors:
         raise Exception("Non zero return code: %d" % process.returncode)
 
-
+# warn about freesurfer version
+with open(os.path.join(os.environ['FREESURFER_HOME'], 'build-stamp.txt'), 'r') as h:
+    bs = h.read()
+if 'x86_64-7.' in bs:
+    fsversion=7
+else:
+    fsversion=6
+    warn("You are using FreeSurver version 6. "
+        "The FreeSurfer 7 BIDS-App is now available via docker pull bids/freesurfer:v7 . "
+        "FreeSurfer 7 will become the default version in the FreeSurfer BIDS-App begining in 2024. "
+        "From that point on, the FreeSurfer 6 BIDS-App will remain available at bids/freesurfer:v6 .")
 __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version')).read()
 
 parser = argparse.ArgumentParser(description='FreeSurfer recon-all + custom template generation.')
@@ -519,9 +530,7 @@ elif args.analysis_level == "group2":  # running stats tables
 
     # The call to python2 is only required if we're running Freesurfer 6, we'll need to check version
     # and modify the calls accordingly.
-    with open(os.path.join(os.environ['FREESURFER_HOME'], 'build-stamp.txt'), 'r') as h:
-        bs = h.read()
-    if '-7.' in bs:
+    if fsversion == 7:
         cmd_start = ''
     else:
         cmd_start = 'python2 '
