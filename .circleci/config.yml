@@ -199,7 +199,12 @@ jobs:
               # make sure we have a lowercase repo
               user_name="bids"
               repo_name=$(echo "${CIRCLE_PROJECT_REPONAME}" | tr '[:upper:]' '[:lower:]')
-              FSVERSION=v<< parameters.version >>
+              FSMAJORVERSION=<< parameters.version >>
+              if [[ FSMAJORVERSION -eq 6 ]]; then
+                FSVERSION=6.0.1
+              else
+                FSVERSION=7.4.1
+              fi
 
               if [[ -n "${DOCKER_TOKEN}" ]]; then
                   echo "${DOCKER_TOKEN}" | docker login -u "${DOCKER_USER}" --password-stdin
@@ -210,12 +215,13 @@ jobs:
 
                   if [[  -n "${CIRCLE_TAG}" ]]; then
                       : "Pushing to DockerHub ${user_name}/${repo_name}:${FSVERSION}-${CIRCLE_TAG}"
-                      if [[ FSVERSION -eq v6 ]]; then
+                      if [[ FSMAJORVERSION -eq 6 ]]; then
                          docker push "${user_name}/${repo_name}:latest"
                       fi
 
-                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FSVERSION}"
-                      docker push ${user_name}/${repo_name}:${FSVERSION}
+                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FSMAJORVERSION}"
+                      docker push ${user_name}/${repo_name}:${FSMAJORVERSION}
+                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FSVERSION}-${CIRCLE_TAG}"
                       docker push "${user_name}/${repo_name}:${FSVERSION}-${CIRCLE_TAG}"
                   fi
 
