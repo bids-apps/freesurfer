@@ -5,7 +5,7 @@ jobs:
   build:
     machine:
       image: ubuntu-2204:2022.10.2
-    resource_class: x-large
+    resource_class: xlarge
     parameters:
       version:
         type: string
