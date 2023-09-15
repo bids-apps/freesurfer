@@ -202,20 +202,34 @@ jobs:
               if [[ -n "${DOCKER_TOKEN}" ]]; then
                   echo "${DOCKER_TOKEN}" | docker login -u "${DOCKER_USER}" --password-stdin
 
-                  : "Pushing to DockerHub ${user_name}/${repo_name}:${FS_VERSION}-unstable"
-                  docker tag "${user_name}/${repo_name}_fs<< parameters.version >>" "${user_name}/${repo_name}:${FS_VERSION}-unstable"
-                  docker push "${user_name}/${repo_name}:${FS_VERSION}-unstable"
+                  : "Pushing unstable versions for ${FS_MAJOR_VERSION} to DockerHub"
+
+                  unstable="${user_name}/${repo_name}:${FS_VERSION}-unstable"
+                  major_unstable="${user_name}/${repo_name}:${FS_MAJOR_VERSION}-unstable"
+
+                  docker tag "${user_name}/${repo_name}_fs<< parameters.version >>" "${unstable}"
+                  docker push "${unstable}"
+                  docker tag "${unstable}" "${major_unstable}"
+                  docker push "${major_unstable}"
 
                   if [[  -n "${CIRCLE_TAG}" ]]; then
+
+                      : "Pushing stable and latest versions for ${FS_VERSION} to DockerHub"
+
+                      latest="${user_name}/${repo_name}:latest"
+
                       if [[ FS_MAJOR_VERSION -eq 6 ]]; then
-                         docker push "${user_name}/${repo_name}:latest"
+                         docker tag "${unstable}" "${latest}"
+                         docker push "${latest}"
                       fi
 
-                      : "Pushing to DockerHub ${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
-                      docker tag "${user_name}/${repo_name}_fs<< parameters.version >>" "${user_name}/${repo_name}:${FS_MAJOR_VERSION}"
-                      docker push ${user_name}/${repo_name}:${FS_MAJOR_VERSION}
-                      docker tag "${user_name}/${repo_name}_fs<< parameters.version >>" "${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
-                      docker push "${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
+                      major_tagged_release="${user_name}/${repo_name}:${FS_MAJOR_VERSION}-${CIRCLE_TAG}"
+                      docker tag "${major_unstable}" "${major_tagged_release}"
+                      docker push "${major_tagged_release}"
+
+                      tagged_release="${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
+                      docker tag "${unstable}" "${tagged_release}"
+                      docker push "${tagged_release}"
                   fi
 
               fi
