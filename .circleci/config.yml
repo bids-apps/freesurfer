@@ -202,19 +202,19 @@ jobs:
               if [[ -n "${DOCKER_TOKEN}" ]]; then
                   echo "${DOCKER_TOKEN}" | docker login -u "${DOCKER_USER}" --password-stdin
 
-                  : "Pushing to DockerHub ${user_name}/${repo_name}:unstable"
-                  docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FS_VERSION}-unstable"
+                  : "Pushing to DockerHub ${user_name}/${repo_name}:${FS_VERSION}-unstable"
+                  docker tag "${user_name}/${repo_name}_fs<< parameters.version >>" "${user_name}/${repo_name}:${FS_VERSION}-unstable"
                   docker push "${user_name}/${repo_name}:${FS_VERSION}-unstable"
 
                   if [[  -n "${CIRCLE_TAG}" ]]; then
-                      : "Pushing to DockerHub ${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
                       if [[ FS_MAJOR_VERSION -eq 6 ]]; then
                          docker push "${user_name}/${repo_name}:latest"
                       fi
 
-                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FS_MAJOR_VERSION}"
+                      : "Pushing to DockerHub ${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
+                      docker tag "${user_name}/${repo_name}_fs<< parameters.version >>" "${user_name}/${repo_name}:${FS_MAJOR_VERSION}"
                       docker push ${user_name}/${repo_name}:${FS_MAJOR_VERSION}
-                      docker tag "${user_name}/${repo_name}" "${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
+                      docker tag "${user_name}/${repo_name}_fs<< parameters.version >>" "${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
                       docker push "${user_name}/${repo_name}:${FS_VERSION}-${CIRCLE_TAG}"
                   fi
 
@@ -271,6 +271,6 @@ workflows:
         - test_<< matrix.version >>
         filters:
           branches:
-            ignore: /.*/
+            only: /.*/
           tags:
             only: /.*/
