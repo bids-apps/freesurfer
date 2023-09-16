@@ -3,18 +3,26 @@
 ## Freesurfer recon-all BIDS App
 
 ### Description
-This app implements surface reconstruction using Freesurfer. It reconstructs the surface for each subject individually and then
-creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates) unless instructed to combine data across sessions. This app is available for both Freesurfer 6 and 7.
+This app implements surface reconstruction using Freesurfer.
+It reconstructs the surface for each subject individually
+and then creates a study specific template.
+In case there are multiple sessions the Freesurfer longitudinal pipeline is used
+(creating subject specific templates) unless instructed to combine data across sessions.
+This app is available for both Freesurfer 6 and 7.
 
-The current Freesurfer version for Freesurfer 6 is based on: freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz
-The current Freesurfer version for Freesurfer 7 is based on: freesurfer-linux-centos7_x86_64-7.4.1.tar.gz
+The current Freesurfer version for Freesurfer 6 is based on:
 
-We only plan to support ove version of Freesurfer 6 and Freesurfer 7 at a time.
+- `freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz`
 
-The output of the pipeline consist of the SUBJECTS_DIR created during the analysis.
+The current Freesurfer version for Freesurfer 7 is based on:
+
+- `freesurfer-linux-centos7_x86_64-7.4.1.tar.gz`
+
+We only plan to support only one version of Freesurfer 6 and Freesurfer 7 at a time.
+
+The output of the pipeline consist of the `SUBJECTS_DIR` created during the analysis.
 
 ### How to get it
-
 Freesurfer 6 will remain the default image till 2024, at which point Freesurfer 7 will become the default.
 
 You can get the default version with `docker pull bids/freesurfer`.
@@ -190,7 +198,8 @@ cortical parcellation and subcortical segementation, and a table with
 		--license_file "/license.txt"
 Also see the *--parcellations* and *--measurements* arguments.
 
-This step writes ouput into `<output_dir>/00_group2_stats_tables/`. E.g.:
+This step writes ouput into `<output_dir>/00_group2_stats_tables/`.
+E.g.:
 
 * `lh.aparc.thickness.tsv` contains cortical thickness values for the
 left hemisphere extracted via the aparac parcellation.
