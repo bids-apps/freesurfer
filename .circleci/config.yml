@@ -274,7 +274,7 @@ workflows:
         context:
         - dockerhub
         requires:
-        - test_<< matrix.version >>
+        - test_<< matrix.version >>_<< matrix.test >>
         filters:
           branches:
             only: /.*/
