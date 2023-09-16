@@ -253,7 +253,7 @@ workflows:
             only: /.*/
 
     - test:
-        name: test_<< matrix.version >>
+        name: test_<< matrix.version >>_<< matrix.test >>
         matrix:
           parameters:
             version: ['6', '7']
@@ -274,7 +274,8 @@ workflows:
         context:
         - dockerhub
         requires:
-        - test_<< matrix.version >>_<< matrix.test >>
+        - test_<< matrix.version >>_1
+        - test_<< matrix.version >>_2
         filters:
           branches:
             only: /.*/
