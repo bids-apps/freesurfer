@@ -1,10 +1,12 @@
+
+[![Docker version](https://img.shields.io/docker/pulls/bids/freesurfer.svg?style=plastic)](https://hub.docker.com/r/bids/freesurfer)
 ## Freesurfer recon-all BIDS App
 
 ### Description
 This app implements surface reconstruction using Freesurfer. It reconstructs the surface for each subject individually and then
-creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates) unless instructed to combine data across sessions. This app is available for both Freesurfer 6 and 7. 
+creates a study specific template. In case there are multiple sessions the Freesurfer longitudinal pipeline is used (creating subject specific templates) unless instructed to combine data across sessions. This app is available for both Freesurfer 6 and 7.
 
-The current Freesurfer version for Freesurfer 6 is based on: freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz  
+The current Freesurfer version for Freesurfer 6 is based on: freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz
 The current Freesurfer version for Freesurfer 7 is based on: freesurfer-linux-centos7_x86_64-7.4.1.tar.gz
 
 We only plan to support ove version of Freesurfer 6 and Freesurfer 7 at a time.
@@ -15,11 +17,11 @@ The output of the pipeline consist of the SUBJECTS_DIR created during the analys
 
 Freesurfer 6 will remain the default image till 2024, at which point Freesurfer 7 will become the default.
 
-You can get the default version with `docker pull bids/freesurfer`.  
+You can get the default version with `docker pull bids/freesurfer`.
 
-Freesurfer 7 is available at `docker pull bids/freesurfer:7`.  
+Freesurfer 7 is available at `docker pull bids/freesurfer:7`.
 
-Freesurfer 6 is available at `docker pull bids/freesurfer:6`.  
+Freesurfer 6 is available at `docker pull bids/freesurfer:6`.
 
 ### Documentation
  - [Surface reconstruction](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all)
@@ -149,12 +151,12 @@ This App has the following command line arguments:
 To run it in participant level mode (for one participant):
 
 		docker run -ti --rm \
-		-v /Users/filo/data/ds005:/bids_dataset:ro \
-		-v /Users/filo/outputs:/outputs \
-		-v /Users/filo/freesurfer_license.txt:/license.txt \
-		bids/freesurfer \
-		/bids_dataset /outputs participant --participant_label 01 \
-		--license_file "/license.txt"
+      -v /Users/filo/data/ds005:/bids_dataset:ro \
+      -v /Users/filo/outputs:/outputs \
+      -v /Users/filo/freesurfer_license.txt:/license.txt \
+      bids/freesurfer \
+        /bids_dataset /outputs participant --participant_label 01 \
+        --license_file "/license.txt"
 
 
 #### Group level
@@ -165,12 +167,12 @@ group level analyses can be run.
 To create a study specific template run:
 
 		docker run -ti --rm \
-		-v /Users/filo/data/ds005:/bids_dataset:ro \
-		-v /Users/filo/outputs:/outputs \
-		-v /Users/filo/freesurfer_license.txt:/license.txt \
-		bids/freesurfer \
-		/bids_dataset /outputs group1 \
-		--license_file "/license.txt"
+      -v /Users/filo/data/ds005:/bids_dataset:ro \
+      -v /Users/filo/outputs:/outputs \
+      -v /Users/filo/freesurfer_license.txt:/license.txt \
+      bids/freesurfer \
+        /bids_dataset /outputs group1 \
+        --license_file "/license.txt"
 
 ##### Stats and quality tables export
 To export tables with aggregated measurements within regions of
