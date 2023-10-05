@@ -254,29 +254,32 @@ if args.analysis_level == "participant":
                         FLAIRs = glob(os.path.join(args.bids_dir, "sub-%s" % subject_label,
                                                    "ses-%s" % session_label, "anat",
                                                    "%s_FLAIR.nii*" % (ar_t2)))
+                        refine_pial_input_args = ""
                         if args.refine_pial == "T2":
                             for T2 in T2s:
                                 if (max(nibabel.load(T2).header.get_zooms()) < 1.2) | args.allow_lowresT2:
-                                    input_args += " " + " ".join(["-T2 %s" % T2])
-                                    input_args += " -T2pial"
+                                    refine_pial_input_args += " " + " ".join(["-T2 %s" % T2])
+                                    refine_pial_input_args += " -T2pial"
                         elif args.refine_pial == "FLAIR":
                             for FLAIR in FLAIRs:
                                 if (max(nibabel.load(FLAIR).header.get_zooms()) < 1.2) | args.allow_lowresT2:
-                                    input_args += " " + " ".join(["-FLAIR %s" % FLAIR])
-                                    input_args += " -FLAIRpial"
+                                    refine_pial_input_args += " " + " ".join(["-FLAIR %s" % FLAIR])
+                                    refine_pial_input_args += " -FLAIRpial"
 
                         fsid = "sub-%s_ses-%s" % (subject_label, session_label)
                         stages = " ".join(["-" + stage for stage in args.stages])
 
 
-                        cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
-                                                                                output_dir,
-                                                                                input_args,
-                                                                                stages,
-                                                                                args.n_cpus)
-                        resume_cmd = "recon-all -subjid %s -sd %s %s -openmp %d" % (fsid,
+                        cmd = "recon-all -subjid %s -sd %s %s %s %s -openmp %d" % (fsid,
+                                                                                   output_dir,
+                                                                                   input_args,
+                                                                                   refine_pial_input_args,
+                                                                                   stages,
+                                                                                   args.n_cpus)
+                        resume_cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
                                                                                     output_dir,
                                                                                     stages,
+                                                                                    refine_pial_input_args,
                                                                                     args.n_cpus)
 
                         if os.path.isfile(os.path.join(output_dir, fsid, "scripts/IsRunning.lh+rh")):
