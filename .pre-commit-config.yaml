@@ -35,3 +35,5 @@ ci:
   autoupdate_schedule: monthly
   autofix_commit_msg: 'style: pre-commit fixes'
   autofix_prs: false
+  skip:
+  - hadolint-docker
