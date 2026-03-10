@@ -53,8 +53,10 @@ do
     if [ $VERSION = "6.0.1" ]
     then
       OUTFILE=${OUTFILEBASE}_fs6
+      extra_args='--miniconda version=latest mamba=true conda_install="python=3.11;pandas=1.5.3" pip_install="nibabel"'
     else
       OUTFILE=${OUTFILEBASE}_fs7
+      extra_args=''
     fi
 
     # Generate a dockerfile for building BIDS-Apps Freesurfer container
@@ -64,6 +66,7 @@ do
       --install tcsh bc tar libgomp1 perl-modules wget curl \
         libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
       --freesurfer version=${VERSION} install_path=/opt/freesurfer \
+      $extra_args \
       --bids_validator version=1.12.0\
       --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ \
             FSLMULTIFILEQUIT=TRUE POSSUMDIR=/usr/share/fsl/5.0 LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
@@ -74,7 +77,7 @@ do
             MINC_LIB_DIR=/opt/freesurfer/mni/lib MNI_DATAPATH=/opt/freesurfer/mni/data \
             FMRI_ANALYSIS_DIR=/opt/freesurfer/fsfast PERL5LIB=/opt/freesurfer/mni/share/perl5 \
             MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
-            PATH=/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+            PATH=/opt/miniconda-latest:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
             PYTHONPATH="" \
       --run 'mkdir root/matlab && touch root/matlab/startup.m' \
       --run 'mkdir /scratch' \
@@ -82,7 +85,7 @@ do
       --copy run.py '/run.py' \
       --run  'chmod +x /run.py' \
       --copy version '/version' \
-      --entrypoint 'python /run.py' \
+      --entrypoint 'python3 /run.py' \
     > $OUTFILE
   done
 done
