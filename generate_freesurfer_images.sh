@@ -53,7 +53,7 @@ do
     if [ $VERSION = "6.0.1" ]
     then
       OUTFILE=${OUTFILEBASE}_fs6
-      extra_args='--miniconda version=latest mamba=true conda_install="python=3.11;pandas=1.5.3" pip_install="nibabel"'
+      extra_args="--miniconda version=latest mamba=true conda_install=pandas pip_install=nibabel"
     else
       OUTFILE=${OUTFILEBASE}_fs7
       extra_args=''
@@ -77,7 +77,7 @@ do
             MINC_LIB_DIR=/opt/freesurfer/mni/lib MNI_DATAPATH=/opt/freesurfer/mni/data \
             FMRI_ANALYSIS_DIR=/opt/freesurfer/fsfast PERL5LIB=/opt/freesurfer/mni/share/perl5 \
             MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
-            PATH=/opt/miniconda-latest:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+            PATH=/opt/miniconda-latest/bin:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
             PYTHONPATH="" \
       --run 'mkdir root/matlab && touch root/matlab/startup.m' \
       --run 'mkdir /scratch' \

@@ -130,7 +130,7 @@ ENV OS="Linux" \
     FMRI_ANALYSIS_DIR="/opt/freesurfer/fsfast" \
     PERL5LIB="/opt/freesurfer/mni/share/perl5" \
     MNI_PERL5LIB="/opt/freesurfer/mni/share/perl5/" \
-    PATH="/opt/miniconda-latest:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    PATH="/opt/miniconda-latest/bin:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     PYTHONPATH=""
 RUN mkdir root/matlab && touch root/matlab/startup.m
 RUN mkdir /scratch
@@ -260,7 +260,7 @@ RUN printf '{ \
         "FMRI_ANALYSIS_DIR": "/opt/freesurfer/fsfast", \
         "PERL5LIB": "/opt/freesurfer/mni/share/perl5", \
         "MNI_PERL5LIB": "/opt/freesurfer/mni/share/perl5/", \
-        "PATH": "/opt/miniconda-latest:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", \
+        "PATH": "/opt/miniconda-latest/bin:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", \
         "PYTHONPATH": "" \
       } \
     }, \
