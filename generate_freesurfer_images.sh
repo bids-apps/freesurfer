@@ -39,7 +39,7 @@
 #
 ###############################################################################
 
-image="repronim/neurodocker@sha256:e552690641a7175ece97e0ef05dd2679d7f916a5bb6864aa92515bd350c24758"
+image="repronim/neurodocker:2.1.1"
 for TARGET in docker singularity
 do
   if [ $TARGET = docker ]
@@ -53,10 +53,8 @@ do
     if [ $VERSION = "6.0.1" ]
     then
       OUTFILE=${OUTFILEBASE}_fs6
-      INSTALL_DIR=/opt/freesurfer
     else
       OUTFILE=${OUTFILEBASE}_fs7
-      INSTALL_DIR=/opt/
     fi
 
     # Generate a dockerfile for building BIDS-Apps Freesurfer container
@@ -65,11 +63,10 @@ do
       --pkg-manager apt \
       --install tcsh bc tar libgomp1 perl-modules wget curl \
         libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib python2 \
-      --freesurfer version=${VERSION} install_path=$INSTALL_DIR \
-      --miniconda version=latest mamba=true conda_install="pandas=1.5.3" pip_install="nibabel" \
+      --freesurfer version=${VERSION} install_path=/opt/freesurfer \
+      --miniconda version=latest mamba=true conda_install="python=3.11 pandas=1.5.3" pip_install="nibabel" \
       --run-bash 'curl -sL https://deb.nodesource.com/setup_18.x | bash -' \
-      --install nodejs \
-      --run-bash 'npm install -g bids-validator@1.12.0' \
+      --bids_validator version=1.12.0\
       --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ \
             FSLMULTIFILEQUIT=TRUE POSSUMDIR=/usr/share/fsl/5.0 LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
             FSLTCLSH=/usr/bin/tclsh FSLWISH=/usr/bin/wish FSLOUTPUTTYPE=NIFTI_GZ \
