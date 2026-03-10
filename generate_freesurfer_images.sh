@@ -62,10 +62,8 @@ do
       --base-image ubuntu:jammy \
       --pkg-manager apt \
       --install tcsh bc tar libgomp1 perl-modules wget curl \
-        libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib python2 \
+        libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
       --freesurfer version=${VERSION} install_path=/opt/freesurfer \
-      --miniconda version=latest mamba=true conda_install="python=3.11 pandas=1.5.3" pip_install="nibabel" \
-      --run-bash 'curl -sL https://deb.nodesource.com/setup_18.x | bash -' \
       --bids_validator version=1.12.0\
       --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ \
             FSLMULTIFILEQUIT=TRUE POSSUMDIR=/usr/share/fsl/5.0 LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
@@ -76,7 +74,7 @@ do
             MINC_LIB_DIR=/opt/freesurfer/mni/lib MNI_DATAPATH=/opt/freesurfer/mni/data \
             FMRI_ANALYSIS_DIR=/opt/freesurfer/fsfast PERL5LIB=/opt/freesurfer/mni/share/perl5 \
             MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
-            PATH=/opt/miniconda-latest/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+            PATH=/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
             PYTHONPATH="" \
       --run 'mkdir root/matlab && touch root/matlab/startup.m' \
       --run 'mkdir /scratch' \
