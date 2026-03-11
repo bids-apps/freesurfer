@@ -86,11 +86,13 @@ apt-get install -y -q --no-install-recommends \
     curl \
     libglu1-mesa \
     libgomp1 \
+    libpython2.7-stdlib \
     libsm-dev \
     libx11-dev \
     libxext-dev \
     libxt-dev \
     perl-modules \
+    python2 \
     tar \
     tcsh \
     wget
@@ -234,7 +236,9 @@ printf '{ \
           "libx11-dev", \
           "libxt-dev", \
           "libxext-dev", \
-          "libglu1-mesa" \
+          "libglu1-mesa", \
+          "libpython2.7-stdlib", \
+          "python2" \
         ], \
         "opts": null \
       } \
@@ -242,7 +246,7 @@ printf '{ \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "apt-get update -qq\\napt-get install -y -q --no-install-recommends \\\\\\n    bc \\\\\\n    curl \\\\\\n    libglu1-mesa \\\\\\n    libgomp1 \\\\\\n    libsm-dev \\\\\\n    libx11-dev \\\\\\n    libxext-dev \\\\\\n    libxt-dev \\\\\\n    perl-modules \\\\\\n    tar \\\\\\n    tcsh \\\\\\n    wget\\nrm -rf /var/lib/apt/lists/*" \
+        "command": "apt-get update -qq\\napt-get install -y -q --no-install-recommends \\\\\\n    bc \\\\\\n    curl \\\\\\n    libglu1-mesa \\\\\\n    libgomp1 \\\\\\n    libpython2.7-stdlib \\\\\\n    libsm-dev \\\\\\n    libx11-dev \\\\\\n    libxext-dev \\\\\\n    libxt-dev \\\\\\n    perl-modules \\\\\\n    python2 \\\\\\n    tar \\\\\\n    tcsh \\\\\\n    wget\\nrm -rf /var/lib/apt/lists/*" \
       } \
     }, \
     { \

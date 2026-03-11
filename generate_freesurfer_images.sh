@@ -53,9 +53,11 @@ do
     if [ $VERSION = "6.0.1" ]
     then
       OUTFILE=${OUTFILEBASE}_fs6
+      extra_install="libpython2.7-stdlib python2"
       extra_args="--miniconda version=latest mamba=true conda_install=pandas pip_install=nibabel"
     else
       OUTFILE=${OUTFILEBASE}_fs7
+      extra_install=''
       extra_args=''
     fi
 
@@ -64,7 +66,7 @@ do
       --base-image ubuntu:jammy \
       --pkg-manager apt \
       --install tcsh bc tar libgomp1 perl-modules wget curl \
-        libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa \
+        libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa $extra_install \
       --freesurfer version=${VERSION} install_path=/opt/freesurfer \
       $extra_args \
       --bids_validator version=1.12.0\
