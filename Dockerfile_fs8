@@ -1,0 +1,31 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+ARG FS_VERSION=8.1.0
+ARG FREESURFER_HOME=/usr/local/freesurfer/$FS_VERSION
+
+RUN apt-get update && apt-get install -y curl && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+  && curl -sLO https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/8.1.0/freesurfer_ubuntu22-${FS_VERSION}_amd64.deb \
+	&& apt install -y --no-install-recommends ./freesurfer_ubuntu22-${FS_VERSION}_amd64.deb \
+	&& rm freesurfer_ubuntu22-${FS_VERSION}_amd64.deb \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& bash -c 'rm -Rf $FREESURFER_HOME/trctrain \
+	   $FREESURFER_HOME/subjects/{V1_average,bert,cvs_avg35,cvs_avg35_inMNI152,fsaverage3,fsaverage4,fsaverage5,fsaverage6,fsaverage_sym} \
+		 $FREESURFER_HOME/lib/qt \
+		 $FREESURFER_HOME/average/mult-comp-cor \
+		 $FREESURFER_HOME/models/synthmorph.deform.3.h5'
+
+SHELL ["/bin/bash", "-c"]
+ENV FREESURFER_HOME=$FREESURFER_HOME
+ENV PATH=$FREESURFER_HOME/python/bin:$PATH
+RUN . $FREESURFER_HOME/FreeSurferEnv.sh \
+	&& env | grep freesurfer > ~/.env \
+	&& echo 'export $(cat ~/.env)' >> ~/.bashrc \
+	&& echo "export PATH=$FREESURFER_HOME/python/bin:"'$PATH' >> ~/.bashrc
+
+COPY ./run.py /run.py
+COPY ./version /version
+
+ENTRYPOINT python3 /run.py
