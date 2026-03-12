@@ -28,4 +28,4 @@ RUN . $FREESURFER_HOME/FreeSurferEnv.sh \
 COPY ./run.py /run.py
 COPY ./version /version
 
-ENTRYPOINT python3 /run.py
+ENTRYPOINT ["python3", "/run.py"]
