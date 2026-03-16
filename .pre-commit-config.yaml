@@ -33,7 +33,7 @@ repos:
     entry: ghcr.io/hadolint/hadolint hadolint
 ci:
   autoupdate_commit_msg: 'chore: update pre-commit hooks'
-  autoupdate_schedule: monthly
+  autoupdate_schedule: quarterly
   autofix_commit_msg: 'style: pre-commit fixes'
   autofix_prs: false
   skip:
