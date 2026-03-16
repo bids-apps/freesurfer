@@ -592,7 +592,7 @@ elif args.analysis_level == "group2":  # running stats tables
     # therefore no euler numbers
     subjects = list(filter(lambda s: ".long.sub-" not in s, subjects))
     if len(subjects) > 0:
-        df = pd.DataFrame([], columns=["subject", "lh_euler", "rh_euler"])
+        df_list = []
         for subject in subjects:
             logfile = os.path.join(output_dir, subject, "scripts/recon-all.log")
             lh_euler, rh_euler = extract_euler(logfile)
@@ -600,7 +600,8 @@ elif args.analysis_level == "group2":  # running stats tables
                                         "lh_euler": [lh_euler],
                                         "rh_euler": [rh_euler]},
                                         columns=["subject", "lh_euler", "rh_euler"])
-            df = df.append(df_subject)
+            df_list.append(df_subject)
+        df = pd.concat(df_list)
         df["mean_euler_bh"] = df[["lh_euler", "rh_euler"]].mean(1)
         df.sort_values("subject", inplace=True)
         df.to_csv(euler_out_file, sep="\t", index=False)
