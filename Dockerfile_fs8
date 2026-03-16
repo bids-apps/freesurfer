@@ -1,0 +1,52 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+ARG FS_VERSION=8.1.0
+ARG FREESURFER_HOME=/usr/local/freesurfer/$FS_VERSION
+
+RUN apt-get update && apt-get install -y curl jq unzip && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+  && curl -sLO https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/8.1.0/freesurfer_ubuntu22-${FS_VERSION}_amd64.deb \
+	&& apt install -y --no-install-recommends ./freesurfer_ubuntu22-${FS_VERSION}_amd64.deb \
+	&& rm freesurfer_ubuntu22-${FS_VERSION}_amd64.deb \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& bash -c 'rm -Rf $FREESURFER_HOME/trctrain \
+	   $FREESURFER_HOME/subjects/{V1_average,bert,cvs_avg35,cvs_avg35_inMNI152,fsaverage3,fsaverage4,fsaverage5,fsaverage6,fsaverage_sym} \
+		 $FREESURFER_HOME/lib/qt \
+		 $FREESURFER_HOME/average/mult-comp-cor \
+		 $FREESURFER_HOME/models/synthmorph.deform.3.h5'
+
+ARG BIDS_VALIDATOR_VERSION=2.4.1
+RUN curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh \
+    && curl -L https://github.com/bids-standard/bids-validator/archive/refs/tags/${BIDS_VALIDATOR_VERSION}.tar.gz | tar -xz \
+    && cd bids-validator-${BIDS_VALIDATOR_VERSION}\
+    && jq -r ".version|=\"${BIDS_VALIDATOR_VERSION}\"" deno.json > ._deno.json \
+    && mv ._deno.json deno.json \
+    && deno run -A ./build.ts \
+    && cp dist/validator/bids-validator.js /usr/bin/ \
+    && echo 'deno -A /usr/bin//bids-validator.js $@' > /usr/bin/bids-validator \
+    && chmod +x /usr/bin/bids-validator \
+    && rm -Rf $PWD
+
+SHELL ["/bin/bash", "-c"]
+ENV FREESURFER_HOME=$FREESURFER_HOME
+ENV SUBJECTS_DIR=$FREESURFER_HOME/subjects
+ENV PATH=$FREESURFER_HOME/python/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/fsfast/bin:$FREESURFER_HOME/tktools:$FREESURFER_HOME/mni/bin:$PATH
+ENV MINC_BIN_DIR=$FREESURFER_HOME/mni/bin
+ENV FSFAST_HOME=$FREESURFER_HOME/fsfast
+ENV FREESURFER=$FREESURFER_HOME
+ENV MNI_DATAPATH=$FREESURFER_HOME/mni/data
+ENV FUNCTIONALS_DIR=$FREESURFER_HOME/sessions
+ENV MINC_LIB_DIR=$FREESURFER_HOME/mni/lib
+ENV FMRI_ANALYSIS_DIR=$FREESURFER_HOME/fsfast
+ENV MNI_DIR=$FREESURFER_HOME/mni
+ENV PERL5LIB=$FREESURFER_HOME/mni/share/perl5
+ENV MNI_PERL5LIB=$FREESURFER_HOME/mni/share/perl5
+ENV LOCAL_DIR=$FREESURFER_HOME/local
+ENV SUBJECTS_DIR=$FREESURFER_HOME/subjects
+
+COPY ./run.py /run.py
+COPY ./version /version
+
+ENTRYPOINT ["python3", "/run.py"]
