@@ -29,12 +29,8 @@ def run(command, env={}, ignore_errors=False):
         raise Exception("Non zero return code: %d" % process.returncode)
 
 # warn about freesurfer version
-with open(os.path.join(os.environ['FREESURFER_HOME'], 'build-stamp.txt'), 'r') as h:
-    bs = h.read()
-if 'x86_64-7.' in bs:
-    fsversion=7
-else:
-    fsversion=6
+fsversion = int(os.environ['FS_VERSION'].split('.')[0])
+if fsversion == 6:
     warn("You are using FreeSurver version 6. "
         "The FreeSurfer 7 BIDS-App is now available via docker pull bids/freesurfer:v7 . "
         "FreeSurfer 7 will become the default version in the FreeSurfer BIDS-App begining in 2024. "
@@ -528,12 +524,9 @@ elif args.analysis_level == "group2":  # running stats tables
                 raise Exception("No freesurfer subject found for %s in %s" % (s, output_dir))
     subjects_str = " ".join(subjects)
 
-    # The call to python2 is only required if we're running Freesurfer 6, we'll need to check version
-    # and modify the calls accordingly.
-    if fsversion == 7:
-        cmd_start = ''
-    else:
-        cmd_start = 'python2 '
+    # FreeSurfer 6's aparcstats2table/asegstats2table need an explicit python2
+    # invocation; FreeSurfer 7+ scripts are python3 and run directly.
+    cmd_start = '' if fsversion >= 7 else 'python2 '
 
     if len(subjects) > 0:
         # create cortical stats
@@ -600,8 +593,8 @@ elif args.analysis_level == "group2":  # running stats tables
                                         "lh_euler": [lh_euler],
                                         "rh_euler": [rh_euler]},
                                         columns=["subject", "lh_euler", "rh_euler"])
-            df = df.append(df_subject)
-        df["mean_euler_bh"] = df[["lh_euler", "rh_euler"]].mean(1)
+            df = pd.concat([df, df_subject])
+        df["mean_euler_bh"] = df[["lh_euler", "rh_euler"]].mean(axis=1)
         df.sort_values("subject", inplace=True)
         df.to_csv(euler_out_file, sep="\t", index=False)
     else:
