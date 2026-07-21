@@ -54,13 +54,29 @@ do
     then
       OUTFILE=${OUTFILEBASE}_fs6
       INSTALL_DIR=/opt/freesurfer
+      FS_ROOT=$INSTALL_DIR
     elif [ $VERSION = "7.4.1" ]
     then
       OUTFILE=${OUTFILEBASE}_fs7
+      # INSTALL_DIR here is the --freesurfer install_path=, i.e. the tar
+      # extraction target below (-C $INSTALL_DIR --strip-components 1) --
+      # it is NOT the same as the true FreeSurfer root (FS_ROOT). The
+      # 7.4.1 tarball's entries are "./freesurfer/...", so
+      # --strip-components 1 only strips the leading "./"; extracting
+      # into /opt/freesurfer directly (like fs6) would double-nest to
+      # /opt/freesurfer/freesurfer. Extracting into /opt/ instead lands
+      # the files at /opt/freesurfer, one level below INSTALL_DIR.
+      # Confirmed by actually building both variants and inspecting the
+      # image (`docker run --entrypoint bash ... find /opt`), not just
+      # reading the extraction command -- a "fix" here that made FS_ROOT
+      # equal INSTALL_DIR broke recon-all's PATH entirely (caught by CI:
+      # bids-apps/freesurfer#96, test_7_1/test_7_2, "recon-all: not found").
       INSTALL_DIR=/opt/
+      FS_ROOT=/opt/freesurfer
     else
       OUTFILE=${OUTFILEBASE}_fs8
       INSTALL_DIR=/usr/local/freesurfer/8.2.0
+      FS_ROOT=$INSTALL_DIR
     fi
 
     # 8.2.0 ships only as a .deb (no generic tarball), so neurodocker's
@@ -105,13 +121,13 @@ do
             FSLMULTIFILEQUIT=TRUE POSSUMDIR=/usr/share/fsl/5.0 LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
             FSLTCLSH=/usr/bin/tclsh FSLWISH=/usr/bin/wish FSLOUTPUTTYPE=NIFTI_GZ \
       --env FS_VERSION=${VERSION} \
-      --env OS=Linux FS_OVERRIDE=0 FIX_VERTEX_AREA= SUBJECTS_DIR=$INSTALL_DIR/subjects \
-            FSF_OUTPUT_FORMAT=nii.gz MNI_DIR=$INSTALL_DIR/mni LOCAL_DIR=$INSTALL_DIR/local \
-            FREESURFER_HOME=$INSTALL_DIR FREESURFER=$INSTALL_DIR FSFAST_HOME=$INSTALL_DIR/fsfast MINC_BIN_DIR=$INSTALL_DIR/mni/bin \
-            MINC_LIB_DIR=$INSTALL_DIR/mni/lib MNI_DATAPATH=$INSTALL_DIR/mni/data \
-            FMRI_ANALYSIS_DIR=$INSTALL_DIR/fsfast FUNCTIONALS_DIR=$INSTALL_DIR/sessions PERL5LIB=$INSTALL_DIR/mni/share/perl5 \
-            MNI_PERL5LIB=$INSTALL_DIR/mni/share/perl5/ \
-            PATH=/opt/miniconda-latest/bin:$INSTALL_DIR/bin:$INSTALL_DIR/fsfast/bin:$INSTALL_DIR/tktools:$INSTALL_DIR/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+      --env OS=Linux FS_OVERRIDE=0 FIX_VERTEX_AREA= SUBJECTS_DIR=$FS_ROOT/subjects \
+            FSF_OUTPUT_FORMAT=nii.gz MNI_DIR=$FS_ROOT/mni LOCAL_DIR=$FS_ROOT/local \
+            FREESURFER_HOME=$FS_ROOT FREESURFER=$FS_ROOT FSFAST_HOME=$FS_ROOT/fsfast MINC_BIN_DIR=$FS_ROOT/mni/bin \
+            MINC_LIB_DIR=$FS_ROOT/mni/lib MNI_DATAPATH=$FS_ROOT/mni/data \
+            FMRI_ANALYSIS_DIR=$FS_ROOT/fsfast FUNCTIONALS_DIR=$FS_ROOT/sessions PERL5LIB=$FS_ROOT/mni/share/perl5 \
+            MNI_PERL5LIB=$FS_ROOT/mni/share/perl5/ \
+            PATH=/opt/miniconda-latest/bin:$FS_ROOT/bin:$FS_ROOT/fsfast/bin:$FS_ROOT/tktools:$FS_ROOT/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
             PYTHONPATH="" \
       --run 'mkdir root/matlab && touch root/matlab/startup.m' \
       --run 'mkdir /scratch' \
