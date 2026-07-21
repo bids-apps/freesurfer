@@ -74,14 +74,15 @@ do
     then
       ARGS+=(--install tcsh bc tar libgomp1 wget curl ca-certificates)
       ARGS+=(--run-bash "wget -q -O /tmp/freesurfer_8.2.0.deb https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/8.2.0/freesurfer_ubuntu22-8.2.0_amd64.deb && apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -q /tmp/freesurfer_8.2.0.deb && rm -f /tmp/freesurfer_8.2.0.deb && rm -rf /var/lib/apt/lists/*")
-      # df.append() (removed in pandas 2.0) is gone from run.py, so no need
-      # to pin the old pandas version the tarball-based images below still need.
-      PANDAS_SPEC="pandas"
     else
       ARGS+=(--install tcsh bc tar libgomp1 perl-modules wget curl libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib python2)
       ARGS+=(--freesurfer version=${VERSION} install_path=$INSTALL_DIR)
-      PANDAS_SPEC="pandas=1.5.3"
     fi
+    # run.py no longer calls df.append() (removed in pandas 2.0), so nothing
+    # needs the old pandas==1.5.3 pin anymore -- and pinning it now actively
+    # breaks the build: Miniconda's "latest" installer currently ships
+    # Python 3.14, which pandas 1.5.3 (needs <3.11) can't be solved against.
+    PANDAS_SPEC="pandas"
 
     # Hand-written equivalent of neurodocker's own --miniconda template: that
     # template (baked into the pinned neurodocker image) predates Anaconda's
