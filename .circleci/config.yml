@@ -229,7 +229,7 @@ jobs:
 
           else
               : "No DOCKER_TOKEN, skipping push to DockerHub"
-              exit 1
+              exit 0
           fi
 
 workflows:
