@@ -31,7 +31,9 @@ def run(command, env={}, ignore_errors=False):
 # warn about freesurfer version
 with open(os.path.join(os.environ['FREESURFER_HOME'], 'build-stamp.txt'), 'r') as h:
     bs = h.read()
-if 'x86_64-7.' in bs:
+if 'x86_64-8.' in bs:
+    fsversion=8
+elif 'x86_64-7.' in bs:
     fsversion=7
 else:
     fsversion=6
