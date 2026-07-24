@@ -278,6 +278,6 @@ workflows:
         - test_<< matrix.version >>_2
         filters:
           branches:
-            only: /.*/
+            ignore: /.*/
           tags:
             only: /.*/
