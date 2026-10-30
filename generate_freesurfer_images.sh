@@ -67,10 +67,12 @@ do
 
     # 8.2.0 ships only as a .deb (no generic tarball), so neurodocker's
     # --freesurfer template (which only knows versions <=7.4.1) can't be used
-    # for it -- install it by hand with --run-bash.
+    # for it -- install it by hand with --run-bash. Drops ~4GB the app never
+    # uses (TRACULA, GUI, extra subjects); keep models/synthmorph.deform.3.h5,
+    # v8 recon-all's default -synthmorph needs it.
     if [ $VERSION = "8.2.0" ]
     then
-      fs_install=(--run-bash "wget -q -O /tmp/freesurfer_8.2.0.deb https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/8.2.0/freesurfer_ubuntu22-8.2.0_amd64.deb && apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -q /tmp/freesurfer_8.2.0.deb && rm -f /tmp/freesurfer_8.2.0.deb && rm -rf /var/lib/apt/lists/*")
+      fs_install=(--run-bash "wget -q -O /tmp/freesurfer_8.2.0.deb https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/8.2.0/freesurfer_ubuntu22-8.2.0_amd64.deb && apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -q /tmp/freesurfer_8.2.0.deb && rm -f /tmp/freesurfer_8.2.0.deb && rm -rf /var/lib/apt/lists/* && cd $FS_ROOT && rm -rf trctrain lib/qt average/mult-comp-cor subjects/{V1_average,bert,cvs_avg35,cvs_avg35_inMNI152,fsaverage3,fsaverage4,fsaverage5,fsaverage6,fsaverage_sym}")
     else
       fs_install=(--freesurfer version=${VERSION} install_path=$FS_ROOT)
     fi
