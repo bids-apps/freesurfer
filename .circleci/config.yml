@@ -63,6 +63,7 @@ jobs:
   test:
     machine:
       image: ubuntu-2204:2022.10.2
+    resource_class: large
     parameters:
       version:
         type: string
@@ -77,6 +78,18 @@ jobs:
         name: load image
         command: |
           docker load -i /tmp/workspace/docker/image_fs<< parameters.version >>.tar
+
+    # FreeSurfer 8 recon-all needs ~24GB of RAM (SynthStrip/SynthSeg/SynthMorph),
+    # more than the 15GB of the largest Linux VM resource class available
+    # to us, so back it with swap on the VM's disk.
+    - run:
+        name: add swap
+        command: |
+          sudo fallocate -l 24G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
 
     - run:
         name: print version
@@ -100,6 +113,8 @@ jobs:
 
     - run:
         name: test << parameters.test >>
+        # swap-backed SynthStrip/SynthSeg can be silent for a long while
+        no_output_timeout: 45m
         command: |2
 
           if [[ << parameters.test >> -eq 1 ]]; then
@@ -137,6 +152,20 @@ jobs:
                   --session_label test
 
             cat ${HOME}/outputs<< parameters.test >>/sub-01_ses-test/scripts/recon-all.done
+          fi
+
+    - run:
+        name: show recon-all.log and OOM kills on failure
+        when: on_fail
+        command: |
+          free -h
+          sudo dmesg -T | grep -i -E 'out of memory|oom-kill|killed process' | tail -n 20 || :
+          log=$(ls -t ${HOME}/outputs<< parameters.test >>/*/scripts/recon-all.log 2>/dev/null | head -n 1)
+          if [[ -n "$log" ]]; then
+            echo "=== tail of $log"
+            sudo tail -n 100 "$log"
+          else
+            echo "No recon-all.log found under ${HOME}/outputs<< parameters.test >>"
           fi
 
     - run:
