@@ -48,15 +48,9 @@ do
   else
     OUTFILEBASE=Singularity
   fi
-  for VERSION in "6.0.1" "7.4.1" "8.2.0"
+  for VERSION in "7.4.1" "8.2.0"
   do
-    if [ $VERSION = "6.0.1" ]
-    then
-      OUTFILE=${OUTFILEBASE}_fs6
-      FS_ROOT=/opt/freesurfer
-      install_pkgs="perl-modules libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa libpython2.7-stdlib python2"
-      extra_args="--miniconda version=latest mamba=true conda_install=pandas pip_install=nibabel"
-    elif [ $VERSION = "7.4.1" ]
+    if [ $VERSION = "7.4.1" ]
     then
       OUTFILE=${OUTFILEBASE}_fs7
       FS_ROOT=/opt/freesurfer
@@ -66,7 +60,7 @@ do
       OUTFILE=${OUTFILEBASE}_fs8
       FS_ROOT=/usr/local/freesurfer/8.2.0
       # apt resolves the .deb's own Depends: (xorg/tcsh/bc/etc.), so no need
-      # to hand-list them here like the tarball-based versions above do.
+      # to hand-list them here like the tarball-based 7.4.1 above does.
       install_pkgs="ca-certificates"
       extra_args="--miniconda version=latest mamba=true conda_install=pandas pip_install=nibabel"
     fi

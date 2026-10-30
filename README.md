@@ -8,11 +8,7 @@ It reconstructs the surface for each subject individually
 and then creates a study specific template.
 In case there are multiple sessions the Freesurfer longitudinal pipeline is used
 (creating subject specific templates) unless instructed to combine data across sessions.
-This app is available for Freesurfer 6, 7, and 8.
-
-The current Freesurfer version for Freesurfer 6 is based on:
-
-- `freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz`
+This app is available for Freesurfer 7 and 8.
 
 The current Freesurfer version for Freesurfer 7 is based on:
 
@@ -22,20 +18,19 @@ The current Freesurfer version for Freesurfer 8 is based on:
 
 - `freesurfer_ubuntu22-8.2.0_amd64.deb`
 
-We only plan to support only one version of Freesurfer 6, Freesurfer 7, and Freesurfer 8 at a time.
+We only plan to support only one version of Freesurfer 7 and Freesurfer 8 at a time.
 
 The output of the pipeline consist of the `SUBJECTS_DIR` created during the analysis.
 
 ### How to get it
-Freesurfer 6 will remain the default image till 2024, at which point Freesurfer 7 will become the default.
-
-You can get the default version with `docker pull bids/freesurfer`.
+Freesurfer 7 is the default image; you can get it with `docker pull bids/freesurfer`.
 
 Freesurfer 8 is available at `docker pull bids/freesurfer:8`.
 
 Freesurfer 7 is available at `docker pull bids/freesurfer:7`.
 
-Freesurfer 6 is available at `docker pull bids/freesurfer:6`.
+Freesurfer 6 images are no longer built, but previously released ones remain
+available at `docker pull bids/freesurfer:6`.
 
 ### Documentation
  - [Surface reconstruction](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all)

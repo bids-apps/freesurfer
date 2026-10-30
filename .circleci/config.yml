@@ -188,9 +188,7 @@ jobs:
             repo_name=$(echo "${CIRCLE_PROJECT_REPONAME}" | tr '[:upper:]' '[:lower:]')
 
             FS_MAJOR_VERSION=<< parameters.version >>
-            if [[ FS_MAJOR_VERSION -eq 6 ]]; then
-              FS_VERSION=6.0.1
-            elif [[ FS_MAJOR_VERSION -eq 7 ]]; then
+            if [[ FS_MAJOR_VERSION -eq 7 ]]; then
               FS_VERSION=7.4.1
             else
               FS_VERSION=8.2.0
@@ -212,7 +210,7 @@ jobs:
 
               latest="${user_name}/${repo_name}:latest"
 
-              if [[ FS_MAJOR_VERSION -eq 6 ]]; then
+              if [[ FS_MAJOR_VERSION -eq 7 ]]; then
                   docker tag "${unstable}" "${latest}"
                   docker push "${latest}"
               fi
@@ -247,21 +245,7 @@ workflows:
         name: build_<< matrix.version >>
         matrix:
           parameters:
-            version: ['6', '7']
-        filters:
-          tags:
-            only: /.*/
-          branches:
-            only: /.*/
-
-    # fs8 has no precomputed group2 fixture (test job compares against
-    # ds114_test<N>_freesurfer_precomp_v6.0.0), so it's built/deployed here
-    # without going through the test job/matrix, unlike 6/7.
-    - build:
-        name: build_<< matrix.version >>
-        matrix:
-          parameters:
-            version: ['8']
+            version: ['7', '8']
         filters:
           tags:
             only: /.*/
@@ -272,7 +256,7 @@ workflows:
         name: test_<< matrix.version >>_<< matrix.test >>
         matrix:
           parameters:
-            version: ['6', '7']
+            version: ['7', '8']
             test: ['1', '2']
         requires:
         - build_<< matrix.version >>
@@ -286,28 +270,12 @@ workflows:
     - deploy:
         matrix:
           parameters:
-            version: ['6', '7']
+            version: ['7', '8']
         context:
         - dockerhub
         requires:
         - test_<< matrix.version >>_1
         - test_<< matrix.version >>_2
-        filters:
-          branches:
-            ignore: /.*/
-          tags:
-            only: /.*/
-
-    # No test_8_* jobs (see build_8 above), so this only requires build_8.
-    - deploy:
-        name: deploy_<< matrix.version >>
-        matrix:
-          parameters:
-            version: ['8']
-        context:
-        - dockerhub
-        requires:
-        - build_<< matrix.version >>
         filters:
           branches:
             ignore: /.*/
