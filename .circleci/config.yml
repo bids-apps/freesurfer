@@ -246,7 +246,7 @@ jobs:
 
               latest="${user_name}/${repo_name}:latest"
 
-              if [[ FS_MAJOR_VERSION -eq 7 ]]; then
+              if [[ FS_MAJOR_VERSION -eq 8 ]]; then
                   docker tag "${unstable}" "${latest}"
                   docker push "${latest}"
               fi
