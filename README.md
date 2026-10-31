@@ -1,5 +1,8 @@
 
-[![Docker version](https://img.shields.io/docker/pulls/bids/freesurfer.svg?style=plastic)](https://hub.docker.com/r/bids/freesurfer)
+[![CircleCI](https://circleci.com/gh/bids-apps/freesurfer.svg?style=shield)](https://circleci.com/gh/bids-apps/freesurfer)
+[![Docker pulls](https://img.shields.io/docker/pulls/bids/freesurfer.svg?style=plastic)](https://hub.docker.com/r/bids/freesurfer)
+[![FreeSurfer 7 image version](https://img.shields.io/docker/v/bids/freesurfer/7.4.1-unstable?label=FreeSurfer%207)](https://hub.docker.com/r/bids/freesurfer/tags?name=7.4.1-unstable)
+[![FreeSurfer 8 image version](https://img.shields.io/docker/v/bids/freesurfer/8.2.0-unstable?label=FreeSurfer%208)](https://hub.docker.com/r/bids/freesurfer/tags?name=8.2.0-unstable)
 ## Freesurfer recon-all BIDS App
 
 ### Description
