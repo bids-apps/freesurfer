@@ -117,11 +117,17 @@ jobs:
         no_output_timeout: 45m
         command: |2
 
+          # TensorFlow's CPU (mklcpu) allocator caps itself at physical RAM
+          # and so ignores swap, failing SynthSeg with "OOM when allocating
+          # tensor". Raise the cap to cover RAM + swap.
+          TF_MKL_ALLOC_MAX_BYTES=$((36 \<< 30))
+
           if [[ << parameters.test >> -eq 1 ]]; then
             docker run -ti --rm --read-only \
               -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
               -v /tmp/workspace/data/ds114_test<< parameters.test >>:/bids_dataset \
               -v ${HOME}/outputs<< parameters.test >>:/outputs \
+              -e TF_MKL_ALLOC_MAX_BYTES=${TF_MKL_ALLOC_MAX_BYTES} \
               --tmpfs /tmp --tmpfs /var/tmp \
                 bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> \
                   /bids_dataset \
@@ -140,6 +146,7 @@ jobs:
               -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
               -v /tmp/workspace/data/ds114_test<< parameters.test >>:/bids_dataset \
               -v ${HOME}/outputs<< parameters.test >>:/outputs \
+              -e TF_MKL_ALLOC_MAX_BYTES=${TF_MKL_ALLOC_MAX_BYTES} \
               --tmpfs /tmp --tmpfs /var/tmp \
                 bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> \
                   /bids_dataset \
