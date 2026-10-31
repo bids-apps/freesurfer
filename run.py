@@ -28,17 +28,6 @@ def run(command, env={}, ignore_errors=False):
     if process.returncode != 0 and not ignore_errors:
         raise Exception("Non zero return code: %d" % process.returncode)
 
-# warn about freesurfer version
-with open(os.path.join(os.environ['FREESURFER_HOME'], 'build-stamp.txt'), 'r') as h:
-    bs = h.read()
-if 'x86_64-7.' in bs:
-    fsversion=7
-else:
-    fsversion=6
-    warn("You are using FreeSurver version 6. "
-        "The FreeSurfer 7 BIDS-App is now available via docker pull bids/freesurfer:v7 . "
-        "FreeSurfer 7 will become the default version in the FreeSurfer BIDS-App begining in 2024. "
-        "From that point on, the FreeSurfer 6 BIDS-App will remain available at bids/freesurfer:v6 .")
 __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version')).read()
 
 parser = argparse.ArgumentParser(description='FreeSurfer recon-all + custom template generation.')
@@ -528,13 +517,6 @@ elif args.analysis_level == "group2":  # running stats tables
                 raise Exception("No freesurfer subject found for %s in %s" % (s, output_dir))
     subjects_str = " ".join(subjects)
 
-    # The call to python2 is only required if we're running Freesurfer 6, we'll need to check version
-    # and modify the calls accordingly.
-    if fsversion == 7:
-        cmd_start = ''
-    else:
-        cmd_start = 'python2 '
-
     if len(subjects) > 0:
         # create cortical stats
         for p in args.parcellations:
@@ -544,7 +526,7 @@ elif args.analysis_level == "group2":  # running stats tables
                     if os.path.isfile(table_file):
                         warn("Replace old file %s" % table_file)
                         os.remove(table_file)
-                    cmd = cmd_start + "`which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
+                    cmd = "`which aparcstats2table` --hemi {h} --subjects {subjects} --parc {p} --meas {m} " \
                           "--tablefile {table_file}".format(h=h, subjects=subjects_str, p=p, m=m,
                                                             table_file=table_file)
                     print("Creating cortical stats table for {h} {p} {m}".format(h=h, p=p, m=m))
@@ -555,7 +537,7 @@ elif args.analysis_level == "group2":  # running stats tables
         if os.path.isfile(table_file):
             warn("Replace old file %s" % table_file)
             os.remove(table_file)
-        cmd = cmd_start + "`which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
+        cmd = "`which asegstats2table` --subjects {subjects} --meas volume --tablefile {" \
               "table_file}".format(subjects=subjects_str, table_file=table_file)
         print("Creating subcortical stats table.")
         run(cmd, env={"SUBJECTS_DIR": output_dir, 'FS_LICENSE': args.license_file})
@@ -602,7 +584,7 @@ elif args.analysis_level == "group2":  # running stats tables
                                         columns=["subject", "lh_euler", "rh_euler"])
             df_list.append(df_subject)
         df = pd.concat(df_list)
-        df["mean_euler_bh"] = df[["lh_euler", "rh_euler"]].mean(1)
+        df["mean_euler_bh"] = df[["lh_euler", "rh_euler"]].mean(axis=1)
         df.sort_values("subject", inplace=True)
         df.to_csv(euler_out_file, sep="\t", index=False)
     else:

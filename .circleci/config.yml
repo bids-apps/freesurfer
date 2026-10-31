@@ -63,6 +63,7 @@ jobs:
   test:
     machine:
       image: ubuntu-2204:2022.10.2
+    resource_class: large
     parameters:
       version:
         type: string
@@ -77,6 +78,18 @@ jobs:
         name: load image
         command: |
           docker load -i /tmp/workspace/docker/image_fs<< parameters.version >>.tar
+
+    # FreeSurfer 8 recon-all needs ~24GB of RAM (SynthStrip/SynthSeg/SynthMorph),
+    # more than the 15GB of the largest Linux VM resource class available
+    # to us, so back it with swap on the VM's disk.
+    - run:
+        name: add swap
+        command: |
+          sudo fallocate -l 24G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
 
     - run:
         name: print version
@@ -100,13 +113,21 @@ jobs:
 
     - run:
         name: test << parameters.test >>
+        # swap-backed SynthStrip/SynthSeg can be silent for a long while
+        no_output_timeout: 45m
         command: |2
+
+          # TensorFlow's CPU (mklcpu) allocator caps itself at physical RAM
+          # and so ignores swap, failing SynthSeg with "OOM when allocating
+          # tensor". Raise the cap to cover RAM + swap.
+          TF_MKL_ALLOC_MAX_BYTES=$((36 \<< 30))
 
           if [[ << parameters.test >> -eq 1 ]]; then
             docker run -ti --rm --read-only \
               -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
               -v /tmp/workspace/data/ds114_test<< parameters.test >>:/bids_dataset \
               -v ${HOME}/outputs<< parameters.test >>:/outputs \
+              -e TF_MKL_ALLOC_MAX_BYTES=${TF_MKL_ALLOC_MAX_BYTES} \
               --tmpfs /tmp --tmpfs /var/tmp \
                 bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> \
                   /bids_dataset \
@@ -125,6 +146,7 @@ jobs:
               -v /tmp/workspace/license_fs<< parameters.version >>/license.txt:/license.txt \
               -v /tmp/workspace/data/ds114_test<< parameters.test >>:/bids_dataset \
               -v ${HOME}/outputs<< parameters.test >>:/outputs \
+              -e TF_MKL_ALLOC_MAX_BYTES=${TF_MKL_ALLOC_MAX_BYTES} \
               --tmpfs /tmp --tmpfs /var/tmp \
                 bids/${CIRCLE_PROJECT_REPONAME}_fs<< parameters.version >> \
                   /bids_dataset \
@@ -137,6 +159,20 @@ jobs:
                   --session_label test
 
             cat ${HOME}/outputs<< parameters.test >>/sub-01_ses-test/scripts/recon-all.done
+          fi
+
+    - run:
+        name: show recon-all.log and OOM kills on failure
+        when: on_fail
+        command: |
+          free -h
+          sudo dmesg -T | grep -i -E 'out of memory|oom-kill|killed process' | tail -n 20 || :
+          log=$(ls -t ${HOME}/outputs<< parameters.test >>/*/scripts/recon-all.log 2>/dev/null | head -n 1)
+          if [[ -n "$log" ]]; then
+            echo "=== tail of $log"
+            sudo tail -n 100 "$log"
+          else
+            echo "No recon-all.log found under ${HOME}/outputs<< parameters.test >>"
           fi
 
     - run:
@@ -188,10 +224,10 @@ jobs:
             repo_name=$(echo "${CIRCLE_PROJECT_REPONAME}" | tr '[:upper:]' '[:lower:]')
 
             FS_MAJOR_VERSION=<< parameters.version >>
-            if [[ FS_MAJOR_VERSION -eq 6 ]]; then
-              FS_VERSION=6.0.1
-            else
+            if [[ FS_MAJOR_VERSION -eq 7 ]]; then
               FS_VERSION=7.4.1
+            else
+              FS_VERSION=8.2.0
             fi
 
             : "Pushing unstable versions for ${FS_MAJOR_VERSION} to DockerHub"
@@ -210,7 +246,7 @@ jobs:
 
               latest="${user_name}/${repo_name}:latest"
 
-              if [[ FS_MAJOR_VERSION -eq 6 ]]; then
+              if [[ FS_MAJOR_VERSION -eq 8 ]]; then
                   docker tag "${unstable}" "${latest}"
                   docker push "${latest}"
               fi
@@ -227,7 +263,7 @@ jobs:
 
           else
               : "No DOCKER_TOKEN, skipping push to DockerHub"
-              exit 1
+              exit 0
           fi
 
 workflows:
@@ -245,7 +281,7 @@ workflows:
         name: build_<< matrix.version >>
         matrix:
           parameters:
-            version: ['6', '7']
+            version: ['7', '8']
         filters:
           tags:
             only: /.*/
@@ -256,7 +292,7 @@ workflows:
         name: test_<< matrix.version >>_<< matrix.test >>
         matrix:
           parameters:
-            version: ['6', '7']
+            version: ['7', '8']
             test: ['1', '2']
         requires:
         - build_<< matrix.version >>
@@ -270,7 +306,7 @@ workflows:
     - deploy:
         matrix:
           parameters:
-            version: ['6', '7']
+            version: ['7', '8']
         context:
         - dockerhub
         requires:

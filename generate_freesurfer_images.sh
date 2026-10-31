@@ -48,38 +48,54 @@ do
   else
     OUTFILEBASE=Singularity
   fi
-  for VERSION in "6.0.1" "7.4.1"
+  for VERSION in "7.4.1" "8.2.0"
   do
-    if [ $VERSION = "6.0.1" ]
+    if [ $VERSION = "7.4.1" ]
     then
-      OUTFILE=${OUTFILEBASE}_fs6
-      extra_install="libpython2.7-stdlib python2"
-      extra_args="--miniconda version=latest mamba=true conda_install=pandas pip_install=nibabel"
-    else
       OUTFILE=${OUTFILEBASE}_fs7
-      extra_install=''
+      FS_ROOT=/opt/freesurfer
+      install_pkgs="perl-modules libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa"
       extra_args=''
+    else
+      OUTFILE=${OUTFILEBASE}_fs8
+      FS_ROOT=/usr/local/freesurfer/8.2.0
+      # apt resolves the .deb's own Depends: (xorg/tcsh/bc/etc.), so no need
+      # to hand-list them here like the tarball-based 7.4.1 above does.
+      install_pkgs="ca-certificates"
+      extra_args="--miniconda version=latest mamba=true conda_install=pandas pip_install=nibabel"
+    fi
+
+    # 8.2.0 ships only as a .deb (no generic tarball), so neurodocker's
+    # --freesurfer template (which only knows versions <=7.4.1) can't be used
+    # for it -- install it by hand with --run-bash. Drops ~4GB the app never
+    # uses (TRACULA, GUI, extra subjects); keep models/synthmorph.deform.3.h5,
+    # v8 recon-all's default -synthmorph needs it.
+    if [ $VERSION = "8.2.0" ]
+    then
+      fs_install=(--run-bash "wget -q -O /tmp/freesurfer_8.2.0.deb https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/8.2.0/freesurfer_ubuntu22-8.2.0_amd64.deb && apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -q /tmp/freesurfer_8.2.0.deb && rm -f /tmp/freesurfer_8.2.0.deb && rm -rf /var/lib/apt/lists/* && cd $FS_ROOT && rm -rf trctrain lib/qt average/mult-comp-cor subjects/{V1_average,bert,cvs_avg35,cvs_avg35_inMNI152,fsaverage3,fsaverage4,fsaverage5,fsaverage6,fsaverage_sym}")
+    else
+      fs_install=(--freesurfer version=${VERSION} install_path=$FS_ROOT)
     fi
 
     # Generate a dockerfile for building BIDS-Apps Freesurfer container
     docker run --rm ${image} generate ${TARGET} \
       --base-image ubuntu:jammy \
       --pkg-manager apt \
-      --install tcsh bc tar libgomp1 perl-modules wget curl \
-        libsm-dev libx11-dev libxt-dev libxext-dev libglu1-mesa $extra_install \
-      --freesurfer version=${VERSION} install_path=/opt/freesurfer \
+      --install tcsh bc tar libgomp1 wget curl $install_pkgs \
+      "${fs_install[@]}" \
       $extra_args \
       --bids_validator version=1.12.0\
       --env FSLDIR=/usr/share/fsl/5.0 FSLOUTPUTTYPE=NIFTI_GZ \
             FSLMULTIFILEQUIT=TRUE POSSUMDIR=/usr/share/fsl/5.0 LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
             FSLTCLSH=/usr/bin/tclsh FSLWISH=/usr/bin/wish FSLOUTPUTTYPE=NIFTI_GZ \
-      --env OS=Linux FS_OVERRIDE=0 FIX_VERTEX_AREA= SUBJECTS_DIR=/opt/freesurfer/subjects \
-            FSF_OUTPUT_FORMAT=nii.gz MNI_DIR=/opt/freesurfer/mni LOCAL_DIR=/opt/freesurfer/local \
-            FREESURFER_HOME=/opt/freesurfer FSFAST_HOME=/opt/freesurfer/fsfast MINC_BIN_DIR=/opt/freesurfer/mni/bin \
-            MINC_LIB_DIR=/opt/freesurfer/mni/lib MNI_DATAPATH=/opt/freesurfer/mni/data \
-            FMRI_ANALYSIS_DIR=/opt/freesurfer/fsfast PERL5LIB=/opt/freesurfer/mni/share/perl5 \
-            MNI_PERL5LIB=/opt/freesurfer/mni/share/perl5/ \
-            PATH=/opt/miniconda-latest/bin:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+      --env FS_VERSION=${VERSION} \
+      --env OS=Linux FS_OVERRIDE=0 FIX_VERTEX_AREA= SUBJECTS_DIR=$FS_ROOT/subjects \
+            FSF_OUTPUT_FORMAT=nii.gz MNI_DIR=$FS_ROOT/mni LOCAL_DIR=$FS_ROOT/local \
+            FREESURFER_HOME=$FS_ROOT FREESURFER=$FS_ROOT FSFAST_HOME=$FS_ROOT/fsfast MINC_BIN_DIR=$FS_ROOT/mni/bin \
+            MINC_LIB_DIR=$FS_ROOT/mni/lib MNI_DATAPATH=$FS_ROOT/mni/data \
+            FMRI_ANALYSIS_DIR=$FS_ROOT/fsfast FUNCTIONALS_DIR=$FS_ROOT/sessions PERL5LIB=$FS_ROOT/mni/share/perl5 \
+            MNI_PERL5LIB=$FS_ROOT/mni/share/perl5/ \
+            PATH=/opt/miniconda-latest/bin:$FS_ROOT/python/bin:$FS_ROOT/bin:$FS_ROOT/fsfast/bin:$FS_ROOT/tktools:$FS_ROOT/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
             PYTHONPATH="" \
       --run 'mkdir root/matlab && touch root/matlab/startup.m' \
       --run 'mkdir /scratch' \

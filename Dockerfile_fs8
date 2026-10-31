@@ -29,66 +29,14 @@ RUN export ND_ENTRYPOINT="/neurodocker/startup.sh" \
 RUN apt-get update -qq \
            && apt-get install -y -q --no-install-recommends \
                   bc \
+                  ca-certificates \
                   curl \
-                  libglu1-mesa \
                   libgomp1 \
-                  libpython2.7-stdlib \
-                  libsm-dev \
-                  libx11-dev \
-                  libxext-dev \
-                  libxt-dev \
-                  perl-modules \
-                  python2 \
                   tar \
                   tcsh \
                   wget \
            && rm -rf /var/lib/apt/lists/*
-ENV OS="Linux" \
-    PATH="/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:$PATH" \
-    FREESURFER_HOME="/opt/freesurfer" \
-    FREESURFER="/opt/freesurfer" \
-    SUBJECTS_DIR="/opt/freesurfer/subjects" \
-    LOCAL_DIR="/opt/freesurfer/local" \
-    FSFAST_HOME="/opt/freesurfer/fsfast" \
-    FMRI_ANALYSIS_DIR="/opt/freesurfer/fsfast" \
-    FUNCTIONALS_DIR="/opt/freesurfer/sessions" \
-    FS_OVERRIDE="0" \
-    FIX_VERTEX_AREA="" \
-    FSF_OUTPUT_FORMAT="nii.gz" \
-    MINC_BIN_DIR="/opt/freesurfer/mni/bin" \
-    MINC_LIB_DIR="/opt/freesurfer/mni/lib" \
-    MNI_DIR="/opt/freesurfer/mni" \
-    MNI_DATAPATH="/opt/freesurfer/mni/data" \
-    MNI_PERL5LIB="/opt/freesurfer/mni/share/perl5" \
-    PERL5LIB="/opt/freesurfer/mni/share/perl5"
-RUN apt-get update -qq \
-    && apt-get install -y -q --no-install-recommends \
-           bc \
-           ca-certificates \
-           curl \
-           libgomp1 \
-           libxmu6 \
-           libxt6 \
-           perl \
-           tcsh \
-    && rm -rf /var/lib/apt/lists/* \
-    && echo "Downloading FreeSurfer ..." \
-    && mkdir -p /opt/freesurfer \
-    && curl -fL ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz \
-    | tar -xz -C /opt/freesurfer --owner root --group root --no-same-owner --transform='s,freesurfer/,,' \
-         --exclude='average/mult-comp-cor' \
-         --exclude='lib/cuda' \
-         --exclude='lib/qt' \
-         --exclude='subjects/V1_average' \
-         --exclude='subjects/bert' \
-         --exclude='subjects/cvs_avg35' \
-         --exclude='subjects/cvs_avg35_inMNI152' \
-         --exclude='subjects/fsaverage3' \
-         --exclude='subjects/fsaverage4' \
-         --exclude='subjects/fsaverage5' \
-         --exclude='subjects/fsaverage6' \
-         --exclude='subjects/fsaverage_sym' \
-         --exclude='trctrain'
+RUN bash -c 'wget -q -O /tmp/freesurfer_8.2.0.deb https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/8.2.0/freesurfer_ubuntu22-8.2.0_amd64.deb && apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -q /tmp/freesurfer_8.2.0.deb && rm -f /tmp/freesurfer_8.2.0.deb && rm -rf /var/lib/apt/lists/* && cd /usr/local/freesurfer/8.2.0 && rm -rf trctrain lib/qt average/mult-comp-cor subjects/{V1_average,bert,cvs_avg35,cvs_avg35_inMNI152,fsaverage3,fsaverage4,fsaverage5,fsaverage6,fsaverage_sym}'
 ENV CONDA_DIR="/opt/miniconda-latest" \
     PATH="/opt/miniconda-latest/bin:$PATH"
 RUN apt-get update -qq \
@@ -155,22 +103,25 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     LD_LIBRARY_PATH="/usr/lib/fsl/5.0:" \
     FSLTCLSH="/usr/bin/tclsh" \
     FSLWISH="/usr/bin/wish"
+ENV FS_VERSION="8.2.0"
 ENV OS="Linux" \
     FS_OVERRIDE="0" \
     FIX_VERTEX_AREA="" \
-    SUBJECTS_DIR="/opt/freesurfer/subjects" \
+    SUBJECTS_DIR="/usr/local/freesurfer/8.2.0/subjects" \
     FSF_OUTPUT_FORMAT="nii.gz" \
-    MNI_DIR="/opt/freesurfer/mni" \
-    LOCAL_DIR="/opt/freesurfer/local" \
-    FREESURFER_HOME="/opt/freesurfer" \
-    FSFAST_HOME="/opt/freesurfer/fsfast" \
-    MINC_BIN_DIR="/opt/freesurfer/mni/bin" \
-    MINC_LIB_DIR="/opt/freesurfer/mni/lib" \
-    MNI_DATAPATH="/opt/freesurfer/mni/data" \
-    FMRI_ANALYSIS_DIR="/opt/freesurfer/fsfast" \
-    PERL5LIB="/opt/freesurfer/mni/share/perl5" \
-    MNI_PERL5LIB="/opt/freesurfer/mni/share/perl5/" \
-    PATH="/opt/miniconda-latest/bin:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    MNI_DIR="/usr/local/freesurfer/8.2.0/mni" \
+    LOCAL_DIR="/usr/local/freesurfer/8.2.0/local" \
+    FREESURFER_HOME="/usr/local/freesurfer/8.2.0" \
+    FREESURFER="/usr/local/freesurfer/8.2.0" \
+    FSFAST_HOME="/usr/local/freesurfer/8.2.0/fsfast" \
+    MINC_BIN_DIR="/usr/local/freesurfer/8.2.0/mni/bin" \
+    MINC_LIB_DIR="/usr/local/freesurfer/8.2.0/mni/lib" \
+    MNI_DATAPATH="/usr/local/freesurfer/8.2.0/mni/data" \
+    FMRI_ANALYSIS_DIR="/usr/local/freesurfer/8.2.0/fsfast" \
+    FUNCTIONALS_DIR="/usr/local/freesurfer/8.2.0/sessions" \
+    PERL5LIB="/usr/local/freesurfer/8.2.0/mni/share/perl5" \
+    MNI_PERL5LIB="/usr/local/freesurfer/8.2.0/mni/share/perl5/" \
+    PATH="/opt/miniconda-latest/bin:/usr/local/freesurfer/8.2.0/python/bin:/usr/local/freesurfer/8.2.0/bin:/usr/local/freesurfer/8.2.0/fsfast/bin:/usr/local/freesurfer/8.2.0/tktools:/usr/local/freesurfer/8.2.0/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     PYTHONPATH=""
 RUN mkdir root/matlab && touch root/matlab/startup.m
 RUN mkdir /scratch
@@ -217,16 +168,9 @@ RUN printf '{ \
           "bc", \
           "tar", \
           "libgomp1", \
-          "perl-modules", \
           "wget", \
           "curl", \
-          "libsm-dev", \
-          "libx11-dev", \
-          "libxt-dev", \
-          "libxext-dev", \
-          "libglu1-mesa", \
-          "libpython2.7-stdlib", \
-          "python2" \
+          "ca-certificates" \
         ], \
         "opts": null \
       } \
@@ -234,36 +178,13 @@ RUN printf '{ \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "apt-get update -qq \\\\\\n    && apt-get install -y -q --no-install-recommends \\\\\\n           bc \\\\\\n           curl \\\\\\n           libglu1-mesa \\\\\\n           libgomp1 \\\\\\n           libpython2.7-stdlib \\\\\\n           libsm-dev \\\\\\n           libx11-dev \\\\\\n           libxext-dev \\\\\\n           libxt-dev \\\\\\n           perl-modules \\\\\\n           python2 \\\\\\n           tar \\\\\\n           tcsh \\\\\\n           wget \\\\\\n    && rm -rf /var/lib/apt/lists/*" \
-      } \
-    }, \
-    { \
-      "name": "env", \
-      "kwds": { \
-        "OS": "Linux", \
-        "PATH": "/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:$PATH", \
-        "FREESURFER_HOME": "/opt/freesurfer", \
-        "FREESURFER": "/opt/freesurfer", \
-        "SUBJECTS_DIR": "/opt/freesurfer/subjects", \
-        "LOCAL_DIR": "/opt/freesurfer/local", \
-        "FSFAST_HOME": "/opt/freesurfer/fsfast", \
-        "FMRI_ANALYSIS_DIR": "/opt/freesurfer/fsfast", \
-        "FUNCTIONALS_DIR": "/opt/freesurfer/sessions", \
-        "FS_OVERRIDE": "0", \
-        "FIX_VERTEX_AREA": "", \
-        "FSF_OUTPUT_FORMAT": "nii.gz", \
-        "MINC_BIN_DIR": "/opt/freesurfer/mni/bin", \
-        "MINC_LIB_DIR": "/opt/freesurfer/mni/lib", \
-        "MNI_DIR": "/opt/freesurfer/mni", \
-        "MNI_DATAPATH": "/opt/freesurfer/mni/data", \
-        "MNI_PERL5LIB": "/opt/freesurfer/mni/share/perl5", \
-        "PERL5LIB": "/opt/freesurfer/mni/share/perl5" \
+        "command": "apt-get update -qq \\\\\\n    && apt-get install -y -q --no-install-recommends \\\\\\n           bc \\\\\\n           ca-certificates \\\\\\n           curl \\\\\\n           libgomp1 \\\\\\n           tar \\\\\\n           tcsh \\\\\\n           wget \\\\\\n    && rm -rf /var/lib/apt/lists/*" \
       } \
     }, \
     { \
       "name": "run", \
       "kwds": { \
-        "command": "apt-get update -qq\\napt-get install -y -q --no-install-recommends \\\\\\n    bc \\\\\\n    ca-certificates \\\\\\n    curl \\\\\\n    libgomp1 \\\\\\n    libxmu6 \\\\\\n    libxt6 \\\\\\n    perl \\\\\\n    tcsh\\nrm -rf /var/lib/apt/lists/*\\necho \\"Downloading FreeSurfer ...\\"\\nmkdir -p /opt/freesurfer\\ncurl -fL ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz \\\\\\n| tar -xz -C /opt/freesurfer --owner root --group root --no-same-owner --transform='"'"'s,freesurfer/,,'"'"' \\\\\\n  --exclude='"'"'average/mult-comp-cor'"'"' \\\\\\n  --exclude='"'"'lib/cuda'"'"' \\\\\\n  --exclude='"'"'lib/qt'"'"' \\\\\\n  --exclude='"'"'subjects/V1_average'"'"' \\\\\\n  --exclude='"'"'subjects/bert'"'"' \\\\\\n  --exclude='"'"'subjects/cvs_avg35'"'"' \\\\\\n  --exclude='"'"'subjects/cvs_avg35_inMNI152'"'"' \\\\\\n  --exclude='"'"'subjects/fsaverage3'"'"' \\\\\\n  --exclude='"'"'subjects/fsaverage4'"'"' \\\\\\n  --exclude='"'"'subjects/fsaverage5'"'"' \\\\\\n  --exclude='"'"'subjects/fsaverage6'"'"' \\\\\\n  --exclude='"'"'subjects/fsaverage_sym'"'"' \\\\\\n  --exclude='"'"'trctrain'"'"'" \
+        "command": "bash -c '"'"'wget -q -O /tmp/freesurfer_8.2.0.deb https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/8.2.0/freesurfer_ubuntu22-8.2.0_amd64.deb && apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -q /tmp/freesurfer_8.2.0.deb && rm -f /tmp/freesurfer_8.2.0.deb && rm -rf /var/lib/apt/lists/* && cd /usr/local/freesurfer/8.2.0 && rm -rf trctrain lib/qt average/mult-comp-cor subjects/{V1_average,bert,cvs_avg35,cvs_avg35_inMNI152,fsaverage3,fsaverage4,fsaverage5,fsaverage6,fsaverage_sym}'"'"'" \
       } \
     }, \
     { \
@@ -300,22 +221,30 @@ RUN printf '{ \
     { \
       "name": "env", \
       "kwds": { \
+        "FS_VERSION": "8.2.0" \
+      } \
+    }, \
+    { \
+      "name": "env", \
+      "kwds": { \
         "OS": "Linux", \
         "FS_OVERRIDE": "0", \
         "FIX_VERTEX_AREA": "", \
-        "SUBJECTS_DIR": "/opt/freesurfer/subjects", \
+        "SUBJECTS_DIR": "/usr/local/freesurfer/8.2.0/subjects", \
         "FSF_OUTPUT_FORMAT": "nii.gz", \
-        "MNI_DIR": "/opt/freesurfer/mni", \
-        "LOCAL_DIR": "/opt/freesurfer/local", \
-        "FREESURFER_HOME": "/opt/freesurfer", \
-        "FSFAST_HOME": "/opt/freesurfer/fsfast", \
-        "MINC_BIN_DIR": "/opt/freesurfer/mni/bin", \
-        "MINC_LIB_DIR": "/opt/freesurfer/mni/lib", \
-        "MNI_DATAPATH": "/opt/freesurfer/mni/data", \
-        "FMRI_ANALYSIS_DIR": "/opt/freesurfer/fsfast", \
-        "PERL5LIB": "/opt/freesurfer/mni/share/perl5", \
-        "MNI_PERL5LIB": "/opt/freesurfer/mni/share/perl5/", \
-        "PATH": "/opt/miniconda-latest/bin:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", \
+        "MNI_DIR": "/usr/local/freesurfer/8.2.0/mni", \
+        "LOCAL_DIR": "/usr/local/freesurfer/8.2.0/local", \
+        "FREESURFER_HOME": "/usr/local/freesurfer/8.2.0", \
+        "FREESURFER": "/usr/local/freesurfer/8.2.0", \
+        "FSFAST_HOME": "/usr/local/freesurfer/8.2.0/fsfast", \
+        "MINC_BIN_DIR": "/usr/local/freesurfer/8.2.0/mni/bin", \
+        "MINC_LIB_DIR": "/usr/local/freesurfer/8.2.0/mni/lib", \
+        "MNI_DATAPATH": "/usr/local/freesurfer/8.2.0/mni/data", \
+        "FMRI_ANALYSIS_DIR": "/usr/local/freesurfer/8.2.0/fsfast", \
+        "FUNCTIONALS_DIR": "/usr/local/freesurfer/8.2.0/sessions", \
+        "PERL5LIB": "/usr/local/freesurfer/8.2.0/mni/share/perl5", \
+        "MNI_PERL5LIB": "/usr/local/freesurfer/8.2.0/mni/share/perl5/", \
+        "PATH": "/opt/miniconda-latest/bin:/usr/local/freesurfer/8.2.0/python/bin:/usr/local/freesurfer/8.2.0/bin:/usr/local/freesurfer/8.2.0/fsfast/bin:/usr/local/freesurfer/8.2.0/tktools:/usr/local/freesurfer/8.2.0/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", \
         "PYTHONPATH": "" \
       } \
     }, \

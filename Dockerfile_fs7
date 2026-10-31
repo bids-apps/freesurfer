@@ -115,6 +115,7 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     LD_LIBRARY_PATH="/usr/lib/fsl/5.0:" \
     FSLTCLSH="/usr/bin/tclsh" \
     FSLWISH="/usr/bin/wish"
+ENV FS_VERSION="7.4.1"
 ENV OS="Linux" \
     FS_OVERRIDE="0" \
     FIX_VERTEX_AREA="" \
@@ -123,11 +124,13 @@ ENV OS="Linux" \
     MNI_DIR="/opt/freesurfer/mni" \
     LOCAL_DIR="/opt/freesurfer/local" \
     FREESURFER_HOME="/opt/freesurfer" \
+    FREESURFER="/opt/freesurfer" \
     FSFAST_HOME="/opt/freesurfer/fsfast" \
     MINC_BIN_DIR="/opt/freesurfer/mni/bin" \
     MINC_LIB_DIR="/opt/freesurfer/mni/lib" \
     MNI_DATAPATH="/opt/freesurfer/mni/data" \
     FMRI_ANALYSIS_DIR="/opt/freesurfer/fsfast" \
+    FUNCTIONALS_DIR="/opt/freesurfer/sessions" \
     PERL5LIB="/opt/freesurfer/mni/share/perl5" \
     MNI_PERL5LIB="/opt/freesurfer/mni/share/perl5/" \
     PATH="/opt/miniconda-latest/bin:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
@@ -177,9 +180,9 @@ RUN printf '{ \
           "bc", \
           "tar", \
           "libgomp1", \
-          "perl-modules", \
           "wget", \
           "curl", \
+          "perl-modules", \
           "libsm-dev", \
           "libx11-dev", \
           "libxt-dev", \
@@ -245,6 +248,12 @@ RUN printf '{ \
     { \
       "name": "env", \
       "kwds": { \
+        "FS_VERSION": "7.4.1" \
+      } \
+    }, \
+    { \
+      "name": "env", \
+      "kwds": { \
         "OS": "Linux", \
         "FS_OVERRIDE": "0", \
         "FIX_VERTEX_AREA": "", \
@@ -253,11 +262,13 @@ RUN printf '{ \
         "MNI_DIR": "/opt/freesurfer/mni", \
         "LOCAL_DIR": "/opt/freesurfer/local", \
         "FREESURFER_HOME": "/opt/freesurfer", \
+        "FREESURFER": "/opt/freesurfer", \
         "FSFAST_HOME": "/opt/freesurfer/fsfast", \
         "MINC_BIN_DIR": "/opt/freesurfer/mni/bin", \
         "MINC_LIB_DIR": "/opt/freesurfer/mni/lib", \
         "MNI_DATAPATH": "/opt/freesurfer/mni/data", \
         "FMRI_ANALYSIS_DIR": "/opt/freesurfer/fsfast", \
+        "FUNCTIONALS_DIR": "/opt/freesurfer/sessions", \
         "PERL5LIB": "/opt/freesurfer/mni/share/perl5", \
         "MNI_PERL5LIB": "/opt/freesurfer/mni/share/perl5/", \
         "PATH": "/opt/miniconda-latest/bin:/opt/freesurfer/python/bin:/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", \
