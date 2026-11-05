@@ -7,10 +7,10 @@ from glob import glob
 from subprocess import Popen, PIPE
 from shutil import rmtree
 import subprocess
+import uuid
 from warnings import warn
 import pandas as pd
 import re
-import errno
 
 def run(command, env={}, ignore_errors=False):
     merged_env = os.environ
@@ -193,15 +193,23 @@ else:
 # running participant level
 if args.analysis_level == "participant":
     fst_links_to_make = ["fsaverage", "lh.EC_average","rh.EC_average"]
+    # Copy these into the output instead of linking: links into the container's FreeSurfer dangle once the
+    # container is gone. The copy gets a temporary name and is renamed, so parallel participant jobs sharing
+    # an output directory never see a half-copied directory.
     for fst in fst_links_to_make:
-        try:
-            os.symlink(os.path.join(os.environ["SUBJECTS_DIR"], fst),os.path.join(output_dir, fst))
-        except OSError as e:
-            if e.errno == errno.EEXIST:
-                print("Symbolic link to {0} already exists".format(fst))
-            else:
-                print("ERROR: Symbolic link to {0} unable to be created because: {1}".format(fst,str(e)))
-                raise e
+        dst = os.path.join(output_dir, fst)
+        if os.path.islink(dst):  # left by an older version of this app
+            try:
+                os.unlink(dst)
+            except FileNotFoundError:  # another job removed it first
+                pass
+        if not os.path.exists(dst):
+            tmp = "{0}.tmp{1}".format(dst, uuid.uuid4().hex)  # not the pid: every container's run.py is pid 1
+            shutil.copytree(os.path.join(os.environ["SUBJECTS_DIR"], fst), tmp, symlinks=True)
+            try:
+                os.rename(tmp, dst)
+            except OSError:  # another job finished the copy first
+                rmtree(tmp)
 
     for subject_label in subjects_to_analyze:
         if glob(os.path.join(args.bids_dir, "sub-%s" % subject_label, "ses-*")):
