@@ -209,3 +209,12 @@ E.g.:
 left hemisphere extracted via the aparac parcellation.
 * `aseg.tsv` contains subcortical information from the aseg segmentation.
 * `euler.tsv` contains the euler numbers
+
+## Tests
+
+Fast tests for `run.py` (no container, no FreeSurfer: a stub `recon-all` records what the app asks for):
+
+```bash
+pip install pytest nibabel pandas numpy
+python -m pytest test
+```
