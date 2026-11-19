@@ -334,10 +334,21 @@ if args.analysis_level == "participant":
                             run(cmd, env=env)
 
             elif len(sessions) > 0 and longitudinal_study is False:
-                # grab all T1s/T2s from multiple sessions and combine
+                # Reached in multiday mode, or in longitudinal mode when no subject has
+                # two or more T1w sessions (so this subject has exactly one).
+                if args.session_label and args.multiple_sessions == "longitudinal":
+                    # Exactly one T1w session is on disk here (the unpack checks it). It was
+                    # selected, so read only it and name the output as the longitudinal
+                    # branch's cross-sectional step would.
+                    (session_label,) = sessions
+                    ses_glob = "ses-%s" % session_label
+                    fsid = "sub-%s_ses-%s" % (subject_label, session_label)
+                else:
+                    ses_glob = "ses-*"
+                    fsid = "sub-%s" % subject_label
                 T1s = glob(os.path.join(args.bids_dir,
                                         "sub-%s" % subject_label,
-                                        "ses-*",
+                                        ses_glob,
                                         "anat",
                                         "%s_T1w.nii*" % (ar_tpl)))
                 input_args = ""
@@ -355,12 +366,12 @@ if args.analysis_level == "participant":
 
                 T2s = glob(os.path.join(args.bids_dir,
                                         "sub-%s" % subject_label,
-                                        "ses-*",
+                                        ses_glob,
                                         "anat",
                                         "%s_T2w.nii*" % (ar_t2)))
                 FLAIRs = glob(os.path.join(args.bids_dir,
                                            "sub-%s" % subject_label,
-                                           "ses-*",
+                                           ses_glob,
                                            "anat",
                                            "%s_FLAIR.nii*" % (ar_t2)))
                 if args.refine_pial == "T2":
@@ -374,7 +385,6 @@ if args.analysis_level == "participant":
                             input_args += " " + " ".join(["-FLAIR %s" % FLAIR])
                             input_args += " -FLAIRpial"
 
-                fsid = "sub-%s" % subject_label
                 stages = " ".join(["-" + stage for stage in args.stages])
 
                 cmd = "recon-all -subjid %s -sd %s %s %s -openmp %d" % (fsid,
