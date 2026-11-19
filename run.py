@@ -46,13 +46,13 @@ parser.add_argument('analysis_level', help='Level of the analysis that will be p
                     choices=['participant', 'group1', 'group2'])
 parser.add_argument('--participant_label', help='The label of the participant that should be analyzed. The label '
                     'corresponds to sub-<participant_label> from the BIDS spec '
-                    '(so it does not include "sub-"). If this parameter is not '
+                    '(the "sub-" prefix is optional). If this parameter is not '
                     'provided all subjects should be analyzed. Multiple '
                     'participants can be specified with a space separated list.',
                     nargs="+")
 parser.add_argument('--session_label', help='The label of the session that should be analyzed. The label '
                     'corresponds to ses-<session_label> from the BIDS spec '
-                    '(so it does not include "ses-"). If this parameter is not '
+                    '(the "ses-" prefix is optional). If this parameter is not '
                     'provided all sessions should be analyzed. Multiple '
                     'sessions can be specified with a space separated list.',
                     nargs="+")
@@ -112,6 +112,17 @@ parser.add_argument('--3T',
                     choices = ['true', 'false'],
                     default = 'true')
 args = parser.parse_args()
+
+
+def strip_prefix(labels, prefix):
+    """Accept 'sub-01' or '01' (and 'ses-' likewise); return bare labels."""
+    if labels is None:
+        return None
+    return [l[len(prefix):] if l.startswith(prefix) else l for l in labels]
+
+
+args.participant_label = strip_prefix(args.participant_label, "sub-")
+args.session_label = strip_prefix(args.session_label, "ses-")
 
 
 three_T = vars(args)['3T']
