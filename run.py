@@ -28,6 +28,12 @@ def run(command, env={}, ignore_errors=False):
     if process.returncode != 0 and not ignore_errors:
         raise Exception("Non zero return code: %d" % process.returncode)
 
+def strip_prefix(prefix):
+    """argparse type: accept '<prefix>X' or 'X', return 'X'."""
+    def strip(label):
+        return label[len(prefix):] if label.startswith(prefix) else label
+    return strip
+
 __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version')).read()
 
 parser = argparse.ArgumentParser(description='FreeSurfer recon-all + custom template generation.')
@@ -49,13 +55,13 @@ parser.add_argument('--participant_label', help='The label of the participant th
                     '(the "sub-" prefix is optional). If this parameter is not '
                     'provided all subjects should be analyzed. Multiple '
                     'participants can be specified with a space separated list.',
-                    nargs="+")
+                    type=strip_prefix("sub-"), nargs="+")
 parser.add_argument('--session_label', help='The label of the session that should be analyzed. The label '
                     'corresponds to ses-<session_label> from the BIDS spec '
                     '(the "ses-" prefix is optional). If this parameter is not '
                     'provided all sessions should be analyzed. Multiple '
                     'sessions can be specified with a space separated list.',
-                    nargs="+")
+                    type=strip_prefix("ses-"), nargs="+")
 parser.add_argument('--n_cpus', help='Number of CPUs/cores available to use.',
                     default=1, type=int)
 parser.add_argument('--stages', help='Autorecon stages to run.',
@@ -112,17 +118,6 @@ parser.add_argument('--3T',
                     choices = ['true', 'false'],
                     default = 'true')
 args = parser.parse_args()
-
-
-def strip_prefix(labels, prefix):
-    """Accept 'sub-01' or '01' (and 'ses-' likewise); return bare labels."""
-    if labels is None:
-        return None
-    return [l[len(prefix):] if l.startswith(prefix) else l for l in labels]
-
-
-args.participant_label = strip_prefix(args.participant_label, "sub-")
-args.session_label = strip_prefix(args.session_label, "ses-")
 
 
 three_T = vars(args)['3T']
