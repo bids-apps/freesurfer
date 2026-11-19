@@ -94,14 +94,14 @@ This App has the following command line arguments:
           --participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]
                                 The label of the participant that should be analyzed.
                                 The label corresponds to sub-<participant_label> from
-                                the BIDS spec (so it does not include "sub-"). If this
+                                the BIDS spec (the "sub-" prefix is optional). If this
                                 parameter is not provided all subjects should be
                                 analyzed. Multiple participants can be specified with
                                 a space separated list.
           --session_label SESSION_LABEL [SESSION_LABEL ...]
                                 The label of the session that should be analyzed. The
                                 label corresponds to ses-<session_label> from the BIDS
-                                spec (so it does not include "ses-"). If this
+                                spec (the "ses-" prefix is optional). If this
                                 parameter is not provided all sessions should be
                                 analyzed. Multiple sessions can be specified with a
                                 space separated list.
