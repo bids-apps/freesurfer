@@ -334,11 +334,12 @@ if args.analysis_level == "participant":
                             run(cmd, env=env)
 
             elif len(sessions) > 0 and longitudinal_study is False:
-                # grab all T1s/T2s from multiple sessions and combine
+                # Reached in multiday mode, or in longitudinal mode when no subject has
+                # two or more T1w sessions (so this subject has exactly one).
                 if args.session_label and args.multiple_sessions == "longitudinal":
-                    # Only one T1w session per subject is on disk (else longitudinal_study
-                    # would be True), so this is a cross-sectional run of that session:
-                    # name it the way the cross-sectional step does (#105).
+                    # Exactly one T1w session is on disk here (the unpack checks it). It was
+                    # selected, so read only it and name the output as the longitudinal
+                    # branch's cross-sectional step would.
                     (session_label,) = sessions
                     ses_glob = "ses-%s" % session_label
                     fsid = "sub-%s_ses-%s" % (subject_label, session_label)
